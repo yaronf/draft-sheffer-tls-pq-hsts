@@ -22,3 +22,4 @@ draft-sheffer-tls-pq-hsts.xml
 package-lock.json
 report.xml
 !requirements.txt
+/internal-docs/
