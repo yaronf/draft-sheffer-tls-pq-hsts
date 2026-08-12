@@ -12,15 +12,14 @@
        This document extends HTTP Strict Transport Security (HSTS)  
 with a new  Strict-Transport-Security  directive,  require-pq-ta . When a
 user agent (UA) has noted that policy for a host, it  MUST  authenticate the
-host using a cryptographically relevant quantum computer (CRQC)-resistant
-trust anchor and  MUST  negotiate a CRQC-resistant (pure post-quantum or
-hybrid) key agreement, in addition to existing HSTS behavior. 
+host using a post-quantum (PQ)
+trust anchor and  MUST  negotiate a PQ (pure post-quantum or
+hybrid) key agreement. 
        The directive is a near-term, origin-opt-in lever for the dual-trust-store
 phase of Web and enterprise PKI migration. It is designed to become
-unnecessary once traditional trust anchors are retired. The document also
+unnecessary once classical trust anchors are retired. The document also
 describes, informatively, the longer authentication migration program in
-which this lever sits, including the eventual role of a PQ-secure signal
-embedded in classical certificates. 
+which this lever sits. 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="post-quantum migration" name="keyword">
@@ -1101,15 +1100,14 @@ svg {
 <p id="section-abstract-1">This document extends HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>
 with a new <code>Strict-Transport-Security</code> directive, <code>require-pq-ta</code>. When a
 user agent (UA) has noted that policy for a host, it <span class="bcp14">MUST</span> authenticate the
-host using a cryptographically relevant quantum computer (CRQC)-resistant
-trust anchor and <span class="bcp14">MUST</span> negotiate a CRQC-resistant (pure post-quantum or
-hybrid) key agreement, in addition to existing HSTS behavior.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+host using a post-quantum (PQ)
+trust anchor and <span class="bcp14">MUST</span> negotiate a PQ (pure post-quantum or
+hybrid) key agreement.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">The directive is a near-term, origin-opt-in lever for the dual-trust-store
 phase of Web and enterprise PKI migration. It is designed to become
-unnecessary once traditional trust anchors are retired. The document also
+unnecessary once classical trust anchors are retired. The document also
 describes, informatively, the longer authentication migration program in
-which this lever sits, including the eventual role of a PQ-secure signal
-embedded in classical certificates.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+which this lever sits.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1179,115 +1177,115 @@ embedded in classical certificates.<a href="#section-abstract-2" class="pilcrow"
             <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
-                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-relation-to-other-work" class="internal xref">Relation to Other Work</a></p>
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-pq-hsts-in-the-broader-migr" class="internal xref">PQ-HSTS in the Broader Migration Context</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-relation-to-other-work" class="internal xref">Relation to Other Work</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-threat-model" class="internal xref">Threat Model</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
-            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-the-migration-program" class="internal xref">The Migration Program</a></p>
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-user-agent-behavior" class="internal xref">User Agent Behavior</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
-                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-problem-framing" class="internal xref">Problem Framing</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.1">
-                    <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="auto internal xref">4.1.1</a>.  <a href="#name-accept-set-versus-credentia" class="internal xref">Accept-set versus credentials in use</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.2">
-                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="auto internal xref">4.1.2</a>.  <a href="#name-adoption-s-curves-and-break" class="internal xref">Adoption S-curves and break budget</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.3">
-                    <p id="section-toc.1-1.4.2.1.2.3.1"><a href="#section-4.1.3" class="auto internal xref">4.1.3</a>.  <a href="#name-key-agreement-proceeds-in-p" class="internal xref">Key agreement proceeds in parallel</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.4">
-                    <p id="section-toc.1-1.4.2.1.2.4.1"><a href="#section-4.1.4" class="auto internal xref">4.1.4</a>.  <a href="#name-public-web-versus-enterpris" class="internal xref">Public Web versus enterprise PKI</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.5">
-                    <p id="section-toc.1-1.4.2.1.2.5.1"><a href="#section-4.1.5" class="auto internal xref">4.1.5</a>.  <a href="#name-dual-complete-paths-not-mix" class="internal xref">Dual complete paths, not mixed chains</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.6">
-                    <p id="section-toc.1-1.4.2.1.2.6.1"><a href="#section-4.1.6" class="auto internal xref">4.1.6</a>.  <a href="#name-why-hsts-shaped-opt-in-is-o" class="internal xref">Why HSTS-shaped opt-in is only a near-term lever</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.7">
-                    <p id="section-toc.1-1.4.2.1.2.7.1"><a href="#section-4.1.7" class="auto internal xref">4.1.7</a>.  <a href="#name-pq-secure-signal-embedded-i" class="internal xref">PQ-secure signal embedded in classical certificates</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.8">
-                    <p id="section-toc.1-1.4.2.1.2.8.1"><a href="#section-4.1.8" class="auto internal xref">4.1.8</a>.  <a href="#name-what-this-document-specifie" class="internal xref">What this document specifies versus only narrates</a></p>
-</li>
-                </ul>
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-noting-the-directive" class="internal xref">Noting the directive</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
-                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-chronological-stages" class="internal xref">Chronological Stages</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
-                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="auto internal xref">4.2.1</a>.  <a href="#name-stage-0-today" class="internal xref">Stage 0 — Today</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.2">
-                    <p id="section-toc.1-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="auto internal xref">4.2.2</a>.  <a href="#name-stage-1-early-pq-issuance-d" class="internal xref">Stage 1 — Early PQ issuance, dual accept</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.3">
-                    <p id="section-toc.1-1.4.2.2.2.3.1"><a href="#section-4.2.3" class="auto internal xref">4.2.3</a>.  <a href="#name-stage-2-opt-in-pin-spreads-" class="internal xref">Stage 2 — Opt-in pin spreads (this document)</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.4">
-                    <p id="section-toc.1-1.4.2.2.2.4.1"><a href="#section-4.2.4" class="auto internal xref">4.2.4</a>.  <a href="#name-stage-3-accelerate-pq-issua" class="internal xref">Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.5">
-                    <p id="section-toc.1-1.4.2.2.2.5.1"><a href="#section-4.2.5" class="auto internal xref">4.2.5</a>.  <a href="#name-stage-4-strict-clients-and-" class="internal xref">Stage 4 — Strict clients and CA shift</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.6">
-                    <p id="section-toc.1-1.4.2.2.2.6.1"><a href="#section-4.2.6" class="auto internal xref">4.2.6</a>.  <a href="#name-stage-5-remove-traditional-" class="internal xref">Stage 5 — Remove traditional trust anchors / plain classical</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.7">
-                    <p id="section-toc.1-1.4.2.2.2.7.1"><a href="#section-4.2.7" class="auto internal xref">4.2.7</a>.  <a href="#name-stage-6-retire-require-pq-t" class="internal xref">Stage 6 — Retire <code>require-pq-ta</code></a></p>
-</li>
-                </ul>
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-enforcement" class="internal xref">Enforcement</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-user-agent-behavior" class="internal xref">User Agent Behavior</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-references" class="internal xref">References</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
-                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-noting-the-directive" class="internal xref">Noting the directive</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
-                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-enforcement" class="internal xref">Enforcement</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
-                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-retirement" class="internal xref">Retirement</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
-            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
-</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-the-migration-program" class="internal xref">The Migration Program</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
-                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+                <p id="section-toc.1-1.9.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-problem-framing" class="internal xref">Problem Framing</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.1">
+                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-accept-set-versus-credentia" class="internal xref">Accept-set versus credentials in use</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.2">
+                    <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-adoption-s-curves-and-break" class="internal xref">Adoption S-curves and break budget</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.3">
+                    <p id="section-toc.1-1.9.2.1.2.3.1"><a href="#appendix-A.1.3" class="auto internal xref">A.1.3</a>.  <a href="#name-key-agreement-proceeds-in-p" class="internal xref">Key agreement proceeds in parallel</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.4">
+                    <p id="section-toc.1-1.9.2.1.2.4.1"><a href="#appendix-A.1.4" class="auto internal xref">A.1.4</a>.  <a href="#name-public-web-versus-enterpris" class="internal xref">Public Web versus enterprise PKI</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.5">
+                    <p id="section-toc.1-1.9.2.1.2.5.1"><a href="#appendix-A.1.5" class="auto internal xref">A.1.5</a>.  <a href="#name-dual-complete-paths-not-mix" class="internal xref">Dual complete paths, not mixed chains</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.6">
+                    <p id="section-toc.1-1.9.2.1.2.6.1"><a href="#appendix-A.1.6" class="auto internal xref">A.1.6</a>.  <a href="#name-why-hsts-shaped-opt-in-is-o" class="internal xref">Why HSTS-shaped opt-in is only a near-term lever</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.7">
+                    <p id="section-toc.1-1.9.2.1.2.7.1"><a href="#appendix-A.1.7" class="auto internal xref">A.1.7</a>.  <a href="#name-pq-secure-signal-embedded-i" class="internal xref">PQ-secure signal embedded in classical certificates</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.8">
+                    <p id="section-toc.1-1.9.2.1.2.8.1"><a href="#appendix-A.1.8" class="auto internal xref">A.1.8</a>.  <a href="#name-what-this-document-specifie" class="internal xref">What this document specifies versus only narrates</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
-                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+                <p id="section-toc.1-1.9.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-chronological-stages" class="internal xref">Chronological Stages</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.1">
+                    <p id="section-toc.1-1.9.2.2.2.1.1"><a href="#appendix-A.2.1" class="auto internal xref">A.2.1</a>.  <a href="#name-stage-0-today" class="internal xref">Stage 0 — Today</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.2">
+                    <p id="section-toc.1-1.9.2.2.2.2.1"><a href="#appendix-A.2.2" class="auto internal xref">A.2.2</a>.  <a href="#name-stage-1-early-pq-issuance-d" class="internal xref">Stage 1 — Early PQ issuance, dual accept</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.3">
+                    <p id="section-toc.1-1.9.2.2.2.3.1"><a href="#appendix-A.2.3" class="auto internal xref">A.2.3</a>.  <a href="#name-stage-2-opt-in-pin-spreads-" class="internal xref">Stage 2 — Opt-in pin spreads (this document)</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.4">
+                    <p id="section-toc.1-1.9.2.2.2.4.1"><a href="#appendix-A.2.4" class="auto internal xref">A.2.4</a>.  <a href="#name-stage-3-accelerate-pq-issua" class="internal xref">Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.5">
+                    <p id="section-toc.1-1.9.2.2.2.5.1"><a href="#appendix-A.2.5" class="auto internal xref">A.2.5</a>.  <a href="#name-stage-4-strict-clients-and-" class="internal xref">Stage 4 — Strict clients and CA shift</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.6">
+                    <p id="section-toc.1-1.9.2.2.2.6.1"><a href="#appendix-A.2.6" class="auto internal xref">A.2.6</a>.  <a href="#name-stage-5-remove-classical-tr" class="internal xref">Stage 5 — Remove classical trust anchors / plain classical</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2.2.7">
+                    <p id="section-toc.1-1.9.2.2.2.7.1"><a href="#appendix-A.2.7" class="auto internal xref">A.2.7</a>.  <a href="#name-stage-6-retire-require-pq-t" class="internal xref">Stage 6 — Retire <code>require-pq-ta</code></a></p>
+</li>
+                </ul>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.10.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.11.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1300,61 +1298,84 @@ embedded in classical certificates.<a href="#section-abstract-2" class="pilcrow"
       </h2>
 <p id="section-1-1">Migrating TLS authentication to post-quantum cryptography cannot be done
 by flipping a single switch. For a long period, relying parties will keep
-<strong>traditional</strong> (classical) trust anchors in their trust stores alongside
-<strong>CRQC-resistant</strong> ones, and many origins will still present only
-traditional credentials. Under active attack, what matters is not whether
-a server <em>can</em> present a post-quantum credential, but whether the client
-<strong>accepts</strong> a traditional path. An attacker that can forge under a
-traditional CA can strip a post-quantum credential and present a classical
-one; a dual-accepting client treats the origin as if it had never
+classical trust anchors in their trust stores alongside
+cryptographically relevant quantum computer (CRQC)-resistant ones, and
+many origins will still present only
+classical credentials. Under active attack, what matters is not whether
+a server can present a post-quantum credential, but whether the client
+accepts a classical path. An attacker able to forge certificates that
+chain to a classical CA can strip a post-quantum credential and present
+only a classical one. A client that still accepts classical paths will
+treat that forged credential as valid, as if the origin had never
 upgraded.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">Key agreement is on a different track. Hybrid and pure post-quantum key
 agreement are already being deployed independently of authentication
 migration. That work does not by itself prevent classical trust-anchor
-downgrade. Once an origin has asserted a post-quantum posture via the
-mechanism in this document, however, allowing a later classical-only key
-agreement would re-open a confidentiality downgrade for that host.
-Therefore, when <code>require-pq-ta</code> is enforced, this document also requires
-CRQC-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
+downgrade; rather, it mitigates the more pressing "harvest now, decrypt
+later" threat model. Once an origin has asserted a post-quantum posture
+via the mechanism in this document, however, allowing a later
+classical-only key agreement would re-open a confidentiality downgrade
+for that host. Therefore, when <code>require-pq-ta</code> is enforced, this document
+also requires CRQC-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This document extends HSTS <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>: it adds a directive on the
 existing <code>Strict-Transport-Security</code> header field and reuses the Known
 HSTS Host storage model, <code>max-age</code>, <code>includeSubDomains</code>, and preload
 lifecycle. It does not define a parallel header. Hosts that send the
 directive must already satisfy HSTS's HTTPS requirements; UAs that do not
 understand the new directive continue to apply ordinary HSTS.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The normative contribution is the near-term opt-in pin. <a href="#migration" class="auto internal xref">Section 4</a>
-describes the larger, multi-year authentication program—including why
-voluntary opt-in alone is too slow for industry post-quantum timelines,
-and how a PQ-secure signal embedded in classical certificates (specified
-elsewhere) can unlock a strict client accept policy afterward—so that
-readers see why this lever exists and how it is meant to disappear.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<div id="relation-to-other-work">
+<p id="section-1-4">The normative contribution of this document is the near-term opt-in
+<code>require-pq-ta</code> pin and the associated user-agent behavior.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<div id="pq-hsts-in-the-broader-migration-context">
 <section id="section-1.1">
-        <h3 id="name-relation-to-other-work">
-<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-relation-to-other-work" class="section-name selfRef">Relation to Other Work</a>
+        <h3 id="name-pq-hsts-in-the-broader-migr">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-pq-hsts-in-the-broader-migr" class="section-name selfRef">PQ-HSTS in the Broader Migration Context</a>
         </h3>
-<p id="section-1.1-1"><span>[<a href="#I-D.sheffer-tls-pqc-continuity" class="cite xref">I-D.sheffer-tls-pqc-continuity</a>]</span> defines a TLS-layer commitment that a
+<p id="section-1.1-1">This mechanism addresses a specific, comparatively well-understood threat:
+classical trust-anchor downgrade during the dual-trust-store period, and
+classical-only key-agreement downgrade once a host has asserted a
+post-quantum posture.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">The harder problem is coordinating a three-sided ecosystem of clients,
+servers, and certificate authorities (or other trust-anchor operators)
+from today's accept set to a CRQC-resistant one on a compressed timeline.
+<span class="cref">TODO: add references to government post-quantum migration
+directives.</span><a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">This document defines one near-term, origin-opt-in lever within an
+incremental migration program. Other parts of that program are still
+being designed. <a href="#migration" class="auto internal xref">Appendix A</a> states the problem and sketches a proposed
+plan, including why voluntary opt-in alone is too slow for industry
+timelines and how later mechanisms (such as a PQ-secure signal embedded
+in classical certificates, specified elsewhere) can unlock a strict
+client accept policy afterward.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="relation-to-other-work">
+<section id="section-1.2">
+        <h3 id="name-relation-to-other-work">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-relation-to-other-work" class="section-name selfRef">Relation to Other Work</a>
+        </h3>
+<p id="section-1.2-1"><span>[<a href="#I-D.sheffer-tls-pqc-continuity" class="cite xref">I-D.sheffer-tls-pqc-continuity</a>]</span> defines a TLS-layer commitment that a
 server will present a PQC or composite end-entity certificate for a period
-of time. This document instead extends HSTS to pin CRQC-resistant <strong>trust
-anchors</strong> (and key agreement when the pin is enforced). The two approaches
-address related downgrade problems at different layers; this document does
-not obsolete the continuity mechanism.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
-<p id="section-1.1-2">Deployment context for the migration narrative (not a single normative
-PKI):<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+of time. This document instead extends HSTS to pin CRQC-resistant trust
+anchors (and key agreement when the pin is enforced). The two approaches
+address related downgrade problems at different layers.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+<p id="section-1.2-2">Physically large post-quantum certificates motivate new certificate
+distribution mechanisms. This document is intended to work with that
+evolution, including Merkle Tree Certificates (MTC)
+<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span> for the public Web PKI, without
+depending on a single encoding.<a href="#section-1.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-3.1">
-            <p id="section-1.1-3.1.1"><strong>Public Web PKI</strong> is assumed to move toward Merkle Tree Certificates
-(MTC) <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>. MTC remains evolving;
+<li class="normal" id="section-1.2-3.1">
+            <p id="section-1.2-3.1.1">Public Web PKI is assumed to move toward MTC. MTC remains evolving;
 normative text in this document stays abstract about trust-anchor
-encoding.<a href="#section-1.1-3.1.1" class="pilcrow">¶</a></p>
+encoding.<a href="#section-1.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.2">
-            <p id="section-1.1-3.2.1"><strong>Enterprise PKI</strong> is assumed to include traditional post-quantum
-certificate chains (pure PQ and/or composite X.509 under CRQC-resistant
-trust anchors), not MTC alone.<a href="#section-1.1-3.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.2-3.2">
+            <p id="section-1.2-3.2.1">Enterprise PKI is assumed to include X.509 post-quantum certificate
+chains (pure PQ and/or composite under CRQC-resistant trust anchors),
+not MTC alone.<a href="#section-1.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-4">Both forms of CRQC-resistant trust anchor can satisfy <code>require-pq-ta</code>.<a href="#section-1.1-4" class="pilcrow">¶</a></p>
+<p id="section-1.2-4">Both forms of CRQC-resistant trust anchor can satisfy <code>require-pq-ta</code>.<a href="#section-1.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1370,55 +1391,59 @@ described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</s
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-2-2">The following terms are used in this document:<a href="#section-2-2" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-2-3">
-        <dt id="section-2-3.1">traditional:</dt>
+        <dt id="section-2-3.1">classical:</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.2">
           <p id="section-2-3.2.1">Cryptography or credentials that are not designed to remain secure
-against a CRQC (for example, classical public-key algorithms in wide use
-on the Web today). A <strong>traditional trust anchor</strong> is a trust anchor that
-authenticates only traditional paths.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
+against a CRQC (for example, RSA or elliptic-curve public-key algorithms
+in wide use on the Web today). A classical trust anchor is a trust
+anchor that authenticates only classical paths.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-3.3">CRQC-resistant (signatures / trust anchors):</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.4">
-          <p id="section-2-3.4.1">Not traditional-only. For authentication material, this document treats
-<strong>pure post-quantum</strong> algorithms and <strong>composite</strong> algorithms
+          <p id="section-2-3.4.1">Not classical-only. For authentication material, this document treats
+pure post-quantum algorithms and composite algorithms
 <span>[<a href="#I-D.ietf-lamps-pq-composite-sigs" class="cite xref">I-D.ietf-lamps-pq-composite-sigs</a>]</span> as one class, consistent with the
 PQC end-entity classification in
 <span>[<a href="#I-D.sheffer-tls-pqc-continuity" class="cite xref">I-D.sheffer-tls-pqc-continuity</a>]</span>. Which algorithms a UA accepts as
 CRQC-resistant is a matter of local policy and the relevant algorithm
-specifications (for example <span>[<a href="#I-D.ietf-lamps-dilithium-certificates" class="cite xref">I-D.ietf-lamps-dilithium-certificates</a>]</span>);
+specifications;
 this document states the property, not a closed algorithm list.<a href="#section-2-3.4.1" class="pilcrow">¶</a></p>
 </dd>
-        <dd class="break"></dd>
-<dt id="section-2-3.5">CRQC-resistant (key agreement):</dt>
-        <dd style="margin-left: 1.5em" id="section-2-3.6">
-          <p id="section-2-3.6.1">Not classical-only. <strong>Hybrid</strong> key agreement (classical combined with a
-post-quantum KEM) and <strong>pure post-quantum</strong> key agreement both satisfy
-this document. Exact TLS NamedGroup / codepoint acceptance is left to
-UA policy and TLS registries <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>.<a href="#section-2-3.6.1" class="pilcrow">¶</a></p>
+      <dd class="break"></dd>
+</dl>
+<p id="section-2-4"><span class="cref">TODO: add a more precise definition of CRQC-resistance for MTC.</span><a href="#section-2-4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-5">
+        <dt id="section-2-5.1">CRQC-resistant (key agreement):</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.2">
+          <p id="section-2-5.2.1">Not classical-only. Hybrid key agreement (classical combined with a
+post-quantum KEM) and pure post-quantum key agreement both satisfy
+this document. Exact NamedGroup / codepoint acceptance is left to UA
+policy and the TLS Supported Groups registry
+<span>[<a href="#IANA.TLS-Parameters" class="cite xref">IANA.TLS-Parameters</a>]</span>.<a href="#section-2-5.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-3.7">trust anchor:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-3.8">
-          <p id="section-2-3.8.1">The root of acceptance for a server credential: an X.509 trust anchor
+<dt id="section-2-5.3">trust anchor:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.4">
+          <p id="section-2-5.4.1">The root of acceptance for a server credential: an X.509 trust anchor
 <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> or an MTC trust base / cosigner trust as defined by
 <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>. Normative requirements in this
-document refer to the <strong>class</strong> of trust anchor (traditional vs
-CRQC-resistant), not to a single encoding.<a href="#section-2-3.8.1" class="pilcrow">¶</a></p>
+document refer to the class of trust anchor (classical vs
+CRQC-resistant), not to a single encoding.<a href="#section-2-5.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-3.9">HSTS terms:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-3.10">
-          <p id="section-2-3.10.1">This document uses <strong>Known HSTS Host</strong>, <strong>HSTS Policy</strong>, <strong>Note</strong>,
+<dt id="section-2-5.5">HSTS terms:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.6">
+          <p id="section-2-5.6.1">This document uses Known HSTS Host, HSTS Policy, Note,
 <code>max-age</code>, <code>includeSubDomains</code>, and related terminology as in
-<span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>.<a href="#section-2-3.10.1" class="pilcrow">¶</a></p>
+<span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-3.11">PQ policy bit / <code>require-pq-ta</code>:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-3.12">
-          <p id="section-2-3.12.1">An additional boolean (or equivalent) associated with a Known HSTS Host
+<dt id="section-2-5.7">PQ policy bit / <code>require-pq-ta</code>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.8">
+          <p id="section-2-5.8.1">An additional boolean associated with a Known HSTS Host
 policy indicating that the <code>require-pq-ta</code> directive is in effect for
-that host until the policy expires or is superseded.<a href="#section-2-3.12.1" class="pilcrow">¶</a></p>
+that host until the policy expires or is superseded.<a href="#section-2-5.8.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1433,13 +1458,13 @@ that host until the policy expires or is superseded.<a href="#section-2-3.12.1" 
 migration period:<a href="#section-3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3-2.1">
-          <p id="section-3-2.1.1"><strong>Classical trust-anchor MitM:</strong> An active attacker forges a traditional
-certificate (or otherwise obtains acceptance under a traditional trust
+          <p id="section-3-2.1.1">Classical trust-anchor MitM: An active attacker forges a classical
+certificate (or otherwise obtains acceptance under a classical trust
 anchor) for a name whose operator intends to use only CRQC-resistant
 authentication, and presents that credential to a dual-accepting UA.<a href="#section-3-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-3-2.2">
-          <p id="section-3-2.2.1"><strong>Classical-only key-agreement downgrade after pin:</strong> Once a host has
+          <p id="section-3-2.2.1">Classical-only key-agreement downgrade after pin: Once a host has
 asserted post-quantum posture via <code>require-pq-ta</code>, an attacker that can
 force classical-only key agreement would undermine confidentiality for
 subsequent visits even if authentication remains CRQC-resistant.<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
@@ -1447,169 +1472,323 @@ subsequent visits even if authentication remains CRQC-resistant.<a href="#sectio
       </ul>
 <p id="section-3-3">Trust-on-first-use (TOFU) limits apply as for HSTS: the first successful
 HTTPS visit that delivers the policy is not itself protected by the pin.
-Preload semantics (specified in a later revision of this document) close
+Preload semantics (to be specified in a later revision of this document) close
 that gap for configured names in the same way HSTS preload does today.<a href="#section-3-3" class="pilcrow">¶</a></p>
-<p id="section-3-4">Non-goals of this mechanism include: replacing industry-wide hybrid key-
-agreement deployment programs; pinning individual end-entity certificates
-or signature algorithms beyond the trust-anchor and path-class rules;
-selecting among individual trust anchors within a class; and specifying
-the wire encoding of a PQ-secure signal inside classical certificates
-(<a href="#migration" class="auto internal xref">Section 4</a>).<a href="#section-3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ua-behavior">
+<section id="section-4">
+      <h2 id="name-user-agent-behavior">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-user-agent-behavior" class="section-name selfRef">User Agent Behavior</a>
+      </h2>
+<p id="section-4-1">This section specifies the UA processing rules associated with
+<code>require-pq-ta</code>. Syntax for emitting the directive on
+<code>Strict-Transport-Security</code>, server commitment rules, and preload
+delivery are left to a subsequent revision of this document; the rules
+below assume the directive has been conveyed as part of an HSTS Policy.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="noting-the-directive">
+<section id="section-4.1">
+        <h3 id="name-noting-the-directive">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-noting-the-directive" class="section-name selfRef">Noting the directive</a>
+        </h3>
+<p id="section-4.1-1">When a UA notes an HSTS Policy for a host per <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> and that policy
+includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span> record that the PQ policy bit is set
+for the Known HSTS Host, with the same expiry and domain scope
+(<code>includeSubDomains</code>) as the rest of that HSTS Policy.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">If a subsequent valid HSTS Policy for the host omits <code>require-pq-ta</code>, the
+UA <span class="bcp14">MUST</span> clear the PQ policy bit (while applying any updated <code>max-age</code> and
+other HSTS directives as usual). UAs that do not implement this document
+ignore the unknown directive and apply ordinary HSTS.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="enforcement">
+<section id="section-4.2">
+        <h3 id="name-enforcement">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
+        </h3>
+<p id="section-4.2-1">When establishing a connection to a Known HSTS Host whose noted policy
+includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span>:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2-2">
+<li id="section-4.2-2.1">
+            <p id="section-4.2-2.1.1">Apply all UA requirements of <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> unchanged (including HTTPS-only
+behavior and failure handling).<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-2.2">
+            <p id="section-4.2-2.2.1">Authenticate the server such that the trust anchor that caused
+acceptance is CRQC-resistant (pure post-quantum or composite per local
+policy), whether that trust anchor is an X.509 trust anchor or an MTC
+trust base / cosigner.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-2.3">
+            <p id="section-4.2-2.3.1">Ensure the accepted certification path is not mixed: every hop is
+classical, or every hop is CRQC-resistant, consistent with local
+policy. (Detailed mixed-path rejection may be refined here or by
+reference to a dedicated path-validation document.)<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.2-2.4">
+            <p id="section-4.2-2.4.1">Negotiate a CRQC-resistant key agreement (hybrid or pure
+post-quantum per local policy). Classical-only key agreement <span class="bcp14">MUST</span> cause
+failure of the connection attempt.<a href="#section-4.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.2-3">If any of the above checks fail, the UA <span class="bcp14">MUST</span> fail the connection in a
+manner consistent with HSTS hard failure (no click-through bypass).<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">This document does not impose separate end-entity signature-algorithm
+requirements beyond the trust-anchor class and path-consistency rules
+above. It does not enumerate TLS NamedGroup codepoints or MTC validation
+procedures; those remain matters for TLS/IANA policy and
+<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>, respectively.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2-5">Absent <code>require-pq-ta</code>, behavior is ordinary HSTS, including whatever key
+agreement the UA would negotiate for that connection.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">Once classical trust anchors are no longer part of the relevant accept
+set (Stage 6 of <a href="#migration" class="auto internal xref">Appendix A</a>), <code>require-pq-ta</code> is redundant. UAs <span class="bcp14">MAY</span>
+clear the PQ policy bit for Known HSTS Hosts (including any preloaded
+equivalent) when local policy determines that the pin is obsolete.
+Servers <span class="bcp14">SHOULD</span> stop sending the directive in that environment. Base HSTS
+policy <span class="bcp14">MAY</span> remain.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-5">
+      <h2 id="name-security-considerations">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-5-1"><span class="cref">TODO Security Considerations (HSTS inheritance; trust-anchor and
+key-agreement downgrade; unknown-directive UAs; enterprise interception;
+MTC evolving).</span><a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="privacy-considerations">
+<section id="section-6">
+      <h2 id="name-privacy-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
+      </h2>
+<p id="section-6-1"><span class="cref">TODO Privacy Considerations (sticky state equivalent to HSTS; private
+browsing alignment; preload privacy profile; no additional tracking
+surface beyond the HSTS PQ policy bit).</span><a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1"><span class="cref">TODO IANA Considerations (`Strict-Transport-Security` directive
+registration for `require-pq-ta`).</span><a href="#section-7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-8">
+      <h2 id="name-references">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-8.1">
+        <h3 id="name-normative-references">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="IANA.TLS-Parameters">[IANA.TLS-Parameters]</dt>
+        <dd>
+<span class="refAuthor">IANA</span>, <span class="refTitle">"Transport Layer Security (TLS) Parameters"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6797">[RFC6797]</dt>
+        <dd>
+<span class="refAuthor">Hodges, J.</span>, <span class="refAuthor">Jackson, C.</span>, and <span class="refAuthor">A. Barth</span>, <span class="refTitle">"HTTP Strict Transport Security (HSTS)"</span>, <span class="seriesInfo">RFC 6797</span>, <span class="seriesInfo">DOI 10.17487/RFC6797</span>, <time datetime="2012-11" class="refDate">November 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6797">https://www.rfc-editor.org/rfc/rfc6797</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-8.2">
+        <h3 id="name-informative-references">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.sheffer-tls-pqc-continuity">[I-D.sheffer-tls-pqc-continuity]</dt>
+        <dd>
+<span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">T. Reddy.K</span>, <span class="refTitle">"PQC Continuity: Downgrade Protection for TLS Servers Migrating to PQC"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-sheffer-tls-pqc-continuity-02</span>, <time datetime="2026-06-09" class="refDate">9 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-sheffer-tls-pqc-continuity-02">https://datatracker.ietf.org/doc/html/draft-sheffer-tls-pqc-continuity-02</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-plants-merkle-tree-certs">[I-D.ietf-plants-merkle-tree-certs]</dt>
+        <dd>
+<span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-05</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-05">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-05</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.ietf-lamps-pq-composite-sigs">[I-D.ietf-lamps-pq-composite-sigs]</dt>
+        <dd>
+<span class="refAuthor">Ounsworth, M.</span>, <span class="refAuthor">Gray, J.</span>, <span class="refAuthor">Pala, M.</span>, <span class="refAuthor">Klaußner, J.</span>, and <span class="refAuthor">S. Fluhrer</span>, <span class="refTitle">"Composite Module-Lattice-Based Digital Signature Algorithm (ML-DSA) for use in X.509 Public Key Infrastructure"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-pq-composite-sigs-19</span>, <time datetime="2026-04-21" class="refDate">21 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-pq-composite-sigs-19">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-pq-composite-sigs-19</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5280">[RFC5280]</dt>
+      <dd>
+<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
 </section>
 </div>
 <div id="migration">
-<section id="section-4">
+<section id="appendix-A">
       <h2 id="name-the-migration-program">
-<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-the-migration-program" class="section-name selfRef">The Migration Program</a>
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-the-migration-program" class="section-name selfRef">The Migration Program</a>
       </h2>
-<p id="section-4-1">This section is <strong>informative</strong>. It situates the <code>require-pq-ta</code> directive
+<p id="appendix-A-1">This appendix is informative. It situates the <code>require-pq-ta</code> directive
 in the long-term Web and enterprise authentication migration. The only
 normative artifact defined by this document is the near-term HSTS
-extension (<a href="#ua-behavior" class="auto internal xref">Section 5</a> and later sections).<a href="#section-4-1" class="pilcrow">¶</a></p>
+extension (<a href="#ua-behavior" class="auto internal xref">Section 4</a> and later sections).<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <div id="problem-framing">
-<section id="section-4.1">
+<section id="appendix-A.1">
         <h3 id="name-problem-framing">
-<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-problem-framing" class="section-name selfRef">Problem Framing</a>
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-problem-framing" class="section-name selfRef">Problem Framing</a>
         </h3>
 <div id="accept-set-versus-credentials-in-use">
-<section id="section-4.1.1">
+<section id="appendix-A.1.1">
           <h4 id="name-accept-set-versus-credentia">
-<a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-accept-set-versus-credentia" class="section-name selfRef">Accept-set versus credentials in use</a>
+<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-accept-set-versus-credentia" class="section-name selfRef">Accept-set versus credentials in use</a>
           </h4>
-<p id="section-4.1.1-1">Under active attack, security is determined by the client's <strong>accept set</strong>,
+<p id="appendix-A.1.1-1">Under active attack, security is determined by the client's accept set,
 not by whether a post-quantum credential is merely available at the origin.
-Deploying a post-quantum certificate while traditional trust anchors remain
+Deploying a post-quantum certificate while classical trust anchors remain
 accepted does not make the origin post-quantum secure: the attacker forges
-via a traditional CA and the client treats the name as un-updated.<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+via a classical CA and the client treats the name as un-updated.<a href="#appendix-A.1.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="adoption-s-curves-and-break-budget">
-<section id="section-4.1.2">
+<section id="appendix-A.1.2">
           <h4 id="name-adoption-s-curves-and-break">
-<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-adoption-s-curves-and-break" class="section-name selfRef">Adoption S-curves and break budget</a>
+<a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-adoption-s-curves-and-break" class="section-name selfRef">Adoption S-curves and break budget</a>
           </h4>
-<p id="section-4.1.2-1">General-purpose clients must wait on essentially the whole server
-population before removing traditional trust anchors from the global accept
+<p id="appendix-A.1.2-1">General-purpose clients must wait on essentially the whole server
+population before removing classical trust anchors from the global accept
 set. Combined with a very small fraction of breakage that operators will
 tolerate, that implies timelines measured in years—often described as
 decades if nothing accelerates the program. Specialized clients that talk
-to a small, controlled server set have a much tighter curve.<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
+to a small, controlled server set have a much tighter curve.<a href="#appendix-A.1.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="key-agreement-proceeds-in-parallel">
-<section id="section-4.1.3">
+<section id="appendix-A.1.3">
           <h4 id="name-key-agreement-proceeds-in-p">
-<a href="#section-4.1.3" class="section-number selfRef">4.1.3. </a><a href="#name-key-agreement-proceeds-in-p" class="section-name selfRef">Key agreement proceeds in parallel</a>
+<a href="#appendix-A.1.3" class="section-number selfRef">A.1.3. </a><a href="#name-key-agreement-proceeds-in-p" class="section-name selfRef">Key agreement proceeds in parallel</a>
           </h4>
-<p id="section-4.1.3-1">Hybrid and post-quantum key agreement continue to roll out independently.
+<p id="appendix-A.1.3-1">Hybrid and post-quantum key agreement continue to roll out independently.
 They do not fix classical trust-anchor authentication downgrade. Under
 <code>require-pq-ta</code>, this document nonetheless requires CRQC-resistant key
 agreement for pinned hosts so that the origin's asserted posture covers
-confidentiality as well as authentication.<a href="#section-4.1.3-1" class="pilcrow">¶</a></p>
+confidentiality as well as authentication.<a href="#appendix-A.1.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="public-web-versus-enterprise-pki">
-<section id="section-4.1.4">
+<section id="appendix-A.1.4">
           <h4 id="name-public-web-versus-enterpris">
-<a href="#section-4.1.4" class="section-number selfRef">4.1.4. </a><a href="#name-public-web-versus-enterpris" class="section-name selfRef">Public Web versus enterprise PKI</a>
+<a href="#appendix-A.1.4" class="section-number selfRef">A.1.4. </a><a href="#name-public-web-versus-enterpris" class="section-name selfRef">Public Web versus enterprise PKI</a>
           </h4>
-<p id="section-4.1.4-1">Long-term expectations differ by deployment:<a href="#section-4.1.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.4-1">Long-term expectations differ by deployment:<a href="#appendix-A.1.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.1.4-2.1">
-              <p id="section-4.1.4-2.1.1">Public Web PKI is expected to move toward MTC
-<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>.<a href="#section-4.1.4-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-A.1.4-2.1">
+              <p id="appendix-A.1.4-2.1.1">Public Web PKI is expected to move toward MTC
+<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>.<a href="#appendix-A.1.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.1.4-2.2">
-              <p id="section-4.1.4-2.2.1">Enterprise PKI is expected to include traditional post-quantum X.509
-chains (pure PQ and/or composite) under CRQC-resistant trust anchors.<a href="#section-4.1.4-2.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-A.1.4-2.2">
+              <p id="appendix-A.1.4-2.2.1">Enterprise PKI is expected to include X.509 post-quantum certificate
+chains (pure PQ and/or composite) under CRQC-resistant trust anchors.<a href="#appendix-A.1.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-4.1.4-3">The HSTS directive is written against the abstract CRQC-resistant trust-
-anchor property so both can comply.<a href="#section-4.1.4-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.4-3">The HSTS directive is written against the abstract CRQC-resistant trust-
+anchor property so both can comply.<a href="#appendix-A.1.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="dual-complete-paths-not-mixed-chains">
-<section id="section-4.1.5">
+<section id="appendix-A.1.5">
           <h4 id="name-dual-complete-paths-not-mix">
-<a href="#section-4.1.5" class="section-number selfRef">4.1.5. </a><a href="#name-dual-complete-paths-not-mix" class="section-name selfRef">Dual complete paths, not mixed chains</a>
+<a href="#appendix-A.1.5" class="section-number selfRef">A.1.5. </a><a href="#name-dual-complete-paths-not-mix" class="section-name selfRef">Dual complete paths, not mixed chains</a>
           </h4>
-<p id="section-4.1.5-1">A path anchored at a CRQC-resistant trust anchor carries post-quantum
+<p id="appendix-A.1.5-1">A path anchored at a CRQC-resistant trust anchor carries post-quantum
 (or composite) signatures. Classical-only clients cannot verify those
 signatures, so a mixed construction such as "PQ CA + classical end-entity"
 does not provide legacy interop. Origins that need both audiences provision
-<strong>two complete paths</strong>—an all-traditional path and an all-CRQC-resistant
-path—and select between them by <strong>trust-anchor type</strong> (for example using
+two complete paths—an all-classical path and an all-CRQC-resistant
+path—and select between them by trust-anchor type (for example using
 what the client advertises in <code>signature_algorithms</code>). Selecting among
-<em>individual</em> trust anchors within a type is a separate problem and is out
-of scope here.<a href="#section-4.1.5-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.5-2">Certificate authorities are expected not to mint mixed
+individual trust anchors within a type is a separate problem and is out
+of scope here.<a href="#appendix-A.1.5-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.5-2">Certificate authorities are expected not to mint mixed
 classical/CRQC-resistant paths. Clients are expected to reject mixed
 paths; detailed validation algorithms may appear in this document or in
-a dedicated path-validation specification.<a href="#section-4.1.5-2" class="pilcrow">¶</a></p>
+a dedicated path-validation specification.<a href="#appendix-A.1.5-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="why-hsts-shaped-opt-in-is-only-a-near-term-lever">
-<section id="section-4.1.6">
+<section id="appendix-A.1.6">
           <h4 id="name-why-hsts-shaped-opt-in-is-o">
-<a href="#section-4.1.6" class="section-number selfRef">4.1.6. </a><a href="#name-why-hsts-shaped-opt-in-is-o" class="section-name selfRef">Why HSTS-shaped opt-in is only a near-term lever</a>
+<a href="#appendix-A.1.6" class="section-number selfRef">A.1.6. </a><a href="#name-why-hsts-shaped-opt-in-is-o" class="section-name selfRef">Why HSTS-shaped opt-in is only a near-term lever</a>
           </h4>
-<p id="section-4.1.6-1">An HSTS-style pin is attractive because non-participating origins are not
+<p id="appendix-A.1.6-1">An HSTS-style pin is attractive because non-participating origins are not
 broken. It is also inherently limited: sticky UA state, TOFU, incomplete
 preload coverage, painful rollback, and private-browsing modes that do not
 retain durable HSTS state. True legacy single-certificate origins never
-opt in. Voluntary adoption can keep growing, but <strong>too slowly</strong> to meet
+opt in. Voluntary adoption can keep growing, but too slowly to meet
 industry post-quantum timelines. A longer program is needed for the
-remainder of the Web.<a href="#section-4.1.6-1" class="pilcrow">¶</a></p>
+remainder of the Web.<a href="#appendix-A.1.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="pq-secure-signal-embedded-in-classical-certificates">
-<section id="section-4.1.7">
+<section id="appendix-A.1.7">
           <h4 id="name-pq-secure-signal-embedded-i">
-<a href="#section-4.1.7" class="section-number selfRef">4.1.7. </a><a href="#name-pq-secure-signal-embedded-i" class="section-name selfRef">PQ-secure signal embedded in classical certificates</a>
+<a href="#appendix-A.1.7" class="section-number selfRef">A.1.7. </a><a href="#name-pq-secure-signal-embedded-i" class="section-name selfRef">PQ-secure signal embedded in classical certificates</a>
           </h4>
-<p id="section-4.1.7-1">A modern client that prefers post-quantum authentication cannot tell, when
+<p id="appendix-A.1.7-1">A modern client that prefers post-quantum authentication cannot tell, when
 an unknown origin presents only a classical credential, whether the origin
-<strong>has no post-quantum path</strong> or an attacker <strong>stripped</strong> it. Sticky
-<code>require-pq-ta</code> helps only after opt-in or preload.<a href="#section-4.1.7-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.7-2">The long-term answer discussed in the community is a credential that
+has no post-quantum path or an attacker stripped it. Sticky
+<code>require-pq-ta</code> helps only after opt-in or preload.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.7-2">The long-term answer discussed in the community is a credential that
 classical clients can still verify as usual, while carrying an embedded
-<strong>PQ-secure</strong> indication that no post-quantum certificate is available for
+PQ-secure indication that no post-quantum certificate is available for
 this end entity / that classical authentication is required for this
 origin. Modern clients that verify that signal may accept classical
-credentials <strong>only</strong> when so assured; otherwise they insist on
-CRQC-resistant authentication. The <strong>wire encoding</strong> of that signal is
-<strong>not</strong> specified in this document.<a href="#section-4.1.7-2" class="pilcrow">¶</a></p>
-<p id="section-4.1.7-3">That construction unlocks the ecosystem as follows:<a href="#section-4.1.7-3" class="pilcrow">¶</a></p>
+credentials only when so assured; otherwise they insist on
+CRQC-resistant authentication. The wire encoding of that signal is
+not specified in this document.<a href="#appendix-A.1.7-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.7-3">That construction unlocks the ecosystem as follows:<a href="#appendix-A.1.7-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-4.1.7-4.1">
-              <p id="section-4.1.7-4.1.1"><strong>Strict client policy:</strong> Accept classical authentication only with PQ
+<li class="normal" id="appendix-A.1.7-4.1">
+              <p id="appendix-A.1.7-4.1.1">Strict client policy: Accept classical authentication only with PQ
 assurance that classical is required for this origin; otherwise require
-CRQC-resistant authentication.<a href="#section-4.1.7-4.1.1" class="pilcrow">¶</a></p>
+CRQC-resistant authentication.<a href="#appendix-A.1.7-4.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.1.7-4.2">
-              <p id="section-4.1.7-4.2.1"><strong>CA incentive:</strong> Once clients are strict, plain classical certificates
+            <li class="normal" id="appendix-A.1.7-4.2">
+              <p id="appendix-A.1.7-4.2.1">CA incentive: Once clients are strict, plain classical certificates
 (no PQ-secure signal) fail for modern clients. CAs are pushed to stop
 issuing plain classical certificates and to issue classical certificates
 that carry the PQ-secure signal, and/or all-CRQC-resistant credentials—
 serving both legacy clients (outer classical) and modern clients (signal
-or PQ path).<a href="#section-4.1.7-4.2.1" class="pilcrow">¶</a></p>
+or PQ path).<a href="#appendix-A.1.7-4.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-4.1.7-4.3">
-              <p id="section-4.1.7-4.3.1"><strong>Single-certificate servers:</strong> Upgrade to multi-certificate / dual-path
+            <li class="normal" id="appendix-A.1.7-4.3">
+              <p id="appendix-A.1.7-4.3.1">Single-certificate servers: Upgrade to multi-certificate / dual-path
 operation, or—when the legacy-client population is small enough—drop
-classical and serve only CRQC-resistant credentials.<a href="#section-4.1.7-4.3.1" class="pilcrow">¶</a></p>
+classical and serve only CRQC-resistant credentials.<a href="#appendix-A.1.7-4.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-4.1.7-5"><code>require-pq-ta</code> remains the <strong>near-term</strong> opt-in lever for origins that
+<p id="appendix-A.1.7-5"><code>require-pq-ta</code> remains the near-term opt-in lever for origins that
 already have a CRQC-resistant path. The PQ-secure signal in classical
 certificates is how the long tail becomes compatible with a strict accept
-set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class="pilcrow">¶</a></p>
+set without waiting solely on unaided S-curves.<a href="#appendix-A.1.7-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="what-this-document-specifies-versus-only-narrates">
-<section id="section-4.1.8">
+<section id="appendix-A.1.8">
           <h4 id="name-what-this-document-specifie">
-<a href="#section-4.1.8" class="section-number selfRef">4.1.8. </a><a href="#name-what-this-document-specifie" class="section-name selfRef">What this document specifies versus only narrates</a>
+<a href="#appendix-A.1.8" class="section-number selfRef">A.1.8. </a><a href="#name-what-this-document-specifie" class="section-name selfRef">What this document specifies versus only narrates</a>
           </h4>
 <table class="center" id="table-1">
             <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
@@ -1636,16 +1815,16 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
 </section>
 </div>
 <div id="chronological-stages">
-<section id="section-4.2">
+<section id="appendix-A.2">
         <h3 id="name-chronological-stages">
-<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-chronological-stages" class="section-name selfRef">Chronological Stages</a>
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-chronological-stages" class="section-name selfRef">Chronological Stages</a>
         </h3>
-<p id="section-4.2-1">Each stage summarizes expected <strong>CA</strong> (or trust-anchor operator),
-<strong>server</strong>, and <strong>client</strong> behavior.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-1">Each stage summarizes expected CA (or trust-anchor operator),
+server, and client behavior.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
 <div id="stage-0-today">
-<section id="section-4.2.1">
+<section id="appendix-A.2.1">
           <h4 id="name-stage-0-today">
-<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-stage-0-today" class="section-name selfRef">Stage 0 — Today</a>
+<a href="#appendix-A.2.1" class="section-number selfRef">A.2.1. </a><a href="#name-stage-0-today" class="section-name selfRef">Stage 0 — Today</a>
           </h4>
 <table class="center" id="table-2">
             <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
@@ -1658,24 +1837,24 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">Traditional issuance only (Web PKI).</td>
+                <td class="text-left" rowspan="1" colspan="1">Classical issuance only (Web PKI).</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">Traditional certificates; HSTS common; no <code>require-pq-ta</code>.</td>
+                <td class="text-left" rowspan="1" colspan="1">Classical certificates; HSTS common; no <code>require-pq-ta</code>.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Accepts traditional authentication; hybrid/PQ key agreement rolling out independently.</td>
+                <td class="text-left" rowspan="1" colspan="1">Accepts classical authentication; hybrid/PQ key agreement rolling out independently.</td>
               </tr>
             </tbody>
           </table>
 </section>
 </div>
 <div id="stage-1-early-pq-issuance-dual-accept">
-<section id="section-4.2.2">
+<section id="appendix-A.2.2">
           <h4 id="name-stage-1-early-pq-issuance-d">
-<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-stage-1-early-pq-issuance-d" class="section-name selfRef">Stage 1 — Early PQ issuance, dual accept</a>
+<a href="#appendix-A.2.2" class="section-number selfRef">A.2.2. </a><a href="#name-stage-1-early-pq-issuance-d" class="section-name selfRef">Stage 1 — Early PQ issuance, dual accept</a>
           </h4>
 <table class="center" id="table-3">
             <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
@@ -1688,25 +1867,24 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">Some CAs begin minting CRQC-resistant credentials (public Web toward MTC; enterprise traditional PQ chains); traditional issuance continues.</td>
+                <td class="text-left" rowspan="1" colspan="1">Some CAs begin minting CRQC-resistant credentials (public Web toward MTC; enterprise X.509 PQ chains); classical issuance continues.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <strong>New</strong> servers can obtain CRQC-resistant credentials, support <code>require-pq-ta</code>, and may dual-home all-traditional and all-CRQC-resistant paths selected by trust-anchor type. <strong>Old</strong> servers remain traditional-only and do not send <code>require-pq-ta</code>.</td>
+                <td class="text-left" rowspan="1" colspan="1">New servers can obtain CRQC-resistant credentials, support <code>require-pq-ta</code>, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send <code>require-pq-ta</code>.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Most clients accept <strong>both</strong> traditional and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS <code>signature_algorithms</code> (and related mechanisms). Capable servers may begin asserting <code>require-pq-ta</code>.</td>
+                <td class="text-left" rowspan="1" colspan="1">Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS <code>signature_algorithms</code> (and related mechanisms). Capable servers may begin asserting <code>require-pq-ta</code>.</td>
               </tr>
             </tbody>
           </table>
 </section>
 </div>
 <div id="stage-2-opt-in-pin-spreads-this-document">
-<section id="section-4.2.3">
+<section id="appendix-A.2.3">
           <h4 id="name-stage-2-opt-in-pin-spreads-">
-<a href="#section-4.2.3" class="section-number selfRef">4.2.3. </a><a href="#name-stage-2-opt-in-pin-spreads-" class="section-name selfRef">Stage 2 — Opt-in pin spreads (this document)</a>
+<a href="#appendix-A.2.3" class="section-number selfRef">A.2.3. </a><a href="#name-stage-2-opt-in-pin-spreads-" class="section-name selfRef">Stage 2 — Opt-in pin spreads (this document)</a>
           </h4>
 <table class="center" id="table-4">
             <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
@@ -1719,7 +1897,7 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">Growing CRQC-resistant issuance; traditional credentials still widely available.</td>
+                <td class="text-left" rowspan="1" colspan="1">Growing CRQC-resistant issuance; classical credentials still widely available.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
@@ -1727,16 +1905,16 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Still dual-accept by default; for Known HSTS Hosts with <code>require-pq-ta</code>, reject traditional trust anchors and classical-only key agreement. Optional preload semantics. Coverage grows, but <strong>adoption remains too slow</strong> for industry post-quantum timelines.</td>
+                <td class="text-left" rowspan="1" colspan="1">Still dual-accept by default; for Known HSTS Hosts with <code>require-pq-ta</code>, reject classical trust anchors and classical-only key agreement. Optional preload semantics. Coverage grows, but adoption remains too slow for industry post-quantum timelines.</td>
               </tr>
             </tbody>
           </table>
 </section>
 </div>
 <div id="stage-3-accelerate-pq-issuance-and-pq-secure-signal-in-classical-certificates">
-<section id="section-4.2.4">
+<section id="appendix-A.2.4">
           <h4 id="name-stage-3-accelerate-pq-issua">
-<a href="#section-4.2.4" class="section-number selfRef">4.2.4. </a><a href="#name-stage-3-accelerate-pq-issua" class="section-name selfRef">Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates</a>
+<a href="#appendix-A.2.4" class="section-number selfRef">A.2.4. </a><a href="#name-stage-3-accelerate-pq-issua" class="section-name selfRef">Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates</a>
           </h4>
 <table class="center" id="table-5">
             <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
@@ -1749,24 +1927,24 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">Broader all-CRQC-resistant issuance under CRQC-resistant trust anchors (no mixed chains). Begin issuing <strong>classical certificates with an embedded PQ-secure signal</strong> ("no PQ / classical required for this end entity") instead of plain classical—encoding specified elsewhere.</td>
+                <td class="text-left" rowspan="1" colspan="1">Broader all-CRQC-resistant issuance under CRQC-resistant trust anchors (no mixed chains). Begin issuing classical certificates with an embedded PQ-secure signal ("no PQ / classical required for this end entity") instead of plain classical—encoding specified elsewhere.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">Dual-homed new servers: all-traditional and/or all-CRQC-resistant by trust-anchor type. Single-certificate legacy servers can adopt classical certificates that carry the PQ-secure signal without multi-certificate support.</td>
+                <td class="text-left" rowspan="1" colspan="1">Dual-homed new servers: all-classical and/or all-CRQC-resistant by trust-anchor type. Single-certificate legacy servers can adopt classical certificates that carry the PQ-secure signal without multi-certificate support.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Still largely dual-accept, but a path opens to <strong>strict</strong> policy once the PQ-secure signal is widely verifiable. Reject mixed paths. For pinned names: CRQC-resistant trust-anchor path and CRQC-resistant key agreement.</td>
+                <td class="text-left" rowspan="1" colspan="1">Still largely dual-accept, but a path opens to strict policy once the PQ-secure signal is widely verifiable. Reject mixed paths. For pinned names: CRQC-resistant trust-anchor path and CRQC-resistant key agreement.</td>
               </tr>
             </tbody>
           </table>
 </section>
 </div>
 <div id="stage-4-strict-clients-and-ca-shift">
-<section id="section-4.2.5">
+<section id="appendix-A.2.5">
           <h4 id="name-stage-4-strict-clients-and-">
-<a href="#section-4.2.5" class="section-number selfRef">4.2.5. </a><a href="#name-stage-4-strict-clients-and-" class="section-name selfRef">Stage 4 — Strict clients and CA shift</a>
+<a href="#appendix-A.2.5" class="section-number selfRef">A.2.5. </a><a href="#name-stage-4-strict-clients-and-" class="section-name selfRef">Stage 4 — Strict clients and CA shift</a>
           </h4>
 <table class="center" id="table-6">
             <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
@@ -1779,7 +1957,7 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">Stop <strong>plain</strong> classical issuance; classical-with-PQ-signal and/or all-CRQC-resistant products serve both old and new clients.</td>
+                <td class="text-left" rowspan="1" colspan="1">Stop plain classical issuance; classical-with-PQ-signal and/or all-CRQC-resistant products serve both old and new clients.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
@@ -1793,10 +1971,10 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
           </table>
 </section>
 </div>
-<div id="stage-5-remove-traditional-trust-anchors-plain-classical">
-<section id="section-4.2.6">
-          <h4 id="name-stage-5-remove-traditional-">
-<a href="#section-4.2.6" class="section-number selfRef">4.2.6. </a><a href="#name-stage-5-remove-traditional-" class="section-name selfRef">Stage 5 — Remove traditional trust anchors / plain classical</a>
+<div id="stage-5-remove-classical-trust-anchors-plain-classical">
+<section id="appendix-A.2.6">
+          <h4 id="name-stage-5-remove-classical-tr">
+<a href="#appendix-A.2.6" class="section-number selfRef">A.2.6. </a><a href="#name-stage-5-remove-classical-tr" class="section-name selfRef">Stage 5 — Remove classical trust anchors / plain classical</a>
           </h4>
 <table class="center" id="table-7">
             <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
@@ -1809,7 +1987,7 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">Traditional Web PKI trust anchors (and traditional-only MTC trust) removed; plain classical gone.</td>
+                <td class="text-left" rowspan="1" colspan="1">Classical Web PKI trust anchors (and classical-only MTC trust) removed; plain classical gone.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
@@ -1824,9 +2002,9 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
 </section>
 </div>
 <div id="stage-6-retire-require-pq-ta">
-<section id="section-4.2.7">
+<section id="appendix-A.2.7">
           <h4 id="name-stage-6-retire-require-pq-t">
-<a href="#section-4.2.7" class="section-number selfRef">4.2.7. </a><a href="#name-stage-6-retire-require-pq-t" class="section-name selfRef">Stage 6 — Retire <code>require-pq-ta</code></a>
+<a href="#appendix-A.2.7" class="section-number selfRef">A.2.7. </a><a href="#name-stage-6-retire-require-pq-t" class="section-name selfRef">Stage 6 — Retire <code>require-pq-ta</code></a>
           </h4>
 <table class="center" id="table-8">
             <caption><a href="#table-8" class="selfRef">Table 8</a></caption>
@@ -1843,201 +2021,32 @@ set without waiting solely on unaided S-curves.<a href="#section-4.1.7-5" class=
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">Expected to stop sending <code>require-pq-ta</code>; base HSTS may remain.</td>
+                <td class="text-left" rowspan="1" colspan="1">Stop sending <code>require-pq-ta</code>; base HSTS may remain.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">The PQ policy bit is redundant; the UA may clear it. The extension succeeds by becoming unnecessary.</td>
+                <td class="text-left" rowspan="1" colspan="1">The PQ policy bit is redundant and may be cleared (including any preloaded equivalent). The extension succeeds by becoming unnecessary.</td>
               </tr>
             </tbody>
           </table>
+<p id="appendix-A.2.7-2">When classical trust anchors are no longer part of the relevant accept
+set, <code>require-pq-ta</code> is obsolete.<a href="#appendix-A.2.7-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-</section>
-</div>
-</section>
-</div>
-<div id="ua-behavior">
-<section id="section-5">
-      <h2 id="name-user-agent-behavior">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-user-agent-behavior" class="section-name selfRef">User Agent Behavior</a>
-      </h2>
-<p id="section-5-1">This section specifies the UA processing rules associated with
-<code>require-pq-ta</code>. Syntax for emitting the directive on
-<code>Strict-Transport-Security</code>, server commitment rules, and preload
-delivery are left to a subsequent revision of this document; the rules
-below assume the directive has been conveyed as part of an HSTS Policy.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<div id="noting-the-directive">
-<section id="section-5.1">
-        <h3 id="name-noting-the-directive">
-<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-noting-the-directive" class="section-name selfRef">Noting the directive</a>
-        </h3>
-<p id="section-5.1-1">When a UA notes an HSTS Policy for a host per <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> and that policy
-includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span> record that the PQ policy bit is set
-for the Known HSTS Host, with the same expiry and domain scope
-(<code>includeSubDomains</code>) as the rest of that HSTS Policy.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2">If a subsequent valid HSTS Policy for the host omits <code>require-pq-ta</code>, the
-UA <span class="bcp14">MUST</span> clear the PQ policy bit (while applying any updated <code>max-age</code> and
-other HSTS directives as usual). UAs that do not implement this document
-ignore the unknown directive and apply ordinary HSTS.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="enforcement">
-<section id="section-5.2">
-        <h3 id="name-enforcement">
-<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
-        </h3>
-<p id="section-5.2-1">When establishing a connection to a Known HSTS Host whose noted policy
-includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span>:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-5.2-2">
-<li id="section-5.2-2.1">
-            <p id="section-5.2-2.1.1">Apply all UA requirements of <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> unchanged (including HTTPS-only
-behavior and failure handling).<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-5.2-2.2">
-            <p id="section-5.2-2.2.1">Authenticate the server such that the <strong>trust anchor that caused
-acceptance</strong> is CRQC-resistant (pure post-quantum or composite per local
-policy), whether that trust anchor is an X.509 trust anchor or an MTC
-trust base / cosigner.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-5.2-2.3">
-            <p id="section-5.2-2.3.1">Ensure the accepted certification path is <strong>not mixed</strong>: every hop is
-traditional, or every hop is CRQC-resistant, consistent with local
-policy. (Detailed mixed-path rejection may be refined here or by
-reference to a dedicated path-validation document.)<a href="#section-5.2-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-5.2-2.4">
-            <p id="section-5.2-2.4.1">Negotiate a <strong>CRQC-resistant key agreement</strong> (hybrid or pure
-post-quantum per local policy). Classical-only key agreement <span class="bcp14">MUST</span> cause
-failure of the connection attempt.<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
-</li>
-        </ol>
-<p id="section-5.2-3">If any of the above checks fail, the UA <span class="bcp14">MUST</span> fail the connection in a
-manner consistent with HSTS hard failure (no click-through bypass).<a href="#section-5.2-3" class="pilcrow">¶</a></p>
-<p id="section-5.2-4">This document does not impose separate end-entity signature-algorithm
-requirements beyond the trust-anchor class and path-consistency rules
-above. It does not enumerate TLS NamedGroup codepoints or MTC validation
-procedures; those remain matters for TLS/IANA policy and
-<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>, respectively.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
-<p id="section-5.2-5">Absent <code>require-pq-ta</code>, behavior is ordinary HSTS, including whatever key
-agreement the UA would negotiate for that connection.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="retirement">
-<section id="section-5.3">
-        <h3 id="name-retirement">
-<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-retirement" class="section-name selfRef">Retirement</a>
-        </h3>
-<p id="section-5.3-1">As described in Stage 6 of <a href="#migration" class="auto internal xref">Section 4</a>, once traditional trust anchors
-are no longer part of the relevant accept set, <code>require-pq-ta</code> is
-redundant. UAs <span class="bcp14">MAY</span> clear the PQ policy bit for Known HSTS Hosts (including
-any preloaded equivalent) when local policy determines that the pin is
-obsolete. Servers <span class="bcp14">SHOULD</span> stop sending the directive in that environment.
-Base HSTS policy <span class="bcp14">MAY</span> remain.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-</section>
-</div>
-<div id="security-considerations">
-<section id="section-6">
-      <h2 id="name-security-considerations">
-<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
-      </h2>
-<p id="section-6-1">TODO Security Considerations (HSTS inheritance; trust-anchor and
-key-agreement downgrade; unknown-directive UAs; enterprise interception;
-MTC evolving).<a href="#section-6-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="privacy-considerations">
-<section id="section-7">
-      <h2 id="name-privacy-considerations">
-<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
-      </h2>
-<p id="section-7-1">TODO Privacy Considerations (sticky state equivalent to HSTS; private
-browsing alignment; preload privacy profile; no additional tracking
-surface beyond the HSTS PQ policy bit).<a href="#section-7-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="iana-considerations">
-<section id="section-8">
-      <h2 id="name-iana-considerations">
-<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
-      </h2>
-<p id="section-8-1">TODO IANA Considerations (<code>Strict-Transport-Security</code> directive
-registration for <code>require-pq-ta</code>).<a href="#section-8-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="sec-combined-references">
-<section id="section-9">
-      <h2 id="name-references">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
-      </h2>
-<div id="sec-normative-references">
-<section id="section-9.1">
-        <h3 id="name-normative-references">
-<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
-        </h3>
-<dl class="references">
-<dt id="RFC2119">[RFC2119]</dt>
-        <dd>
-<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC6797">[RFC6797]</dt>
-        <dd>
-<span class="refAuthor">Hodges, J.</span>, <span class="refAuthor">Jackson, C.</span>, and <span class="refAuthor">A. Barth</span>, <span class="refTitle">"HTTP Strict Transport Security (HSTS)"</span>, <span class="seriesInfo">RFC 6797</span>, <span class="seriesInfo">DOI 10.17487/RFC6797</span>, <time datetime="2012-11" class="refDate">November 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6797">https://www.rfc-editor.org/rfc/rfc6797</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC8174">[RFC8174]</dt>
-        <dd>
-<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC9846">[RFC9846]</dt>
-      <dd>
-<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 9846</span>, <span class="seriesInfo">DOI 10.17487/RFC9846</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9846">https://www.rfc-editor.org/rfc/rfc9846</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-</dl>
-</section>
-</div>
-<div id="sec-informative-references">
-<section id="section-9.2">
-        <h3 id="name-informative-references">
-<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
-        </h3>
-<dl class="references">
-<dt id="I-D.ietf-lamps-dilithium-certificates">[I-D.ietf-lamps-dilithium-certificates]</dt>
-        <dd>
-<span class="refAuthor">Massimo, J.</span>, <span class="refAuthor">Kampanakis, P.</span>, <span class="refAuthor">Turner, S.</span>, and <span class="refAuthor">B. Westerbaan</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure - Algorithm Identifiers for the Module-Lattice-Based Digital Signature Algorithm (ML-DSA)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-dilithium-certificates-13</span>, <time datetime="2025-09-30" class="refDate">30 September 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-dilithium-certificates-13">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-dilithium-certificates-13</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.ietf-lamps-pq-composite-sigs">[I-D.ietf-lamps-pq-composite-sigs]</dt>
-        <dd>
-<span class="refAuthor">Ounsworth, M.</span>, <span class="refAuthor">Gray, J.</span>, <span class="refAuthor">Pala, M.</span>, <span class="refAuthor">Klaußner, J.</span>, and <span class="refAuthor">S. Fluhrer</span>, <span class="refTitle">"Composite Module-Lattice-Based Digital Signature Algorithm (ML-DSA) for use in X.509 Public Key Infrastructure"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-lamps-pq-composite-sigs-19</span>, <time datetime="2026-04-21" class="refDate">21 April 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-lamps-pq-composite-sigs-19">https://datatracker.ietf.org/doc/html/draft-ietf-lamps-pq-composite-sigs-19</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.ietf-plants-merkle-tree-certs">[I-D.ietf-plants-merkle-tree-certs]</dt>
-        <dd>
-<span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-05</span>, <time datetime="2026-07-06" class="refDate">6 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-05">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-05</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="I-D.sheffer-tls-pqc-continuity">[I-D.sheffer-tls-pqc-continuity]</dt>
-        <dd>
-<span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">T. Reddy.K</span>, <span class="refTitle">"PQC Continuity: Downgrade Protection for TLS Servers Migrating to PQC"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-sheffer-tls-pqc-continuity-02</span>, <time datetime="2026-06-09" class="refDate">9 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-sheffer-tls-pqc-continuity-02">https://datatracker.ietf.org/doc/html/draft-sheffer-tls-pqc-continuity-02</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC5280">[RFC5280]</dt>
-      <dd>
-<span class="refAuthor">Cooper, D.</span>, <span class="refAuthor">Santesson, S.</span>, <span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Boeyen, S.</span>, <span class="refAuthor">Housley, R.</span>, and <span class="refAuthor">W. Polk</span>, <span class="refTitle">"Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile"</span>, <span class="seriesInfo">RFC 5280</span>, <span class="seriesInfo">DOI 10.17487/RFC5280</span>, <time datetime="2008-05" class="refDate">May 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5280">https://www.rfc-editor.org/rfc/rfc5280</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-</dl>
 </section>
 </div>
 </section>
 </div>
 <div id="acknowledgments">
-<section id="appendix-A">
+<section id="appendix-B">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">TODO acknowledge.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-1"><span class="cref">TODO acknowledge.</span><a href="#appendix-B-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
