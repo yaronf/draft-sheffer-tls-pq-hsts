@@ -1316,12 +1316,18 @@ via the mechanism in this document, however, allowing a later
 classical-only key agreement would re-open a confidentiality downgrade
 for that host. Therefore, when <code>require-pq-ta</code> is enforced, this document
 also requires CRQC-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document extends HSTS <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>: it adds a directive on the
+<p id="section-1-3">This document extends HSTS <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>: it adds directives on the
 existing <code>Strict-Transport-Security</code> header field and reuses the Known
-HSTS Host storage model, <code>max-age</code>, <code>includeSubDomains</code>, and preload
-lifecycle. It does not define a parallel header. Hosts that send the
-directive must already satisfy HSTS's HTTPS requirements; UAs that do not
-understand the new directive continue to apply ordinary HSTS.<a href="#section-1-3" class="pilcrow">¶</a></p>
+HSTS Host storage model, <code>max-age</code>, and preload lifecycle. It does not
+define a parallel header. Domain scope for the PQ policy is independent
+of HSTS <code>includeSubDomains</code>: a separate <code>PqIncludeSubDomains</code> directive
+controls whether <code>require-pq-ta</code> applies to subdomains. That separation
+allows an apex to keep tree-wide HTTPS-only HSTS without forcing every
+subdomain to be PQ-ready (which would otherwise break non-PQ subdomains
+or, if the operator omitted HSTS <code>includeSubDomains</code> to avoid that,
+re-open HTTP rewrite attacks on those names). Hosts that send
+<code>require-pq-ta</code> must already satisfy HSTS's HTTPS requirements; UAs that
+do not understand the new directives continue to apply ordinary HSTS.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">The normative contribution of this document is the near-term opt-in
 <code>require-pq-ta</code> pin and the associated user-agent behavior. Where this
 document uses "PQ" in the title and abbreviation (PQ-HSTS), the
@@ -1442,7 +1448,8 @@ CRQC-resistant), not to a single encoding.<a href="#section-2-5.4.1" class="pilc
         <dd style="margin-left: 1.5em" id="section-2-5.6">
           <p id="section-2-5.6.1">This document uses Known HSTS Host, HSTS Policy, Note,
 <code>max-age</code>, <code>includeSubDomains</code>, and related terminology as in
-<span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
+<span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>. HSTS <code>includeSubDomains</code> continues to govern only the
+HTTPS-only (and related RFC 6797) domain scope.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-5.7">PQ policy bit / <code>require-pq-ta</code>:</dt>
@@ -1450,6 +1457,15 @@ CRQC-resistant), not to a single encoding.<a href="#section-2-5.4.1" class="pilc
           <p id="section-2-5.8.1">An additional boolean associated with a Known HSTS Host
 policy indicating that the <code>require-pq-ta</code> directive is in effect for
 that host until the policy expires or is superseded.<a href="#section-2-5.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-5.9">PQ domain scope / <code>PqIncludeSubDomains</code>:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.10">
+          <p id="section-2-5.10.1">When present together with <code>require-pq-ta</code>, indicates that the PQ
+policy bit also applies to subdomains of the Known HSTS Host, analogous
+to—but independent of—HSTS <code>includeSubDomains</code>. Absent
+<code>PqIncludeSubDomains</code>, <code>require-pq-ta</code> applies only to the host that
+asserted the policy.<a href="#section-2-5.10.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1492,23 +1508,40 @@ revision of this document.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-user-agent-behavior" class="section-name selfRef">User Agent Behavior</a>
       </h2>
 <p id="section-4-1">This section specifies the UA processing rules associated with
-<code>require-pq-ta</code>. Syntax for emitting the directive on
-<code>Strict-Transport-Security</code>, server commitment rules, and preload
-delivery are left to a subsequent revision of this document; the rules
-below assume the directive has been conveyed as part of an HSTS Policy.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<code>require-pq-ta</code> and <code>PqIncludeSubDomains</code>. Syntax for emitting the
+directives on <code>Strict-Transport-Security</code>, server commitment rules, and
+preload delivery are left to a subsequent revision of this document; the
+rules below assume the directives have been conveyed as part of an HSTS
+Policy.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <div id="noting-the-directive">
 <section id="section-4.1">
         <h3 id="name-noting-the-directive">
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-noting-the-directive" class="section-name selfRef">Noting the directive</a>
         </h3>
 <p id="section-4.1-1">When a UA notes an HSTS Policy for a host per <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> and that policy
-includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span> record that the PQ policy bit is set
-for the Known HSTS Host, with the same expiry and domain scope
-(<code>includeSubDomains</code>) as the rest of that HSTS Policy.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
-<p id="section-4.1-2">If a subsequent valid HSTS Policy for the host omits <code>require-pq-ta</code>, the
-UA <span class="bcp14">MUST</span> clear the PQ policy bit (while applying any updated <code>max-age</code> and
-other HSTS directives as usual). UAs that do not implement this document
-ignore the unknown directive and apply ordinary HSTS.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span>:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.1-2">
+<li id="section-4.1-2.1">
+            <p id="section-4.1-2.1.1">Record that the PQ policy bit is set for the Known HSTS Host, with the
+same expiry (<code>max-age</code>) as that HSTS Policy.<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1">Record a separate PQ domain-scope flag: set if and only if the same
+policy also includes <code>PqIncludeSubDomains</code>; otherwise clear (host-only
+PQ scope).<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-4.1-3">HSTS <code>includeSubDomains</code> <span class="bcp14">MUST NOT</span> be treated as implying PQ subdomain
+scope, and <code>PqIncludeSubDomains</code> <span class="bcp14">MUST NOT</span> be treated as implying HSTS
+subdomain scope.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">If a subsequent valid HSTS Policy for the host omits <code>require-pq-ta</code>, the
+UA <span class="bcp14">MUST</span> clear the PQ policy bit and the PQ domain-scope flag (while
+applying any updated <code>max-age</code> and other HSTS directives as usual). If the
+policy includes <code>require-pq-ta</code> but omits <code>PqIncludeSubDomains</code>, the UA
+<span class="bcp14">MUST</span> clear the PQ domain-scope flag while retaining the PQ policy bit.
+<code>PqIncludeSubDomains</code> without <code>require-pq-ta</code> has no effect. UAs that do
+not implement this document ignore the unknown directives and apply
+ordinary HSTS.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="enforcement">
@@ -1516,8 +1549,11 @@ ignore the unknown directive and apply ordinary HSTS.<a href="#section-4.1-2" cl
         <h3 id="name-enforcement">
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
         </h3>
-<p id="section-4.2-1">When establishing a connection to a Known HSTS Host whose noted policy
-includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span>:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-1">When establishing a connection to a host for which the noted HSTS Policy
+includes <code>require-pq-ta</code>—either because the host itself is a Known HSTS
+Host with that bit set, or because an ancestor Known HSTS Host has the PQ
+policy bit set with PQ domain scope (<code>PqIncludeSubDomains</code>) covering this
+host—the UA <span class="bcp14">MUST</span>:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.2-2">
 <li id="section-4.2-2.1">
             <p id="section-4.2-2.1.1">Apply all UA requirements of <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> unchanged (including HTTPS-only
@@ -1565,9 +1601,11 @@ environment. Base HSTS policy <span class="bcp14">MAY</span> remain.<a href="#se
       <h2 id="name-security-considerations">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-5-1"><span class="cref">TODO Security Considerations (HSTS inheritance; trust-anchor and
+<p id="section-5-1"><span class="cref">TODO Security Considerations (HSTS inheritance; independent
+`PqIncludeSubDomains` vs HSTS `includeSubDomains`; trust-anchor and
 key-agreement downgrade; unknown-directive UAs; enterprise interception;
-MTC evolving).</span><a href="#section-5-1" class="pilcrow">¶</a></p>
+cookie scoping / `__Host-` and related Stage 2 risks from
+{{ChromiumPQAuthRoadmap}}; MTC evolving).</span><a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="privacy-considerations">
@@ -1586,7 +1624,7 @@ surface beyond the HSTS PQ policy bit).</span><a href="#section-6-1" class="pilc
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
 <p id="section-7-1"><span class="cref">TODO IANA Considerations (`Strict-Transport-Security` directive
-registration for `require-pq-ta`).</span><a href="#section-7-1" class="pilcrow">¶</a></p>
+registration for `require-pq-ta` and `PqIncludeSubDomains`).</span><a href="#section-7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1602,7 +1640,7 @@ registration for `require-pq-ta`).</span><a href="#section-7-1" class="pilcrow">
 <dl class="references">
 <dt id="IANA.TLS-Parameters">[IANA.TLS-Parameters]</dt>
         <dd>
-<span class="refAuthor">IANA</span>, <span class="refTitle">"Transport Layer Security (TLS) Parameters"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8">https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8</a>&gt;</span>. </dd>
+<span class="refAuthor">IANA</span>, <span class="refTitle">"Transport Layer Security (TLS) Parameters"</span>, <span>&lt;<a href="https://www.iana.org/assignments/tls-parameters">https://www.iana.org/assignments/tls-parameters</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6797">[RFC6797]</dt>
         <dd>
@@ -1632,6 +1670,10 @@ registration for `require-pq-ta`).</span><a href="#section-7-1" class="pilcrow">
 <dt id="CABForumSC081v3">[CABForumSC081v3]</dt>
         <dd>
 <span class="refAuthor">CA/Browser Forum</span>, <span class="refTitle">"Ballot SC081v3: Introduce Schedule of Reducing Validity and Data Reuse Periods"</span>, <time datetime="2025-04" class="refDate">April 2025</time>, <span>&lt;<a href="https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/">https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ChromiumPQAuthRoadmap">[ChromiumPQAuthRoadmap]</dt>
+        <dd>
+<span class="refAuthor">Benjamin, D.</span> and <span class="refAuthor">J. DeBlasio</span>, <span class="refTitle">"Post-Quantum HTTPS Authentication Roadmap"</span>, <time datetime="2026-02" class="refDate">February 2026</time>, <span>&lt;<a href="https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/">https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.sheffer-tls-pqc-continuity">[I-D.sheffer-tls-pqc-continuity]</dt>
         <dd>
@@ -1666,7 +1708,9 @@ registration for `require-pq-ta`).</span><a href="#section-7-1" class="pilcrow">
 <p id="appendix-A-1">This appendix is informative. It situates the <code>require-pq-ta</code> directive
 in the long-term public Web authentication migration (with notes on
 enterprise use). The normative behavior defined by this document is the
-near-term HSTS extension in <a href="#ua-behavior" class="auto internal xref">Section 4</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+near-term HSTS extension in <a href="#ua-behavior" class="auto internal xref">Section 4</a>. An industry roadmap for the
+same migration, including the role of an HSTS-like opt-in and later
+PKI-only stages, is described in <span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <div id="problem-framing">
 <section id="appendix-A.1">
         <h3 id="name-problem-framing">
