@@ -86,15 +86,19 @@ Table of Contents
      1.2.  Relation to Other Work
    2.  Conventions and Definitions
    3.  Threat Model
-   4.  User Agent Behavior
-     4.1.  Noting the directive
-     4.2.  Enforcement
-   5.  Security Considerations
-   6.  Privacy Considerations
-   7.  IANA Considerations
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
+   4.  Syntax
+   5.  Server Processing
+   6.  User Agent Behavior
+     6.1.  Noting the directive
+     6.2.  Enforcement
+   7.  Preload
+   8.  Operational Considerations
+   9.  Security Considerations
+   10. Privacy Considerations
+   11. IANA Considerations
+   12. References
+     12.1.  Normative References
+     12.2.  Informative References
    Appendix A.  The Migration to PQ-Secure Authentication in TLS
      A.1.  Problem Framing
        A.1.1.  Acceptable authentication algorithms versus credentials
@@ -297,19 +301,36 @@ Table of Contents
    that are often visited in private browsing (incognito) modes, where
    UAs typically do not retain durable HSTS / require-pq-ta
    state—preload is then the only way to obtain the pin's protection.
-   Preload delivery details are specified in a later revision of this
-   document.
+   Preload semantics are outlined in Section 7.
 
-4.  User Agent Behavior
+4.  Syntax
+
+
+   // TODO Syntax: ABNF / grammar delta to {{RFC6797}} for `require-pq-
+   // ta` and `PqIncludeSubDomains` (valueless directives); interaction
+   // with `max-age`, `includeSubDomains`, and `preload`; unknown-
+   // directive handling unchanged; examples of host-only PQ vs tree-
+   // wide PQ.
+
+5.  Server Processing
+
+
+   // TODO Server processing: emit `require-pq-ta` only when the origin
+   // can serve a CRQC-resistant-TA credential and complete PQ/hybrid
+   // key agreement for the commitment window; emit
+   // `PqIncludeSubDomains` only when the entire covered subdomain tree
+   // is similarly ready; staged `max-age`; relation to ordinary HSTS
+   // HTTPS requirements; clearing / omitting directives.
+
+6.  User Agent Behavior
 
    This section specifies the UA processing rules associated with
-   require-pq-ta and PqIncludeSubDomains.  Syntax for emitting the
-   directives on Strict-Transport-Security, server commitment rules, and
-   preload delivery are left to a subsequent revision of this document;
-   the rules below assume the directives have been conveyed as part of
-   an HSTS Policy.
+   require-pq-ta and PqIncludeSubDomains.  Directive syntax is in
+   Section 4; server emission rules are in Section 5; preload is in
+   Section 7.  The rules below assume the directives have been conveyed
+   as part of an HSTS Policy.
 
-4.1.  Noting the directive
+6.1.  Noting the directive
 
    When a UA notes an HSTS Policy for a host per [RFC6797] and that
    policy includes require-pq-ta, the UA MUST:
@@ -334,7 +355,7 @@ Table of Contents
    ta has no effect.  UAs that do not implement this document ignore the
    unknown directives and apply ordinary HSTS.
 
-4.2.  Enforcement
+6.2.  Enforcement
 
    When establishing a connection to a host for which the noted HSTS
    Policy includes require-pq-ta—either because the host itself is a
@@ -378,7 +399,29 @@ Table of Contents
    that the pin is obsolete.  Servers SHOULD stop sending the directive
    in that environment.  Base HSTS policy MAY remain.
 
-5.  Security Considerations
+7.  Preload
+
+
+   // TODO Preload: semantics only—configured/preloaded names may be
+   // treated as already Noted with `require-pq-ta` (and optional
+   // `PqIncludeSubDomains`) before first visit, closing the TOFU gap as
+   // for HSTS today; informative submission expectations (evidence of
+   // STS+PQ directives, CRQC-resistant-TA serving, PQ/hybrid KE).  Do
+   // not prescribe one shared list vs a parallel list (implementation/
+   // operations detail).  Stage 6: UAs MAY drop preloaded PQ
+   // enforcement when the pin is obsolete.
+
+8.  Operational Considerations
+
+
+   // TODO Operational considerations: CDN / multi-CDN consistency;
+   // staged `max-age`; independent HSTS `includeSubDomains` vs
+   // `PqIncludeSubDomains`; HTTPS-only prerequisites; enterprise TLS
+   // interception; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains;
+   // MTC evolving; do not assert the pin before hybrid/PQ KE is solid
+   // for the served audience.
+
+9.  Security Considerations
 
 
    // TODO Security Considerations (HSTS inheritance; independent
@@ -387,22 +430,22 @@ Table of Contents
    // interception; cookie scoping / `__Host-` and related Stage 2 risks
    // from {{ChromiumPQAuthRoadmap}}; MTC evolving).
 
-6.  Privacy Considerations
+10.  Privacy Considerations
 
 
    // TODO Privacy Considerations (sticky state equivalent to HSTS;
    // private browsing alignment; preload privacy profile; no additional
    // tracking surface beyond the HSTS PQ policy bit).
 
-7.  IANA Considerations
+11.  IANA Considerations
 
 
    // TODO IANA Considerations (`Strict-Transport-Security` directive
    // registration for `require-pq-ta` and `PqIncludeSubDomains`).
 
-8.  References
+12.  References
 
-8.1.  Normative References
+12.1.  Normative References
 
    [IANA.TLS-Parameters]
               IANA, "Transport Layer Security (TLS) Parameters",
@@ -422,7 +465,7 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-8.2.  Informative References
+12.2.  Informative References
 
    [RescorlaPQEmergency]
               Rescorla, E., "PQ emergency", April 2024,
@@ -483,10 +526,17 @@ Appendix A.  The Migration to PQ-Secure Authentication in TLS
    This appendix is informative.  It situates the require-pq-ta
    directive in the long-term public Web authentication migration (with
    notes on enterprise use).  The normative behavior defined by this
-   document is the near-term HSTS extension in Section 4.  An industry
+   document is the near-term HSTS extension in Section 6.  An industry
    roadmap for the same migration, including the role of an HSTS-like
    opt-in and later PKI-only stages, is described in
    [ChromiumPQAuthRoadmap].
+
+
+   // TODO Appendix material still missing relative to the drafting
+   // plan: brief comparison with {{I-D.sheffer-tls-pqc-continuity}}
+   // beyond {{other-work}} if needed; pointer to mixed-path prohibition
+   // / separate path-validation draft if that work is split out of this
+   // document.
 
 A.1.  Problem Framing
 
