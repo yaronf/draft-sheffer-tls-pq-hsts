@@ -156,7 +156,7 @@ plan, including why voluntary opt-in alone is too slow for industry
 timelines and how later mechanisms (such as a PQ-secure signal embedded
 in classical certificates, specified elsewhere) can unlock a strict client policy for acceptable authentication algorithms afterward.
 
-## Relation to Other Work
+## Relation to Other Work {#other-work}
 
 {{?I-D.sheffer-tls-pqc-continuity}} defines a TLS-layer commitment that a
 server will present a PQC or composite end-entity certificate for a period
@@ -260,17 +260,32 @@ Preload closes that gap for configured names, as it does for HSTS today.
 It is especially important for origins that are often visited in private
 browsing (incognito) modes, where UAs typically do not retain durable
 HSTS / `require-pq-ta` state—preload is then the only way to obtain the
-pin's protection. Preload delivery details are specified in a later
-revision of this document.
+pin's protection. Preload semantics are outlined in {{preload}}.
+
+# Syntax {#syntax}
+
+<cref>TODO Syntax: ABNF / grammar delta to {{!RFC6797}} for
+`require-pq-ta` and `PqIncludeSubDomains` (valueless directives);
+interaction with `max-age`, `includeSubDomains`, and `preload`;
+unknown-directive handling unchanged; examples of host-only PQ vs
+tree-wide PQ.</cref>
+
+# Server Processing {#server}
+
+<cref>TODO Server processing: emit `require-pq-ta` only when the origin
+can serve a CRQC-resistant-TA credential and complete PQ/hybrid key
+agreement for the commitment window; emit `PqIncludeSubDomains` only when
+the entire covered subdomain tree is similarly ready; staged `max-age`;
+relation to ordinary HSTS HTTPS requirements; clearing / omitting
+directives.</cref>
 
 # User Agent Behavior {#ua-behavior}
 
 This section specifies the UA processing rules associated with
-`require-pq-ta` and `PqIncludeSubDomains`. Syntax for emitting the
-directives on `Strict-Transport-Security`, server commitment rules, and
-preload delivery are left to a subsequent revision of this document; the
-rules below assume the directives have been conveyed as part of an HSTS
-Policy.
+`require-pq-ta` and `PqIncludeSubDomains`. Directive syntax is in
+{{syntax}}; server emission rules are in {{server}}; preload is in
+{{preload}}. The rules below assume the directives have been conveyed as
+part of an HSTS Policy.
 
 ## Noting the directive
 
@@ -338,6 +353,28 @@ pin is obsolete. Servers SHOULD stop sending the directive in that
 environment. Base HSTS policy MAY remain.
 
 
+# Preload {#preload}
+
+<cref>TODO Preload: semantics only—configured/preloaded names may be
+treated as already Noted with `require-pq-ta` (and optional
+`PqIncludeSubDomains`) before first visit, closing the TOFU gap as for
+HSTS today; informative submission expectations (evidence of STS+PQ
+directives, CRQC-resistant-TA serving, PQ/hybrid KE). Do not prescribe
+one shared list vs a parallel list (implementation/operations detail).
+Stage 6: UAs MAY drop preloaded PQ enforcement when the pin is
+obsolete.</cref>
+
+
+# Operational Considerations {#ops}
+
+<cref>TODO Operational considerations: CDN / multi-CDN consistency;
+staged `max-age`; independent HSTS `includeSubDomains` vs
+`PqIncludeSubDomains`; HTTPS-only prerequisites; enterprise TLS
+interception; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
+evolving; do not assert the pin before hybrid/PQ KE is solid for the
+served audience.</cref>
+
+
 # Security Considerations
 
 <cref>TODO Security Considerations (HSTS inheritance; independent
@@ -370,6 +407,12 @@ enterprise use). The normative behavior defined by this document is the
 near-term HSTS extension in {{ua-behavior}}. An industry roadmap for the
 same migration, including the role of an HSTS-like opt-in and later
 PKI-only stages, is described in {{ChromiumPQAuthRoadmap}}.
+
+<cref>TODO Appendix material still missing relative to the drafting plan:
+brief comparison with {{?I-D.sheffer-tls-pqc-continuity}} beyond
+{{other-work}} if needed; pointer to mixed-path prohibition /
+separate path-validation draft if that work is split out of this
+document.</cref>
 
 ## Problem Framing
 
