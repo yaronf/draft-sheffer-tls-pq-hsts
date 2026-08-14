@@ -47,6 +47,21 @@ normative:
     author:
       org: IANA
 
+informative:
+  RescorlaPQEmergency:
+    title: "PQ emergency"
+    target: https://educatedguesswork.org/posts/pq-emergency/
+    author:
+      ins: E. Rescorla
+      name: Eric Rescorla
+    date: 2024-04
+  CABForumSC081v3:
+    title: "Ballot SC081v3: Introduce Schedule of Reducing Validity and Data Reuse Periods"
+    target: https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/
+    author:
+      org: CA/Browser Forum
+    date: 2025-04
+
 ...
 
 --- abstract
@@ -111,8 +126,9 @@ post-quantum posture.
 
 The harder problem is coordinating a three-sided ecosystem of clients,
 servers, and certificate authorities (or other trust-anchor operators)
-from today's accept set to a CRQC-resistant one on a compressed timeline.
-<cref>TODO: add references to government post-quantum migration
+from today's set of acceptable algorithms to a CRQC-resistant set on a compressed timeline
+{{RescorlaPQEmergency}}.
+<cref>TODO: add references to government/industry post-quantum migration
 directives.</cref>
 
 This document defines one near-term, origin-opt-in lever within an
@@ -120,8 +136,7 @@ incremental migration program. Other parts of that program are still
 being designed. {{migration}} states the problem and sketches a proposed
 plan, including why voluntary opt-in alone is too slow for industry
 timelines and how later mechanisms (such as a PQ-secure signal embedded
-in classical certificates, specified elsewhere) can unlock a strict
-client accept policy afterward.
+in classical certificates, specified elsewhere) can unlock a strict client policy for acceptable algorithms afterward.
 
 ## Relation to Other Work
 
@@ -212,8 +227,12 @@ migration period:
 
 Trust-on-first-use (TOFU) limits apply as for HSTS: the first successful
 HTTPS visit that delivers the policy is not itself protected by the pin.
-Preload semantics (to be specified in a later revision of this document) close
-that gap for configured names in the same way HSTS preload does today.
+Preload closes that gap for configured names, as it does for HSTS today.
+It is especially important for origins that are often visited in private
+browsing (incognito) modes, where UAs typically do not retain durable
+HSTS / `require-pq-ta` state—preload is then the only way to obtain the
+pin's protection. Preload delivery details are specified in a later
+revision of this document.
 
 # User Agent Behavior {#ua-behavior}
 
@@ -266,12 +285,12 @@ procedures; those remain matters for TLS/IANA policy and
 Absent `require-pq-ta`, behavior is ordinary HSTS, including whatever key
 agreement the UA would negotiate for that connection.
 
-Once classical trust anchors are no longer part of the relevant accept
-set (Stage 6 of {{migration}}), `require-pq-ta` is redundant. UAs MAY
-clear the PQ policy bit for Known HSTS Hosts (including any preloaded
-equivalent) when local policy determines that the pin is obsolete.
-Servers SHOULD stop sending the directive in that environment. Base HSTS
-policy MAY remain.
+Once classical trust anchors are no longer part of the relevant set of
+acceptable algorithms (Stage 5 of {{migration}}), `require-pq-ta` is
+redundant (Stage 6). UAs MAY clear the PQ policy bit for Known HSTS Hosts
+(including any preloaded equivalent) when local policy determines that the
+pin is obsolete. Servers SHOULD stop sending the directive in that
+environment. Base HSTS policy MAY remain.
 
 
 # Security Considerations
@@ -296,7 +315,7 @@ registration for `require-pq-ta`).</cref>
 
 --- back
 
-# The Migration Program {#migration}
+# The Migration to PQ-Secure Identity in TLS {#migration}
 
 This appendix is informative. It situates the `require-pq-ta` directive
 in the long-term Web and enterprise authentication migration. The only
@@ -305,28 +324,35 @@ extension ({{ua-behavior}} and later sections).
 
 ## Problem Framing
 
-### Accept-set versus credentials in use
+Some motivations for this work are widely shared in industry; others are
+more subtle. The subsections below state the assumptions used in this
+appendix so that the migration discussion is explicit and easier to
+debate.
 
-Under active attack, security is determined by the client's accept set,
+### Acceptable algorithms versus credentials in use
+
+Under active attack, security is determined by the client's set of acceptable algorithms,
 not by whether a post-quantum credential is merely available at the origin.
 Deploying a post-quantum certificate while classical trust anchors remain
-accepted does not make the origin post-quantum secure: the attacker forges
-via a classical CA and the client treats the name as un-updated.
+accepted does not make the origin post-quantum secure. An attacker who can
+forge a certificate under a classical CA can strip the post-quantum
+credential and present a classical one; the client will accept it as if the
+origin had never upgraded.
 
 ### Adoption S-curves and break budget
 
 General-purpose clients must wait on essentially the whole server
-population before removing classical trust anchors from the global accept
-set. Combined with a very small fraction of breakage that operators will
-tolerate, that implies timelines measured in years—often described as
+population before removing classical trust anchors from the global set of acceptable
+algorithms. Combined with a very small fraction of breakage that operators will
+tolerate, that implies timelines measured in years or even
 decades if nothing accelerates the program. Specialized clients that talk
 to a small, controlled server set have a much tighter curve.
 
 ### Key agreement proceeds in parallel
 
-Hybrid and post-quantum key agreement continue to roll out independently.
-They do not fix classical trust-anchor authentication downgrade. Under
-`require-pq-ta`, this document nonetheless requires CRQC-resistant key
+Post-quantum key agreement (usually hybrid with a classical schema) continues to roll out independently.
+It does not fix classical trust-anchor authentication downgrade. Under
+`require-pq-ta`, this document requires CRQC-resistant key
 agreement for pinned hosts so that the origin's asserted posture covers
 confidentiality as well as authentication.
 
@@ -339,35 +365,41 @@ Long-term expectations differ by deployment:
 - Enterprise PKI is expected to include X.509 post-quantum certificate
   chains (pure PQ and/or composite) under CRQC-resistant trust anchors.
 
-The HSTS directive is written against the abstract CRQC-resistant trust-
-anchor property so both can comply.
+The HSTS directive is stated using a "trust anchor" abstraction in order
+to accommodate both options.
 
 ### Dual complete paths, not mixed chains
 
 A path anchored at a CRQC-resistant trust anchor carries post-quantum
 (or composite) signatures. Classical-only clients cannot verify those
-signatures, so a mixed construction such as "PQ CA + classical end-entity"
-does not provide legacy interop. Origins that need both audiences provision
-two complete paths—an all-classical path and an all-CRQC-resistant
-path—and select between them by trust-anchor type (for example using
-what the client advertises in `signature_algorithms`). Selecting among
-individual trust anchors within a type is a separate problem and is out
-of scope here.
+signatures, so a mixed construction such as "PQ CA + classical
+end-entity" does not provide legacy interoperability. Origins that need
+both audiences provision two complete paths—an all-classical path and an
+all-CRQC-resistant path—and select between them per connection (for
+example using what the client advertises in `signature_algorithms`).
+
+Selecting among individual trust anchors
+{{?I-D.ietf-tls-trust-anchor-ids}} is a separate problem and is out of
+scope here.
 
 Certificate authorities are expected not to mint mixed
 classical/CRQC-resistant paths. Clients are expected to reject mixed
-paths; detailed validation algorithms may appear in this document or in
-a dedicated path-validation specification.
+paths.
+<cref>TODO: is a separate draft needed to forbid CAs from issuing mixed
+chains, or should client rejection alone suffice?</cref>
 
-### Why HSTS-shaped opt-in is only a near-term lever
+### Why an HSTS extension is only a near-term lever
 
-An HSTS-style pin is attractive because non-participating origins are not
-broken. It is also inherently limited: sticky UA state, TOFU, incomplete
-preload coverage, painful rollback, and private-browsing modes that do not
-retain durable HSTS state. True legacy single-certificate origins never
-opt in. Voluntary adoption can keep growing, but too slowly to meet
-industry post-quantum timelines. A longer program is needed for the
-remainder of the Web.
+An HSTS-style pin is attractive: non-participating origins are not broken,
+and each participating client and server gains clear security value. It is
+also inherently limited. Sticky UA state, TOFU, incomplete preload list
+coverage of the Web, painful rollback, and private-browsing modes that do
+not retain durable HSTS state all constrain reach. Performance costs (CPU
+and network bandwidth for CRQC-resistant credentials and key agreement)
+may further discourage adoption by individual servers. True legacy
+single-certificate origins never opt in. Voluntary adoption can keep
+growing, but too slowly to meet industry post-quantum timelines. A more
+aggressive program is needed for the remainder of the Web.
 
 ### PQ-secure signal embedded in classical certificates
 
@@ -376,54 +408,51 @@ an unknown origin presents only a classical credential, whether the origin
 has no post-quantum path or an attacker stripped it. Sticky
 `require-pq-ta` helps only after opt-in or preload.
 
-The long-term answer discussed in the community is a credential that
-classical clients can still verify as usual, while carrying an embedded
-PQ-secure indication that no post-quantum certificate is available for
-this end entity / that classical authentication is required for this
-origin. Modern clients that verify that signal may accept classical
-credentials only when so assured; otherwise they insist on
-CRQC-resistant authentication. The wire encoding of that signal is
-not specified in this document.
+A proposed long-term answer is a credential that classical clients can
+still verify as usual, while carrying an embedded PQ-secure indication
+that no post-quantum certificate is available for this end entity—that
+is, that classical authentication is required for this origin. Modern
+clients that verify that signal may accept classical credentials only
+when so assured; otherwise they insist on CRQC-resistant authentication.
+The wire encoding of that signal is not specified in this document.
 
 That construction unlocks the ecosystem as follows:
 
-- Strict client policy: Accept classical authentication only with PQ
+- Implementation effort is concentrated on certificate authorities (a
+  small number of issuers) and on clients (a small number of major
+  implementations, especially browsers). Because publicly trusted
+  certificates have bounded lifetimes {{CABForumSC081v3}}, once all newly
+  issued classical certificates carry the signal, remaining certificates
+  without it age out on a predictable schedule. After that point, the
+  only non-CRQC-resistant servers that remain are those that still
+  present a single classical certificate.
+- Strict client policy: accept classical authentication only with PQ
   assurance that classical is required for this origin; otherwise require
   CRQC-resistant authentication.
-- CA incentive: Once clients are strict, plain classical certificates
-  (no PQ-secure signal) fail for modern clients. CAs are pushed to stop
-  issuing plain classical certificates and to issue classical certificates
-  that carry the PQ-secure signal, and/or all-CRQC-resistant credentials—
-  serving both legacy clients (outer classical) and modern clients (signal
-  or PQ path).
-- Single-certificate servers: Upgrade to multi-certificate / dual-path
-  operation, or—when the legacy-client population is small enough—drop
-  classical and serve only CRQC-resistant credentials.
+- Single-certificate servers: upgrade to multi-certificate / dual-path
+  operation, or — when the legacy-client population is small enough — stop
+  relying on classical-only issuance, which forces those origins to
+  upgrade or lose modern-client connectivity.
 
-`require-pq-ta` remains the near-term opt-in lever for origins that
-already have a CRQC-resistant path. The PQ-secure signal in classical
-certificates is how the long tail becomes compatible with a strict accept
-set without waiting solely on unaided S-curves.
-
-### What this document specifies versus only narrates
-
-| In this migration narrative (informative) | Normative in this document |
-|---|---|
-| Accept-set logic, S-curves, dual paths by trust-anchor type, mixed-path prohibition, role of the PQ-secure signal in classical certificates, ecosystem endgame, retirement | `require-pq-ta` opt-in; UA note and enforce of trust-anchor class and key-agreement class; fail closed; retirement behavior |
-| Wire encoding of the PQ-secure signal; individual trust-anchor selection | Out of scope (other documents) |
+`require-pq-ta` remains the near-term, easy-to-deploy opt-in lever for
+origins that already have a CRQC-resistant path. The PQ-secure signal in
+classical certificates is how the long tail can be brought along without
+weakening the security of origins that have already upgraded.
 
 ## Chronological Stages
 
-Each stage summarizes expected CA (or trust-anchor operator),
-server, and client behavior.
+Each stage summarizes expected CA (or trust-anchor operator), server, and
+client behavior. The sequence is idealized: large-scale adoption will be
+more uneven, with different parts of the ecosystem moving at different
+rates.
 
 ### Stage 0 — Today
 
 | Role | State |
 |---|---|
 | CA | Classical issuance only (Web PKI). |
-| Server | Classical certificates; HSTS common; no `require-pq-ta`. |
-| Client | Accepts classical authentication; hybrid/PQ key agreement rolling out independently. |
+| Server | Classical certificates; HSTS common; no `require-pq-ta`. Hybrid/PQ key agreement rolling out independently. |
+| Client | Accepts classical authentication. Hybrid/PQ key agreement rolling out independently. |
 
 ### Stage 1 — Early PQ issuance, dual accept
 
@@ -433,19 +462,22 @@ server, and client behavior.
 | Server | New servers can obtain CRQC-resistant credentials, support `require-pq-ta`, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send `require-pq-ta`. |
 | Client | Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS `signature_algorithms` (and related mechanisms). Capable servers may begin asserting `require-pq-ta`. |
 
+This stage is gated on industry adoption of PQ-ready credential
+infrastructure, expected for the public Web to center on MTC.
+
 ### Stage 2 — Opt-in pin spreads (this document)
 
 | Role | State |
 |---|---|
 | CA | Growing CRQC-resistant issuance; classical credentials still widely available. |
 | Server | More origins send STS including `require-pq-ta` once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in. |
-| Client | Still dual-accept by default; for Known HSTS Hosts with `require-pq-ta`, reject classical trust anchors and classical-only key agreement. Optional preload semantics. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
+| Client | Still dual-accept by default; for Known HSTS Hosts with `require-pq-ta` (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
 
 ### Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates
 
 | Role | State |
 |---|---|
-| CA | Broader all-CRQC-resistant issuance under CRQC-resistant trust anchors (no mixed chains). Begin issuing classical certificates with an embedded PQ-secure signal ("no PQ / classical required for this end entity") instead of plain classical—encoding specified elsewhere. |
+| CA | Broader CRQC-resistant issuance (no mixed chains). Begin issuing classical certificates with an embedded PQ-secure signal ("classical required for this end entity") instead of plain classical—encoding specified elsewhere. |
 | Server | Dual-homed new servers: all-classical and/or all-CRQC-resistant by trust-anchor type. Single-certificate legacy servers can adopt classical certificates that carry the PQ-secure signal without multi-certificate support. |
 | Client | Still largely dual-accept, but a path opens to strict policy once the PQ-secure signal is widely verifiable. Reject mixed paths. For pinned names: CRQC-resistant trust-anchor path and CRQC-resistant key agreement. |
 
@@ -457,24 +489,21 @@ server, and client behavior.
 | Server | Single-certificate origins stay on classical-with-PQ-signal, upgrade to dual-path, or—as legacy clients shrink—switch to CRQC-resistant only. Dual-homed origins prefer CRQC-resistant paths to modern clients. |
 | Client | Deploy strict policy: classical only with PQ assurance that classical is required for this origin; otherwise CRQC-resistant only. Opt-in `require-pq-ta` still helps early PQ origins; the PQ-secure signal covers the long tail. |
 
-### Stage 5 — Remove classical trust anchors / plain classical
+### Stage 5 — Remove classical trust anchors
 
 | Role | State |
 |---|---|
-| CA | Classical Web PKI trust anchors (and classical-only MTC trust) removed; plain classical gone. |
-| Server | CRQC-resistant only (or residual classical-with-PQ-signal only while last classical verifiers remain—deployment-dependent). |
-| Client | Every successful acceptance uses CRQC-resistant authentication; classical without PQ assurance is rejected. |
+| CA | Classical Web PKI trust anchors are removed from relying-party trust stores. Plain classical issuance is gone. |
+| Server | Serve CRQC-resistant credentials. Residual classical-with-PQ-signal credentials may linger only while last classical-only verifiers remain (deployment-dependent). |
+| Client | Successful authentication uses CRQC-resistant trust anchors. Classical credentials without PQ assurance are rejected. |
 
 ### Stage 6 — Retire `require-pq-ta`
 
 | Role | State |
 |---|---|
-| CA | CRQC-resistant-only trust world (for this PKI). |
+| CA | CRQC-resistant-only trust for the Web PKI. |
 | Server | Stop sending `require-pq-ta`; base HSTS may remain. |
-| Client | The PQ policy bit is redundant and may be cleared (including any preloaded equivalent). The extension succeeds by becoming unnecessary. |
-
-When classical trust anchors are no longer part of the relevant accept
-set, `require-pq-ta` is obsolete.
+| Client | Clear `require-pq-ta` state (including preload) and eventually remove PQ-HSTS enforcement; the pin is redundant. The extension succeeds by becoming unnecessary. |
 
 # Acknowledgments
 {:numbered="false"}
