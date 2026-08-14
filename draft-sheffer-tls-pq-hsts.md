@@ -474,7 +474,7 @@ locally chosen timelines.
 
 | Role | State |
 |---|---|
-| CA | Some CAs begin minting CRQC-resistant credentials (public Web toward MTC; enterprise X.509 PQ chains); classical issuance continues. |
+| CA | Some CAs begin minting CRQC-resistant credentials (public Web toward MTC); classical issuance continues. |
 | Server | New servers can obtain CRQC-resistant credentials, support `require-pq-ta`, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send `require-pq-ta`. |
 | Client | Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS `signature_algorithms` (and related mechanisms). Capable servers may begin asserting `require-pq-ta`. |
 
