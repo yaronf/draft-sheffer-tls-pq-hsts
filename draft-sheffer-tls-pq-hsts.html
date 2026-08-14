@@ -12,14 +12,15 @@
        This document extends HTTP Strict Transport Security (HSTS)  
 with a new  Strict-Transport-Security  directive,  require-pq-ta . When a
 user agent (UA) has noted that policy for a host, it  MUST  authenticate the
-host using a post-quantum (PQ)
-trust anchor and  MUST  negotiate a PQ (pure post-quantum or
-hybrid) key agreement. 
+host using a cryptographically relevant quantum computer
+(CRQC)-resistant trust anchor and  MUST  negotiate a CRQC-resistant (pure
+post-quantum or hybrid) key agreement. 
        The directive is a near-term, origin-opt-in lever for the dual-trust-store
-phase of Web and enterprise PKI migration. It is designed to become
-unnecessary once classical trust anchors are retired. The document also
-describes, informatively, the longer authentication migration program in
-which this lever sits. 
+phase of PKI migration—primarily the public Web PKI, though the same
+mechanism can be used in enterprise deployments. It is designed to become
+unnecessary once classical trust anchors are retired from the relevant
+trust store. The document also describes, informatively, the longer
+public-Web authentication migration program in which this lever sits. 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="post-quantum migration" name="keyword">
@@ -1100,14 +1101,15 @@ svg {
 <p id="section-abstract-1">This document extends HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>
 with a new <code>Strict-Transport-Security</code> directive, <code>require-pq-ta</code>. When a
 user agent (UA) has noted that policy for a host, it <span class="bcp14">MUST</span> authenticate the
-host using a post-quantum (PQ)
-trust anchor and <span class="bcp14">MUST</span> negotiate a PQ (pure post-quantum or
-hybrid) key agreement.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+host using a cryptographically relevant quantum computer
+(CRQC)-resistant trust anchor and <span class="bcp14">MUST</span> negotiate a CRQC-resistant (pure
+post-quantum or hybrid) key agreement.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">The directive is a near-term, origin-opt-in lever for the dual-trust-store
-phase of Web and enterprise PKI migration. It is designed to become
-unnecessary once classical trust anchors are retired. The document also
-describes, informatively, the longer authentication migration program in
-which this lever sits.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+phase of PKI migration—primarily the public Web PKI, though the same
+mechanism can be used in enterprise deployments. It is designed to become
+unnecessary once classical trust anchors are retired from the relevant
+trust store. The document also describes, informatively, the longer
+public-Web authentication migration program in which this lever sits.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1222,13 +1224,13 @@ which this lever sits.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-the-migration-to-pq-secure-" class="internal xref">The Migration to PQ-Secure Identity in TLS</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-the-migration-to-pq-secure-" class="internal xref">The Migration to PQ-Secure Authentication in TLS</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
                 <p id="section-toc.1-1.9.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-problem-framing" class="internal xref">Problem Framing</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.1">
-                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-acceptable-algorithms-versu" class="internal xref">Acceptable algorithms versus credentials in use</a></p>
+                    <p id="section-toc.1-1.9.2.1.2.1.1"><a href="#appendix-A.1.1" class="auto internal xref">A.1.1</a>.  <a href="#name-acceptable-authentication-a" class="internal xref">Acceptable authentication algorithms versus credentials in use</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1.2.2">
                     <p id="section-toc.1-1.9.2.1.2.2.1"><a href="#appendix-A.1.2" class="auto internal xref">A.1.2</a>.  <a href="#name-adoption-s-curves-and-break" class="internal xref">Adoption S-curves and break budget</a></p>
@@ -1296,7 +1298,7 @@ which this lever sits.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 <p id="section-1-1">Migrating TLS authentication to post-quantum cryptography cannot be done
 by flipping a single switch. For a long period, relying parties will keep
 classical trust anchors in their trust stores alongside
-cryptographically relevant quantum computer (CRQC)-resistant ones, and
+CRQC-resistant ones, and
 many origins will still present only
 classical credentials. Under active attack, what matters is not whether
 a server can present a post-quantum credential, but whether the client
@@ -1321,7 +1323,10 @@ lifecycle. It does not define a parallel header. Hosts that send the
 directive must already satisfy HSTS's HTTPS requirements; UAs that do not
 understand the new directive continue to apply ordinary HSTS.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">The normative contribution of this document is the near-term opt-in
-<code>require-pq-ta</code> pin and the associated user-agent behavior.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<code>require-pq-ta</code> pin and the associated user-agent behavior. Where this
+document uses "PQ" in the title and abbreviation (PQ-HSTS), the
+normative requirement is CRQC-resistant trust-anchor authentication and
+CRQC-resistant key agreement as defined below—not a single algorithm.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <div id="pq-hsts-in-the-broader-migration-context">
 <section id="section-1.1">
         <h3 id="name-pq-hsts-in-the-broader-migr">
@@ -1333,7 +1338,8 @@ classical-only key-agreement downgrade once a host has asserted a
 post-quantum posture.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <p id="section-1.1-2">The harder problem is coordinating a three-sided ecosystem of clients,
 servers, and certificate authorities (or other trust-anchor operators)
-from today's set of acceptable algorithms to a CRQC-resistant set on a compressed timeline
+from today's set of acceptable authentication algorithms to a
+CRQC-resistant set on a compressed timeline
 <span>[<a href="#RescorlaPQEmergency" class="cite xref">RescorlaPQEmergency</a>]</span>.
 <span class="cref">TODO: add references to government/industry post-quantum migration
 directives.</span><a href="#section-1.1-2" class="pilcrow">¶</a></p>
@@ -1342,7 +1348,7 @@ incremental migration program. Other parts of that program are still
 being designed. <a href="#migration" class="auto internal xref">Appendix A</a> states the problem and sketches a proposed
 plan, including why voluntary opt-in alone is too slow for industry
 timelines and how later mechanisms (such as a PQ-secure signal embedded
-in classical certificates, specified elsewhere) can unlock a strict client policy for acceptable algorithms afterward.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
+in classical certificates, specified elsewhere) can unlock a strict client policy for acceptable authentication algorithms afterward.<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="relation-to-other-work">
@@ -1364,12 +1370,15 @@ depending on a single encoding.<a href="#section-1.2-2" class="pilcrow">¶</a></
 <li class="normal" id="section-1.2-3.1">
             <p id="section-1.2-3.1.1">Public Web PKI is assumed to move toward MTC. MTC remains evolving;
 normative text in this document stays abstract about trust-anchor
-encoding.<a href="#section-1.2-3.1.1" class="pilcrow">¶</a></p>
+encoding. The migration stages in <a href="#migration" class="auto internal xref">Appendix A</a> are written primarily
+for this ecosystem.<a href="#section-1.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.2-3.2">
-            <p id="section-1.2-3.2.1">Enterprise PKI is assumed to include X.509 post-quantum certificate
-chains (pure PQ and/or composite under CRQC-resistant trust anchors),
-not MTC alone.<a href="#section-1.2-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.2-3.2.1">Enterprise PKI may use X.509 post-quantum certificate chains (pure PQ
+and/or composite under CRQC-resistant trust anchors) rather than MTC.
+Enterprises set their own migration timelines; this document neither
+drives nor constrains them. The <code>require-pq-ta</code> mechanism remains
+available where an enterprise origin and its clients choose to use it.<a href="#section-1.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-1.2-4">Both forms of CRQC-resistant trust anchor can satisfy <code>require-pq-ta</code>.<a href="#section-1.2-4" class="pilcrow">¶</a></p>
@@ -1541,9 +1550,9 @@ procedures; those remain matters for TLS/IANA policy and
 <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>, respectively.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
 <p id="section-4.2-5">Absent <code>require-pq-ta</code>, behavior is ordinary HSTS, including whatever key
 agreement the UA would negotiate for that connection.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
-<p id="section-4.2-6">Once classical trust anchors are no longer part of the relevant set of
-acceptable algorithms (Stage 5 of <a href="#migration" class="auto internal xref">Appendix A</a>), <code>require-pq-ta</code> is
-redundant (Stage 6). UAs <span class="bcp14">MAY</span> clear the PQ policy bit for Known HSTS Hosts
+<p id="section-4.2-6">Once classical trust anchors are no longer accepted for authentication
+(Stage 5 of <a href="#migration" class="auto internal xref">Appendix A</a>), <code>require-pq-ta</code> is redundant (Stage 6). UAs <span class="bcp14">MAY</span>
+clear the PQ policy bit for Known HSTS Hosts
 (including any preloaded equivalent) when local policy determines that the
 pin is obsolete. Servers <span class="bcp14">SHOULD</span> stop sending the directive in that
 environment. Base HSTS policy <span class="bcp14">MAY</span> remain.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
@@ -1652,12 +1661,12 @@ registration for `require-pq-ta`).</span><a href="#section-7-1" class="pilcrow">
 <div id="migration">
 <section id="appendix-A">
       <h2 id="name-the-migration-to-pq-secure-">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-the-migration-to-pq-secure-" class="section-name selfRef">The Migration to PQ-Secure Identity in TLS</a>
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-the-migration-to-pq-secure-" class="section-name selfRef">The Migration to PQ-Secure Authentication in TLS</a>
       </h2>
 <p id="appendix-A-1">This appendix is informative. It situates the <code>require-pq-ta</code> directive
-in the long-term Web and enterprise authentication migration. The only
-normative artifact defined by this document is the near-term HSTS
-extension (<a href="#ua-behavior" class="auto internal xref">Section 4</a> and later sections).<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+in the long-term public Web authentication migration (with notes on
+enterprise use). The normative behavior defined by this document is the
+near-term HSTS extension in <a href="#ua-behavior" class="auto internal xref">Section 4</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <div id="problem-framing">
 <section id="appendix-A.1">
         <h3 id="name-problem-framing">
@@ -1667,13 +1676,14 @@ extension (<a href="#ua-behavior" class="auto internal xref">Section 4</a> and l
 more subtle. The subsections below state the assumptions used in this
 appendix so that the migration discussion is explicit and easier to
 debate.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
-<div id="acceptable-algorithms-versus-credentials-in-use">
+<div id="acceptable-authentication-algorithms-versus-credentials-in-use">
 <section id="appendix-A.1.1">
-          <h4 id="name-acceptable-algorithms-versu">
-<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-acceptable-algorithms-versu" class="section-name selfRef">Acceptable algorithms versus credentials in use</a>
+          <h4 id="name-acceptable-authentication-a">
+<a href="#appendix-A.1.1" class="section-number selfRef">A.1.1. </a><a href="#name-acceptable-authentication-a" class="section-name selfRef">Acceptable authentication algorithms versus credentials in use</a>
           </h4>
-<p id="appendix-A.1.1-1">Under active attack, security is determined by the client's set of acceptable algorithms,
-not by whether a post-quantum credential is merely available at the origin.
+<p id="appendix-A.1.1-1">Under active attack, security is determined by the client's set of
+acceptable authentication algorithms, not by whether a post-quantum
+credential is merely available at the origin.
 Deploying a post-quantum certificate while classical trust anchors remain
 accepted does not make the origin post-quantum secure. An attacker who can
 forge a certificate under a classical CA can strip the post-quantum
@@ -1687,8 +1697,9 @@ origin had never upgraded.<a href="#appendix-A.1.1-1" class="pilcrow">¶</a></p>
 <a href="#appendix-A.1.2" class="section-number selfRef">A.1.2. </a><a href="#name-adoption-s-curves-and-break" class="section-name selfRef">Adoption S-curves and break budget</a>
           </h4>
 <p id="appendix-A.1.2-1">General-purpose clients must wait on essentially the whole server
-population before removing classical trust anchors from the global set of acceptable
-algorithms. Combined with a very small fraction of breakage that operators will
+population before removing classical trust anchors from the client's
+set of acceptable authentication algorithms. Combined with a very small
+fraction of breakage that operators will
 tolerate, that implies timelines measured in years or even
 decades if nothing accelerates the program. Specialized clients that talk
 to a small, controlled server set have a much tighter curve.<a href="#appendix-A.1.2-1" class="pilcrow">¶</a></p>
@@ -1699,7 +1710,8 @@ to a small, controlled server set have a much tighter curve.<a href="#appendix-A
           <h4 id="name-key-agreement-proceeds-in-p">
 <a href="#appendix-A.1.3" class="section-number selfRef">A.1.3. </a><a href="#name-key-agreement-proceeds-in-p" class="section-name selfRef">Key agreement proceeds in parallel</a>
           </h4>
-<p id="appendix-A.1.3-1">Post-quantum key agreement (usually hybrid with a classical schema) continues to roll out independently.
+<p id="appendix-A.1.3-1">Post-quantum key agreement (usually hybrid with a classical algorithm)
+continues to roll out independently.
 It does not fix classical trust-anchor authentication downgrade. Under
 <code>require-pq-ta</code>, this document requires CRQC-resistant key
 agreement for pinned hosts so that the origin's asserted posture covers
@@ -1711,7 +1723,7 @@ confidentiality as well as authentication.<a href="#appendix-A.1.3-1" class="pil
           <h4 id="name-public-web-versus-enterpris">
 <a href="#appendix-A.1.4" class="section-number selfRef">A.1.4. </a><a href="#name-public-web-versus-enterpris" class="section-name selfRef">Public Web versus enterprise PKI</a>
           </h4>
-<p id="appendix-A.1.4-1">Long-term expectations differ by deployment:<a href="#appendix-A.1.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.4-1">Long-term credential forms differ by deployment:<a href="#appendix-A.1.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A.1.4-2.1">
               <p id="appendix-A.1.4-2.1.1">Public Web PKI is expected to move toward MTC
@@ -1722,8 +1734,11 @@ confidentiality as well as authentication.<a href="#appendix-A.1.3-1" class="pil
 chains (pure PQ and/or composite) under CRQC-resistant trust anchors.<a href="#appendix-A.1.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="appendix-A.1.4-3">The HSTS directive is stated using a "trust anchor" abstraction in order
-to accommodate both options.<a href="#appendix-A.1.4-3" class="pilcrow">¶</a></p>
+<p id="appendix-A.1.4-3">The HSTS directive is stated using a "trust anchor" abstraction so both
+can use <code>require-pq-ta</code>. The chronological stages below focus on the
+public Web PKI, where industry-wide coordination is the hard problem.
+Enterprise operators migrate on their own schedules; this document does
+not attempt to set or enforce those schedules.<a href="#appendix-A.1.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="dual-complete-paths-not-mixed-chains">
@@ -1819,9 +1834,11 @@ weakening the security of origins that have already upgraded.<a href="#appendix-
 <a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-chronological-stages" class="section-name selfRef">Chronological Stages</a>
         </h3>
 <p id="appendix-A.2-1">Each stage summarizes expected CA (or trust-anchor operator), server, and
-client behavior. The sequence is idealized: large-scale adoption will be
-more uneven, with different parts of the ecosystem moving at different
-rates.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+client behavior in the public Web PKI. The sequence is idealized:
+large-scale adoption will be more uneven, with different parts of the
+ecosystem moving at different rates. Enterprise deployments are out of
+scope for this staged narrative; they may reuse <code>require-pq-ta</code> but on
+locally chosen timelines.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
 <div id="stage-0-today">
 <section id="appendix-A.2.1">
           <h4 id="name-stage-0-today">
