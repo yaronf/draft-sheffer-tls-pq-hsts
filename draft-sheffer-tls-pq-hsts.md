@@ -41,11 +41,7 @@ author:
     email: davidben@google.com
 
 normative:
-  IANA.TLS-Parameters:
-    title: "Transport Layer Security (TLS) Parameters"
-    target: https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8
-    author:
-      org: IANA
+  IANA.TLS-Parameters: IANA.tls-parameters
 
 informative:
   RescorlaPQEmergency:
@@ -61,6 +57,17 @@ informative:
     author:
       org: CA/Browser Forum
     date: 2025-04
+  ChromiumPQAuthRoadmap:
+    title: "Post-Quantum HTTPS Authentication Roadmap"
+    target: https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/
+    author:
+      -
+        ins: D. Benjamin
+        name: David Benjamin
+      -
+        ins: J. DeBlasio
+        name: Joe DeBlasio
+    date: 2026-02
 
 ...
 
@@ -108,12 +115,18 @@ classical-only key agreement would re-open a confidentiality downgrade
 for that host. Therefore, when `require-pq-ta` is enforced, this document
 also requires CRQC-resistant key agreement for that host.
 
-This document extends HSTS {{!RFC6797}}: it adds a directive on the
+This document extends HSTS {{!RFC6797}}: it adds directives on the
 existing `Strict-Transport-Security` header field and reuses the Known
-HSTS Host storage model, `max-age`, `includeSubDomains`, and preload
-lifecycle. It does not define a parallel header. Hosts that send the
-directive must already satisfy HSTS's HTTPS requirements; UAs that do not
-understand the new directive continue to apply ordinary HSTS.
+HSTS Host storage model, `max-age`, and preload lifecycle. It does not
+define a parallel header. Domain scope for the PQ policy is independent
+of HSTS `includeSubDomains`: a separate `PqIncludeSubDomains` directive
+controls whether `require-pq-ta` applies to subdomains. That separation
+allows an apex to keep tree-wide HTTPS-only HSTS without forcing every
+subdomain to be PQ-ready (which would otherwise break non-PQ subdomains
+or, if the operator omitted HSTS `includeSubDomains` to avoid that,
+re-open HTTP rewrite attacks on those names). Hosts that send
+`require-pq-ta` must already satisfy HSTS's HTTPS requirements; UAs that
+do not understand the new directives continue to apply ordinary HSTS.
 
 The normative contribution of this document is the near-term opt-in
 `require-pq-ta` pin and the associated user-agent behavior. Where this
@@ -211,12 +224,20 @@ trust anchor:
 HSTS terms:
 : This document uses Known HSTS Host, HSTS Policy, Note,
   `max-age`, `includeSubDomains`, and related terminology as in
-  {{!RFC6797}}.
+  {{!RFC6797}}. HSTS `includeSubDomains` continues to govern only the
+  HTTPS-only (and related RFC 6797) domain scope.
 
 PQ policy bit / `require-pq-ta`:
 : An additional boolean associated with a Known HSTS Host
   policy indicating that the `require-pq-ta` directive is in effect for
   that host until the policy expires or is superseded.
+
+PQ domain scope / `PqIncludeSubDomains`:
+: When present together with `require-pq-ta`, indicates that the PQ
+  policy bit also applies to subdomains of the Known HSTS Host, analogous
+  to—but independent of—HSTS `includeSubDomains`. Absent
+  `PqIncludeSubDomains`, `require-pq-ta` applies only to the host that
+  asserted the policy.
 
 
 # Threat Model
@@ -245,27 +266,43 @@ revision of this document.
 # User Agent Behavior {#ua-behavior}
 
 This section specifies the UA processing rules associated with
-`require-pq-ta`. Syntax for emitting the directive on
-`Strict-Transport-Security`, server commitment rules, and preload
-delivery are left to a subsequent revision of this document; the rules
-below assume the directive has been conveyed as part of an HSTS Policy.
+`require-pq-ta` and `PqIncludeSubDomains`. Syntax for emitting the
+directives on `Strict-Transport-Security`, server commitment rules, and
+preload delivery are left to a subsequent revision of this document; the
+rules below assume the directives have been conveyed as part of an HSTS
+Policy.
 
 ## Noting the directive
 
 When a UA notes an HSTS Policy for a host per {{!RFC6797}} and that policy
-includes `require-pq-ta`, the UA MUST record that the PQ policy bit is set
-for the Known HSTS Host, with the same expiry and domain scope
-(`includeSubDomains`) as the rest of that HSTS Policy.
+includes `require-pq-ta`, the UA MUST:
+
+1. Record that the PQ policy bit is set for the Known HSTS Host, with the
+   same expiry (`max-age`) as that HSTS Policy.
+2. Record a separate PQ domain-scope flag: set if and only if the same
+   policy also includes `PqIncludeSubDomains`; otherwise clear (host-only
+   PQ scope).
+
+HSTS `includeSubDomains` MUST NOT be treated as implying PQ subdomain
+scope, and `PqIncludeSubDomains` MUST NOT be treated as implying HSTS
+subdomain scope.
 
 If a subsequent valid HSTS Policy for the host omits `require-pq-ta`, the
-UA MUST clear the PQ policy bit (while applying any updated `max-age` and
-other HSTS directives as usual). UAs that do not implement this document
-ignore the unknown directive and apply ordinary HSTS.
+UA MUST clear the PQ policy bit and the PQ domain-scope flag (while
+applying any updated `max-age` and other HSTS directives as usual). If the
+policy includes `require-pq-ta` but omits `PqIncludeSubDomains`, the UA
+MUST clear the PQ domain-scope flag while retaining the PQ policy bit.
+`PqIncludeSubDomains` without `require-pq-ta` has no effect. UAs that do
+not implement this document ignore the unknown directives and apply
+ordinary HSTS.
 
 ## Enforcement
 
-When establishing a connection to a Known HSTS Host whose noted policy
-includes `require-pq-ta`, the UA MUST:
+When establishing a connection to a host for which the noted HSTS Policy
+includes `require-pq-ta`—either because the host itself is a Known HSTS
+Host with that bit set, or because an ancestor Known HSTS Host has the PQ
+policy bit set with PQ domain scope (`PqIncludeSubDomains`) covering this
+host—the UA MUST:
 
 1. Apply all UA requirements of {{!RFC6797}} unchanged (including HTTPS-only
    behavior and failure handling).
@@ -303,9 +340,11 @@ environment. Base HSTS policy MAY remain.
 
 # Security Considerations
 
-<cref>TODO Security Considerations (HSTS inheritance; trust-anchor and
+<cref>TODO Security Considerations (HSTS inheritance; independent
+`PqIncludeSubDomains` vs HSTS `includeSubDomains`; trust-anchor and
 key-agreement downgrade; unknown-directive UAs; enterprise interception;
-MTC evolving).</cref>
+cookie scoping / `__Host-` and related Stage 2 risks from
+{{ChromiumPQAuthRoadmap}}; MTC evolving).</cref>
 
 
 # Privacy Considerations
@@ -318,7 +357,7 @@ surface beyond the HSTS PQ policy bit).</cref>
 # IANA Considerations
 
 <cref>TODO IANA Considerations (`Strict-Transport-Security` directive
-registration for `require-pq-ta`).</cref>
+registration for `require-pq-ta` and `PqIncludeSubDomains`).</cref>
 
 
 --- back
@@ -328,7 +367,9 @@ registration for `require-pq-ta`).</cref>
 This appendix is informative. It situates the `require-pq-ta` directive
 in the long-term public Web authentication migration (with notes on
 enterprise use). The normative behavior defined by this document is the
-near-term HSTS extension in {{ua-behavior}}.
+near-term HSTS extension in {{ua-behavior}}. An industry roadmap for the
+same migration, including the role of an HSTS-like opt-in and later
+PKI-only stages, is described in {{ChromiumPQAuthRoadmap}}.
 
 ## Problem Framing
 
