@@ -610,8 +610,8 @@ A.2.2.  Stage 1 — Early PQ issuance, dual accept
      | Role   | State                                               |
      +========+=====================================================+
      | CA     | Some CAs begin minting CRQC-resistant credentials   |
-     |        | (public Web toward MTC; enterprise X.509 PQ         |
-     |        | chains); classical issuance continues.              |
+     |        | (public Web toward MTC); classical issuance         |
+     |        | continues.                                          |
      +--------+-----------------------------------------------------+
      | Server | New servers can obtain CRQC-resistant credentials,  |
      |        | support require-pq-ta, and may dual-home all-       |
