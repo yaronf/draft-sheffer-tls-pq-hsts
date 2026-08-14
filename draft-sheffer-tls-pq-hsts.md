@@ -69,15 +69,16 @@ informative:
 This document extends HTTP Strict Transport Security (HSTS) {{!RFC6797}}
 with a new `Strict-Transport-Security` directive, `require-pq-ta`. When a
 user agent (UA) has noted that policy for a host, it MUST authenticate the
-host using a post-quantum (PQ)
-trust anchor and MUST negotiate a PQ (pure post-quantum or
-hybrid) key agreement.
+host using a cryptographically relevant quantum computer
+(CRQC)-resistant trust anchor and MUST negotiate a CRQC-resistant (pure
+post-quantum or hybrid) key agreement.
 
 The directive is a near-term, origin-opt-in lever for the dual-trust-store
-phase of Web and enterprise PKI migration. It is designed to become
-unnecessary once classical trust anchors are retired. The document also
-describes, informatively, the longer authentication migration program in
-which this lever sits.
+phase of PKI migration—primarily the public Web PKI, though the same
+mechanism can be used in enterprise deployments. It is designed to become
+unnecessary once classical trust anchors are retired from the relevant
+trust store. The document also describes, informatively, the longer
+public-Web authentication migration program in which this lever sits.
 
 
 --- middle
@@ -87,7 +88,7 @@ which this lever sits.
 Migrating TLS authentication to post-quantum cryptography cannot be done
 by flipping a single switch. For a long period, relying parties will keep
 classical trust anchors in their trust stores alongside
-cryptographically relevant quantum computer (CRQC)-resistant ones, and
+CRQC-resistant ones, and
 many origins will still present only
 classical credentials. Under active attack, what matters is not whether
 a server can present a post-quantum credential, but whether the client
@@ -115,7 +116,10 @@ directive must already satisfy HSTS's HTTPS requirements; UAs that do not
 understand the new directive continue to apply ordinary HSTS.
 
 The normative contribution of this document is the near-term opt-in
-`require-pq-ta` pin and the associated user-agent behavior.
+`require-pq-ta` pin and the associated user-agent behavior. Where this
+document uses "PQ" in the title and abbreviation (PQ-HSTS), the
+normative requirement is CRQC-resistant trust-anchor authentication and
+CRQC-resistant key agreement as defined below—not a single algorithm.
 
 ## PQ-HSTS in the Broader Migration Context
 
@@ -126,7 +130,8 @@ post-quantum posture.
 
 The harder problem is coordinating a three-sided ecosystem of clients,
 servers, and certificate authorities (or other trust-anchor operators)
-from today's set of acceptable algorithms to a CRQC-resistant set on a compressed timeline
+from today's set of acceptable authentication algorithms to a
+CRQC-resistant set on a compressed timeline
 {{RescorlaPQEmergency}}.
 <cref>TODO: add references to government/industry post-quantum migration
 directives.</cref>
@@ -136,7 +141,7 @@ incremental migration program. Other parts of that program are still
 being designed. {{migration}} states the problem and sketches a proposed
 plan, including why voluntary opt-in alone is too slow for industry
 timelines and how later mechanisms (such as a PQ-secure signal embedded
-in classical certificates, specified elsewhere) can unlock a strict client policy for acceptable algorithms afterward.
+in classical certificates, specified elsewhere) can unlock a strict client policy for acceptable authentication algorithms afterward.
 
 ## Relation to Other Work
 
@@ -154,10 +159,13 @@ depending on a single encoding.
 
 - Public Web PKI is assumed to move toward MTC. MTC remains evolving;
   normative text in this document stays abstract about trust-anchor
-  encoding.
-- Enterprise PKI is assumed to include X.509 post-quantum certificate
-  chains (pure PQ and/or composite under CRQC-resistant trust anchors),
-  not MTC alone.
+  encoding. The migration stages in {{migration}} are written primarily
+  for this ecosystem.
+- Enterprise PKI may use X.509 post-quantum certificate chains (pure PQ
+  and/or composite under CRQC-resistant trust anchors) rather than MTC.
+  Enterprises set their own migration timelines; this document neither
+  drives nor constrains them. The `require-pq-ta` mechanism remains
+  available where an enterprise origin and its clients choose to use it.
 
 Both forms of CRQC-resistant trust anchor can satisfy `require-pq-ta`.
 
@@ -285,9 +293,9 @@ procedures; those remain matters for TLS/IANA policy and
 Absent `require-pq-ta`, behavior is ordinary HSTS, including whatever key
 agreement the UA would negotiate for that connection.
 
-Once classical trust anchors are no longer part of the relevant set of
-acceptable algorithms (Stage 5 of {{migration}}), `require-pq-ta` is
-redundant (Stage 6). UAs MAY clear the PQ policy bit for Known HSTS Hosts
+Once classical trust anchors are no longer accepted for authentication
+(Stage 5 of {{migration}}), `require-pq-ta` is redundant (Stage 6). UAs MAY
+clear the PQ policy bit for Known HSTS Hosts
 (including any preloaded equivalent) when local policy determines that the
 pin is obsolete. Servers SHOULD stop sending the directive in that
 environment. Base HSTS policy MAY remain.
@@ -315,12 +323,12 @@ registration for `require-pq-ta`).</cref>
 
 --- back
 
-# The Migration to PQ-Secure Identity in TLS {#migration}
+# The Migration to PQ-Secure Authentication in TLS {#migration}
 
 This appendix is informative. It situates the `require-pq-ta` directive
-in the long-term Web and enterprise authentication migration. The only
-normative artifact defined by this document is the near-term HSTS
-extension ({{ua-behavior}} and later sections).
+in the long-term public Web authentication migration (with notes on
+enterprise use). The normative behavior defined by this document is the
+near-term HSTS extension in {{ua-behavior}}.
 
 ## Problem Framing
 
@@ -329,10 +337,11 @@ more subtle. The subsections below state the assumptions used in this
 appendix so that the migration discussion is explicit and easier to
 debate.
 
-### Acceptable algorithms versus credentials in use
+### Acceptable authentication algorithms versus credentials in use
 
-Under active attack, security is determined by the client's set of acceptable algorithms,
-not by whether a post-quantum credential is merely available at the origin.
+Under active attack, security is determined by the client's set of
+acceptable authentication algorithms, not by whether a post-quantum
+credential is merely available at the origin.
 Deploying a post-quantum certificate while classical trust anchors remain
 accepted does not make the origin post-quantum secure. An attacker who can
 forge a certificate under a classical CA can strip the post-quantum
@@ -342,15 +351,17 @@ origin had never upgraded.
 ### Adoption S-curves and break budget
 
 General-purpose clients must wait on essentially the whole server
-population before removing classical trust anchors from the global set of acceptable
-algorithms. Combined with a very small fraction of breakage that operators will
+population before removing classical trust anchors from the client's
+set of acceptable authentication algorithms. Combined with a very small
+fraction of breakage that operators will
 tolerate, that implies timelines measured in years or even
 decades if nothing accelerates the program. Specialized clients that talk
 to a small, controlled server set have a much tighter curve.
 
 ### Key agreement proceeds in parallel
 
-Post-quantum key agreement (usually hybrid with a classical schema) continues to roll out independently.
+Post-quantum key agreement (usually hybrid with a classical algorithm)
+continues to roll out independently.
 It does not fix classical trust-anchor authentication downgrade. Under
 `require-pq-ta`, this document requires CRQC-resistant key
 agreement for pinned hosts so that the origin's asserted posture covers
@@ -358,15 +369,18 @@ confidentiality as well as authentication.
 
 ### Public Web versus enterprise PKI
 
-Long-term expectations differ by deployment:
+Long-term credential forms differ by deployment:
 
 - Public Web PKI is expected to move toward MTC
   {{?I-D.ietf-plants-merkle-tree-certs}}.
 - Enterprise PKI is expected to include X.509 post-quantum certificate
   chains (pure PQ and/or composite) under CRQC-resistant trust anchors.
 
-The HSTS directive is stated using a "trust anchor" abstraction in order
-to accommodate both options.
+The HSTS directive is stated using a "trust anchor" abstraction so both
+can use `require-pq-ta`. The chronological stages below focus on the
+public Web PKI, where industry-wide coordination is the hard problem.
+Enterprise operators migrate on their own schedules; this document does
+not attempt to set or enforce those schedules.
 
 ### Dual complete paths, not mixed chains
 
@@ -442,9 +456,11 @@ weakening the security of origins that have already upgraded.
 ## Chronological Stages
 
 Each stage summarizes expected CA (or trust-anchor operator), server, and
-client behavior. The sequence is idealized: large-scale adoption will be
-more uneven, with different parts of the ecosystem moving at different
-rates.
+client behavior in the public Web PKI. The sequence is idealized:
+large-scale adoption will be more uneven, with different parts of the
+ecosystem moving at different rates. Enterprise deployments are out of
+scope for this staged narrative; they may reuse `require-pq-ta` but on
+locally chosen timelines.
 
 ### Stage 0 — Today
 
