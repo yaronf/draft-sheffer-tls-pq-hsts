@@ -76,19 +76,14 @@ informative:
 
 This document defines an HTTP response header field, `Require-PQ-Auth`,
 modeled on HTTP Strict Transport Security (HSTS) {{?RFC6797}} but
-carried as a separate field with its own sticky client state. The field
-value is a Structured Fields Dictionary {{!RFC9651}}. When a user agent
-(UA) has noted that policy for a host, it MUST authenticate the host
-using a cryptographically relevant quantum computer (CRQC)-resistant
-trust anchor and MUST negotiate a CRQC-resistant (pure post-quantum or
-hybrid) key agreement.
-
-The header is a near-term, origin-opt-in lever for the dual-trust-store
-phase of PKI migration—primarily the public Web PKI, though the same
-mechanism can be used in enterprise deployments. It is designed to become
-unnecessary once classical trust anchors are retired from the relevant
-trust store. The document also describes, informatively, the longer
-public-Web authentication migration program in which this lever sits.
+carried separately with its own sticky client state as a Structured
+Fields Dictionary {{!RFC9651}}. When a user agent has noted that policy
+for a host, it MUST authenticate using a cryptographically relevant
+quantum computer (CRQC)-resistant trust anchor and MUST negotiate
+CRQC-resistant (pure post-quantum or hybrid) key agreement. The header
+is a near-term, origin-opt-in lever for dual-trust-store PKI migration
+and is intended to become unnecessary once classical trust anchors are
+retired.
 
 
 --- middle
