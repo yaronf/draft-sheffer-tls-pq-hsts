@@ -1,5 +1,5 @@
 ---
-title: "An HSTS Extension for Secure PQ Migration"
+title: "An HSTS-like Header for Secure PQ Migration"
 abbrev: "PQ-HSTS"
 category: std
 
@@ -16,6 +16,7 @@ pi:
 keyword:
  - post-quantum migration
  - HSTS
+ - Structured Fields
 venue:
   group: "Transport Layer Security"
   type: "Working Group"
@@ -73,14 +74,16 @@ informative:
 
 --- abstract
 
-This document extends HTTP Strict Transport Security (HSTS) {{!RFC6797}}
-with a new `Strict-Transport-Security` directive, `require-pq-ta`. When a
-user agent (UA) has noted that policy for a host, it MUST authenticate the
-host using a cryptographically relevant quantum computer
-(CRQC)-resistant trust anchor and MUST negotiate a CRQC-resistant (pure
-post-quantum or hybrid) key agreement.
+This document defines an HTTP response header field, `Require-PQ-Auth`,
+modeled on HTTP Strict Transport Security (HSTS) {{?RFC6797}} but
+carried as a separate field with its own sticky client state. The field
+value is a Structured Fields Dictionary {{!RFC9651}}. When a user agent
+(UA) has noted that policy for a host, it MUST authenticate the host
+using a cryptographically relevant quantum computer (CRQC)-resistant
+trust anchor and MUST negotiate a CRQC-resistant (pure post-quantum or
+hybrid) key agreement.
 
-The directive is a near-term, origin-opt-in lever for the dual-trust-store
+The header is a near-term, origin-opt-in lever for the dual-trust-store
 phase of PKI migration—primarily the public Web PKI, though the same
 mechanism can be used in enterprise deployments. It is designed to become
 unnecessary once classical trust anchors are retired from the relevant
@@ -112,27 +115,31 @@ downgrade; rather, it mitigates the more pressing "harvest now, decrypt
 later" threat model. Once an origin has asserted a post-quantum posture
 via the mechanism in this document, however, allowing a later
 classical-only key agreement would re-open a confidentiality downgrade
-for that host. Therefore, when `require-pq-ta` is enforced, this document
-also requires CRQC-resistant key agreement for that host.
+for that host. Therefore, when `Require-PQ-Auth` is enforced, this
+document also requires CRQC-resistant key agreement for that host.
 
-This document extends HSTS {{!RFC6797}}: it adds directives on the
-existing `Strict-Transport-Security` header field and reuses the Known
-HSTS Host storage model, `max-age`, and preload lifecycle. It does not
-define a parallel header. Domain scope for the PQ policy is independent
-of HSTS `includeSubDomains`: a separate `PqIncludeSubDomains` directive
-controls whether `require-pq-ta` applies to subdomains. That separation
-allows an apex to keep tree-wide HTTPS-only HSTS without forcing every
-subdomain to be PQ-ready (which would otherwise break non-PQ subdomains
-or, if the operator omitted HSTS `includeSubDomains` to avoid that,
-re-open HTTP rewrite attacks on those names). Hosts that send
-`require-pq-ta` must already satisfy HSTS's HTTPS requirements; UAs that
-do not understand the new directives continue to apply ordinary HSTS.
+This document defines an HTTP response header field, `Require-PQ-Auth`,
+with HSTS-like semantics but carried separately from
+`Strict-Transport-Security`, with its own sticky UA state. That
+structure follows HTTP Public Key Pinning {{?RFC7469}}. An industry
+outline of the same migration, including an HSTS-like opt-in stage,
+appears in {{ChromiumPQAuthRoadmap}}.
+
+HTTPS and PQ readiness often diverge on `max-age`, subdomain scope, and
+preload, so those knobs cannot usefully share one HSTS policy.
+
+Noting `Require-PQ-Auth` requires a securely delivered HTTPS response. It
+does not require the host to be a Known HSTS Host {{!RFC6797}}. HSTS and
+`Require-PQ-Auth` lifecycles are independent. UAs that do not implement
+this document ignore the unknown header field.
 
 The normative contribution of this document is the near-term opt-in
-`require-pq-ta` pin and the associated user-agent behavior. Where this
+`Require-PQ-Auth` pin and the associated user-agent behavior. Where this
 document uses "PQ" in the title and abbreviation (PQ-HSTS), the
 normative requirement is CRQC-resistant trust-anchor authentication and
 CRQC-resistant key agreement as defined below—not a single algorithm.
+The informal name reflects HSTS-like behavior, not an extension of the
+`Strict-Transport-Security` header field.
 
 ## PQ-HSTS in the Broader Migration Context
 
@@ -160,9 +167,9 @@ in classical certificates, specified elsewhere) can unlock a strict client polic
 
 {{?I-D.sheffer-tls-pqc-continuity}} defines a TLS-layer commitment that a
 server will present a PQC or composite end-entity certificate for a period
-of time. This document instead extends HSTS to pin CRQC-resistant trust
-anchors (and key agreement when the pin is enforced). The two approaches
-address related downgrade problems at different layers.
+of time. This document instead defines an HTTP sticky policy that pins
+CRQC-resistant trust anchors (and key agreement when the pin is enforced).
+The two approaches address related downgrade problems at different layers.
 
 Physically large post-quantum certificates motivate new certificate
 distribution mechanisms. This document is intended to work with that
@@ -177,10 +184,10 @@ depending on a single encoding.
 - Enterprise PKI may use X.509 post-quantum certificate chains (pure PQ
   and/or composite under CRQC-resistant trust anchors) rather than MTC.
   Enterprises set their own migration timelines; this document neither
-  drives nor constrains them. The `require-pq-ta` mechanism remains
+  drives nor constrains them. The `Require-PQ-Auth` mechanism remains
   available where an enterprise origin and its clients choose to use it.
 
-Both forms of CRQC-resistant trust anchor can satisfy `require-pq-ta`.
+Both forms of CRQC-resistant trust anchor can satisfy `Require-PQ-Auth`.
 
 
 # Conventions and Definitions
@@ -222,22 +229,15 @@ trust anchor:
   CRQC-resistant), not to a single encoding.
 
 HSTS terms:
-: This document uses Known HSTS Host, HSTS Policy, Note,
-  `max-age`, `includeSubDomains`, and related terminology as in
-  {{!RFC6797}}. HSTS `includeSubDomains` continues to govern only the
-  HTTPS-only (and related RFC 6797) domain scope.
+: This document refers to Known HSTS Host, HSTS Policy, and related
+  terminology from {{!RFC6797}} only for comparison. HSTS state is
+  independent of the policy defined here.
 
-PQ policy bit / `require-pq-ta`:
-: An additional boolean associated with a Known HSTS Host
-  policy indicating that the `require-pq-ta` directive is in effect for
-  that host until the policy expires or is superseded.
-
-PQ domain scope / `PqIncludeSubDomains`:
-: When present together with `require-pq-ta`, indicates that the PQ
-  policy bit also applies to subdomains of the Known HSTS Host, analogous
-  to—but independent of—HSTS `includeSubDomains`. Absent
-  `PqIncludeSubDomains`, `require-pq-ta` applies only to the host that
-  asserted the policy.
+Known PQ Host / PQ Policy:
+: A host for which the UA has noted a valid `Require-PQ-Auth` policy
+  ({{syntax}}, {{ua-behavior}}), including expiry derived from `max-age`
+  and whether `include-subdomains` applies. Storage is parallel to—not
+  part of—HSTS Policy storage.
 
 
 # Threat Model
@@ -250,91 +250,132 @@ migration period:
   anchor) for a name whose operator intends to use only CRQC-resistant
   authentication, and presents that credential to a dual-accepting UA.
 - Classical-only key-agreement downgrade after pin: Once a host has
-  asserted post-quantum posture via `require-pq-ta`, an attacker that can
-  force classical-only key agreement would undermine confidentiality for
-  subsequent visits even if authentication remains CRQC-resistant.
+  asserted post-quantum posture via `Require-PQ-Auth`, an attacker that
+  can force classical-only key agreement would undermine confidentiality
+  for subsequent visits even if authentication remains CRQC-resistant.
 
 Trust-on-first-use (TOFU) limits apply as for HSTS: the first successful
 HTTPS visit that delivers the policy is not itself protected by the pin.
 Preload closes that gap for configured names, as it does for HSTS today.
 It is especially important for origins that are often visited in private
 browsing (incognito) modes, where UAs typically do not retain durable
-HSTS / `require-pq-ta` state—preload is then the only way to obtain the
-pin's protection. Preload semantics are outlined in {{preload}}.
+sticky policy state—preload is then the only way to obtain the pin's
+protection. Preload semantics are outlined in {{preload}}.
 
 # Syntax {#syntax}
 
-<cref>TODO Syntax: ABNF / grammar delta to {{!RFC6797}} for
-`require-pq-ta` and `PqIncludeSubDomains` (valueless directives);
-interaction with `max-age`, `includeSubDomains`, and `preload`;
-unknown-directive handling unchanged; examples of host-only PQ vs
-tree-wide PQ.</cref>
+`Require-PQ-Auth` is an HTTP Structured Header field {{!RFC9651}}. Its
+value MUST be a Dictionary. Recipients that cannot parse the field value
+as a Dictionary MUST NOT update any Noted PQ Policy for the host based on
+that field (any previously Noted policy remains unchanged).
+
+The following Dictionary members are defined. Keys are lowercase as
+required by Structured Fields. Unknown members MUST be ignored.
+Recognized members are processed as specified below when the Dictionary
+parses successfully.
+
+max-age:
+: Integer (required). Non-negative number of seconds after receipt
+  during which the UA regards the host as a Known PQ Host with this
+  policy. A value of 0 signals the UA to delete any Noted PQ Policy for
+  the host (including subdomain scope learned from this host).
+
+include-subdomains:
+: Boolean true if present as a bare Dictionary member (optional). If
+  present, the PQ Policy applies to the host and to hosts whose domain
+  names are subdomains of that host's domain name, analogous to HSTS
+  `includeSubDomains` {{!RFC6797}} but applying only to this PQ Policy.
+  Absence means host-only scope.
+
+preload:
+: Boolean true if present as a bare Dictionary member (optional). Presence
+  does not change how the UA enforces a Noted PQ Policy. It only indicates
+  that the operator wants this host considered for inclusion on a PQ
+  preload list (the same role the HSTS `preload` token plays for HSTS
+  preload submission; see <https://hstspreload.org/>). Whether and how
+  such a list is operated is out of scope (see {{preload}}).
+
+If the Dictionary does not include a usable `max-age`, or if any present
+member is malformed for its type, the UA MUST NOT update Noted PQ Policy
+from this field.
+
+Examples:
+
+~~~
+Require-PQ-Auth: max-age=86400
+~~~
+
+~~~
+Require-PQ-Auth: max-age=31536000, include-subdomains
+~~~
+
+~~~
+Require-PQ-Auth: max-age=31536000, include-subdomains, preload
+~~~
 
 # Server Processing {#server}
 
-<cref>TODO Server processing: emit `require-pq-ta` only when the origin
+<cref>TODO Server processing: emit `Require-PQ-Auth` only when the origin
 can serve a CRQC-resistant-TA credential and complete PQ/hybrid key
-agreement for the commitment window; emit `PqIncludeSubDomains` only when
-the entire covered subdomain tree is similarly ready; staged `max-age`;
-relation to ordinary HSTS HTTPS requirements; clearing / omitting
-directives.</cref>
+agreement for the commitment window; emit `include-subdomains` only when
+the entire covered subdomain tree is similarly ready; choose `max-age`
+independently of HSTS; serialize as an RFC 9651 Dictionary; staged
+ramp; noting requires HTTPS but not HSTS; clear Noted policy with
+`max-age` of 0 (omitting the header does not clear).</cref>
 
 # User Agent Behavior {#ua-behavior}
 
-This section specifies the UA processing rules associated with
-`require-pq-ta` and `PqIncludeSubDomains`. Directive syntax is in
-{{syntax}}; server emission rules are in {{server}}; preload is in
-{{preload}}. The rules below assume the directives have been conveyed as
-part of an HSTS Policy.
+This section defines how UAs note and enforce `Require-PQ-Auth` policy.
 
-## Noting the directive
+## Noting the header
 
-When a UA notes an HSTS Policy for a host per {{!RFC6797}} and that policy
-includes `require-pq-ta`, the UA MUST:
+Upon receipt of a `Require-PQ-Auth` header field in an HTTP response, the
+UA MUST NOT note a PQ Policy unless all of the following hold:
 
-1. Record that the PQ policy bit is set for the Known HSTS Host, with the
-   same expiry (`max-age`) as that HSTS Policy.
-2. Record a separate PQ domain-scope flag: set if and only if the same
-   policy also includes `PqIncludeSubDomains`; otherwise clear (host-only
-   PQ scope).
+1. The response was received over an error-free TLS connection
+   (HTTPS).
+2. The field value parses as a Structured Fields Dictionary per
+   {{syntax}}, including a valid `max-age` member.
 
-HSTS `includeSubDomains` MUST NOT be treated as implying PQ subdomain
-scope, and `PqIncludeSubDomains` MUST NOT be treated as implying HSTS
-subdomain scope.
+The host need not be a Known HSTS Host. Noting PQ Policy MUST NOT modify
+HSTS Policy storage.
 
-If a subsequent valid HSTS Policy for the host omits `require-pq-ta`, the
-UA MUST clear the PQ policy bit and the PQ domain-scope flag (while
-applying any updated `max-age` and other HSTS directives as usual). If the
-policy includes `require-pq-ta` but omits `PqIncludeSubDomains`, the UA
-MUST clear the PQ domain-scope flag while retaining the PQ policy bit.
-`PqIncludeSubDomains` without `require-pq-ta` has no effect. UAs that do
-not implement this document ignore the unknown directives and apply
-ordinary HSTS.
+When noting, the UA MUST:
+
+1. Store a PQ Policy for the host as a Known PQ Host, with expiry derived
+   from `max-age` (or delete the policy if `max-age` is 0).
+2. Record subdomain scope from `include-subdomains` when that member is
+   usable; otherwise host-only scope.
+
+If a subsequent valid `Require-PQ-Auth` field is noted for the host, it
+replaces the prior PQ Policy (including subdomain scope) for that host.
+Absence of the header field on a later response does not by itself clear
+PQ Policy before expiry; servers clear state with `max-age` of 0.
+
+UAs that do not implement this document ignore the unknown header field.
 
 ## Enforcement
 
-When establishing a connection to a host for which the noted HSTS Policy
-includes `require-pq-ta`—either because the host itself is a Known HSTS
-Host with that bit set, or because an ancestor Known HSTS Host has the PQ
-policy bit set with PQ domain scope (`PqIncludeSubDomains`) covering this
-host—the UA MUST:
+When establishing a connection to a host covered by an unexpired Noted PQ
+Policy—either because the host itself is a Known PQ Host, or because an
+ancestor Known PQ Host has `include-subdomains` covering this host—the UA
+MUST:
 
-1. Apply all UA requirements of {{!RFC6797}} unchanged (including HTTPS-only
-   behavior and failure handling).
-2. Authenticate the server such that the trust anchor that caused
+1. Authenticate the server such that the trust anchor that caused
    acceptance is CRQC-resistant (pure post-quantum or composite per local
    policy), whether that trust anchor is an X.509 trust anchor or an MTC
    trust base / cosigner.
-3. Ensure the accepted certification path is not mixed: every hop is
+2. Ensure the accepted certification path is not mixed: every hop is
    classical, or every hop is CRQC-resistant, consistent with local
    policy. (Detailed mixed-path rejection may be refined here or by
    reference to a dedicated path-validation document.)
-4. Negotiate a CRQC-resistant key agreement (hybrid or pure
+3. Negotiate a CRQC-resistant key agreement (hybrid or pure
    post-quantum per local policy). Classical-only key agreement MUST cause
    failure of the connection attempt.
 
 If any of the above checks fail, the UA MUST fail the connection in a
-manner consistent with HSTS hard failure (no click-through bypass).
+manner consistent with HSTS hard failure (no click-through bypass)
+({{Section 8.4 of !RFC6797}}).
 
 This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
@@ -342,71 +383,70 @@ above. It does not enumerate TLS NamedGroup codepoints or MTC validation
 procedures; those remain matters for TLS/IANA policy and
 {{?I-D.ietf-plants-merkle-tree-certs}}, respectively.
 
-Absent `require-pq-ta`, behavior is ordinary HSTS, including whatever key
-agreement the UA would negotiate for that connection.
-
 Once classical trust anchors are no longer accepted for authentication
-(Stage 5 of {{migration}}), `require-pq-ta` is redundant (Stage 6). UAs MAY
-clear the PQ policy bit for Known HSTS Hosts
-(including any preloaded equivalent) when local policy determines that the
-pin is obsolete. Servers SHOULD stop sending the directive in that
-environment. Base HSTS policy MAY remain.
+(Stage 5 of {{migration}}), `Require-PQ-Auth` is redundant (Stage 6). UAs
+MAY clear PQ Policy for Known PQ Hosts (including any preloaded
+equivalent) when local policy determines that the pin is obsolete.
+Servers SHOULD stop sending the header in that environment. HSTS policy,
+if any, is unaffected.
 
 
 # Preload {#preload}
 
 <cref>TODO Preload: semantics only—configured/preloaded names may be
-treated as already Noted with `require-pq-ta` (and optional
-`PqIncludeSubDomains`) before first visit, closing the TOFU gap as for
-HSTS today; informative submission expectations (evidence of STS+PQ
-directives, CRQC-resistant-TA serving, PQ/hybrid KE). Do not prescribe
-one shared list vs a parallel list (implementation/operations detail).
-Stage 6: UAs MAY drop preloaded PQ enforcement when the pin is
-obsolete.</cref>
+treated as already Noted Known PQ Hosts (with optional
+`include-subdomains`) before first visit, closing the TOFU gap as for
+HSTS today; the `preload` Dictionary member signals submission intent for
+a PQ preload list and is independent of HSTS `preload`; informative
+submission expectations (evidence of `Require-PQ-Auth`,
+CRQC-resistant-TA serving, PQ/hybrid KE). Do not prescribe one shared
+list vs a parallel list (implementation/operations detail). Stage 6: UAs
+MAY drop preloaded PQ enforcement when the pin is obsolete.</cref>
 
 
 # Operational Considerations {#ops}
 
 <cref>TODO Operational considerations: CDN / multi-CDN consistency;
-staged `max-age`; independent HSTS `includeSubDomains` vs
-`PqIncludeSubDomains`; HTTPS-only prerequisites; enterprise TLS
-interception; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
-evolving; do not assert the pin before hybrid/PQ KE is solid for the
+staged `max-age` independent of HSTS; independent HSTS
+`includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
+HSTS not required; enterprise TLS interception; public Web ≈ MTC vs
+enterprise ≈ X.509 PQ chains; MTC evolving; SFV serialization (lowercase
+keys, commas); do not assert the pin before hybrid/PQ KE is solid for the
 served audience.</cref>
 
 
 # Security Considerations
 
-<cref>TODO Security Considerations (HSTS inheritance; independent
-`PqIncludeSubDomains` vs HSTS `includeSubDomains`; trust-anchor and
-key-agreement downgrade; unknown-directive UAs; enterprise interception;
-cookie scoping / `__Host-` and related Stage 2 risks from
+<cref>TODO Security Considerations (orthogonal HSTS vs PQ state;
+trust-anchor and key-agreement downgrade; unknown-header UAs; enterprise
+interception; cookie scoping / `__Host-` and related Stage 2 risks from
 {{ChromiumPQAuthRoadmap}}; MTC evolving).</cref>
 
 
 # Privacy Considerations
 
-<cref>TODO Privacy Considerations (sticky state equivalent to HSTS; private
-browsing alignment; preload privacy profile; no additional tracking
-surface beyond the HSTS PQ policy bit).</cref>
+<cref>TODO Privacy Considerations (sticky state parallel to HSTS; private
+browsing alignment; preload privacy profile; subdomain bitvectors;
+residual `max-age` TTL entropy without overselling oracles).</cref>
 
 
 # IANA Considerations
 
-<cref>TODO IANA Considerations (`Strict-Transport-Security` directive
-registration for `require-pq-ta` and `PqIncludeSubDomains`).</cref>
+<cref>TODO IANA Considerations: register HTTP field name
+`Require-PQ-Auth` as a Structured Header (Dictionary) per {{!RFC9651}}.</cref>
 
 
 --- back
 
 # The Migration to PQ-Secure Authentication in TLS {#migration}
 
-This appendix is informative. It situates the `require-pq-ta` directive
+This appendix is informative. It situates the `Require-PQ-Auth` header
 in the long-term public Web authentication migration (with notes on
 enterprise use). The normative behavior defined by this document is the
-near-term HSTS extension in {{ua-behavior}}. An industry roadmap for the
-same migration, including the role of an HSTS-like opt-in and later
-PKI-only stages, is described in {{ChromiumPQAuthRoadmap}}.
+near-term HSTS-like mechanism in {{ua-behavior}} and {{syntax}}. An
+industry roadmap for the same migration, including the role of an
+HSTS-like opt-in and later PKI-only stages, is described in
+{{ChromiumPQAuthRoadmap}}.
 
 <cref>TODO Appendix material still missing relative to the drafting plan:
 brief comparison with {{?I-D.sheffer-tls-pqc-continuity}} beyond
@@ -447,7 +487,7 @@ to a small, controlled server set have a much tighter curve.
 Post-quantum key agreement (usually hybrid with a classical algorithm)
 continues to roll out independently.
 It does not fix classical trust-anchor authentication downgrade. Under
-`require-pq-ta`, this document requires CRQC-resistant key
+`Require-PQ-Auth`, this document requires CRQC-resistant key
 agreement for pinned hosts so that the origin's asserted posture covers
 confidentiality as well as authentication.
 
@@ -460,8 +500,8 @@ Long-term credential forms differ by deployment:
 - Enterprise PKI is expected to include X.509 post-quantum certificate
   chains (pure PQ and/or composite) under CRQC-resistant trust anchors.
 
-The HSTS directive is stated using a "trust anchor" abstraction so both
-can use `require-pq-ta`. The chronological stages below focus on the
+The PQ policy header is stated using a "trust anchor" abstraction so both
+can use `Require-PQ-Auth`. The chronological stages below focus on the
 public Web PKI, where industry-wide coordination is the hard problem.
 Enterprise operators migrate on their own schedules; this document does
 not attempt to set or enforce those schedules.
@@ -486,13 +526,13 @@ paths.
 <cref>TODO: is a separate draft needed to forbid CAs from issuing mixed
 chains, or should client rejection alone suffice?</cref>
 
-### Why an HSTS extension is only a near-term lever
+### Why an HSTS-like header is only a near-term lever
 
-An HSTS-style pin is attractive: non-participating origins are not broken,
+An HSTS-like pin is attractive: non-participating origins are not broken,
 and each participating client and server gains clear security value. It is
 also inherently limited. Sticky UA state, TOFU, incomplete preload list
 coverage of the Web, painful rollback, and private-browsing modes that do
-not retain durable HSTS state all constrain reach. Performance costs (CPU
+not retain durable sticky policy state all constrain reach. Performance costs (CPU
 and network bandwidth for CRQC-resistant credentials and key agreement)
 may further discourage adoption by individual servers. True legacy
 single-certificate origins never opt in. Voluntary adoption can keep
@@ -504,7 +544,7 @@ aggressive program is needed for the remainder of the Web.
 A modern client that prefers post-quantum authentication cannot tell, when
 an unknown origin presents only a classical credential, whether the origin
 has no post-quantum path or an attacker stripped it. Sticky
-`require-pq-ta` helps only after opt-in or preload.
+`Require-PQ-Auth` helps only after opt-in or preload.
 
 A proposed long-term answer is a credential that classical clients can
 still verify as usual, while carrying an embedded PQ-secure indication
@@ -532,7 +572,7 @@ That construction unlocks the ecosystem as follows:
   relying on classical-only issuance, which forces those origins to
   upgrade or lose modern-client connectivity.
 
-`require-pq-ta` remains the near-term, easy-to-deploy opt-in lever for
+`Require-PQ-Auth` remains the near-term, easy-to-deploy opt-in lever for
 origins that already have a CRQC-resistant path. The PQ-secure signal in
 classical certificates is how the long tail can be brought along without
 weakening the security of origins that have already upgraded.
@@ -543,7 +583,7 @@ Each stage summarizes expected CA (or trust-anchor operator), server, and
 client behavior in the public Web PKI. The sequence is idealized:
 large-scale adoption will be more uneven, with different parts of the
 ecosystem moving at different rates. Enterprise deployments are out of
-scope for this staged narrative; they may reuse `require-pq-ta` but on
+scope for this staged narrative; they may reuse `Require-PQ-Auth` but on
 locally chosen timelines.
 
 ### Stage 0 — Today
@@ -551,7 +591,7 @@ locally chosen timelines.
 | Role | State |
 |---|---|
 | CA | Classical issuance only (Web PKI). |
-| Server | Classical certificates; HSTS common; no `require-pq-ta`. Hybrid/PQ key agreement rolling out independently. |
+| Server | Classical certificates; HSTS common; no `Require-PQ-Auth`. Hybrid/PQ key agreement rolling out independently. |
 | Client | Accepts classical authentication. Hybrid/PQ key agreement rolling out independently. |
 
 ### Stage 1 — Early PQ issuance, dual accept
@@ -559,8 +599,8 @@ locally chosen timelines.
 | Role | State |
 |---|---|
 | CA | Some CAs begin minting CRQC-resistant credentials (public Web toward MTC); classical issuance continues. |
-| Server | New servers can obtain CRQC-resistant credentials, support `require-pq-ta`, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send `require-pq-ta`. |
-| Client | Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS `signature_algorithms` (and related mechanisms). Capable servers may begin asserting `require-pq-ta`. |
+| Server | New servers can obtain CRQC-resistant credentials, support `Require-PQ-Auth`, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send `Require-PQ-Auth`. |
+| Client | Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS `signature_algorithms` (and related mechanisms). Capable servers may begin asserting `Require-PQ-Auth`. |
 
 This stage is gated on industry adoption of PQ-ready credential
 infrastructure, expected for the public Web to center on MTC.
@@ -570,8 +610,8 @@ infrastructure, expected for the public Web to center on MTC.
 | Role | State |
 |---|---|
 | CA | Growing CRQC-resistant issuance; classical credentials still widely available. |
-| Server | More origins send STS including `require-pq-ta` once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in. |
-| Client | Still dual-accept by default; for Known HSTS Hosts with `require-pq-ta` (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
+| Server | More origins send `Require-PQ-Auth` once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in. |
+| Client | Still dual-accept by default; for Known PQ Hosts (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
 
 ### Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates
 
@@ -587,7 +627,7 @@ infrastructure, expected for the public Web to center on MTC.
 |---|---|
 | CA | Stop plain classical issuance; classical-with-PQ-signal and/or all-CRQC-resistant products serve both old and new clients. |
 | Server | Single-certificate origins stay on classical-with-PQ-signal, upgrade to dual-path, or—as legacy clients shrink—switch to CRQC-resistant only. Dual-homed origins prefer CRQC-resistant paths to modern clients. |
-| Client | Deploy strict policy: classical only with PQ assurance that classical is required for this origin; otherwise CRQC-resistant only. Opt-in `require-pq-ta` still helps early PQ origins; the PQ-secure signal covers the long tail. |
+| Client | Deploy strict policy: classical only with PQ assurance that classical is required for this origin; otherwise CRQC-resistant only. Opt-in `Require-PQ-Auth` still helps early PQ origins; the PQ-secure signal covers the long tail. |
 
 ### Stage 5 — Remove classical trust anchors
 
@@ -597,15 +637,16 @@ infrastructure, expected for the public Web to center on MTC.
 | Server | Serve CRQC-resistant credentials. Residual classical-with-PQ-signal credentials may linger only while last classical-only verifiers remain (deployment-dependent). |
 | Client | Successful authentication uses CRQC-resistant trust anchors. Classical credentials without PQ assurance are rejected. |
 
-### Stage 6 — Retire `require-pq-ta`
+### Stage 6 — Retire `Require-PQ-Auth`
 
 | Role | State |
 |---|---|
 | CA | CRQC-resistant-only trust for the Web PKI. |
-| Server | Stop sending `require-pq-ta`; base HSTS may remain. |
-| Client | Clear `require-pq-ta` state (including preload) and eventually remove PQ-HSTS enforcement; the pin is redundant. The extension succeeds by becoming unnecessary. |
+| Server | Stop sending `Require-PQ-Auth`; HSTS may remain. |
+| Client | Clear `Require-PQ-Auth` state (including preload) and eventually remove enforcement; the pin is redundant. The mechanism succeeds by becoming unnecessary. |
 
 # Acknowledgments
 {:numbered="false"}
 
 <cref>TODO acknowledge.</cref>
+
