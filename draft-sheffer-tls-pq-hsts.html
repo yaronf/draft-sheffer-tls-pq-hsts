@@ -11,18 +11,14 @@
 <meta content="
        This document defines an HTTP response header field,  Require-PQ-Auth ,
 modeled on HTTP Strict Transport Security (HSTS)   but
-carried as a separate field with its own sticky client state. The field
-value is a Structured Fields Dictionary  . When a user agent
-(UA) has noted that policy for a host, it  MUST  authenticate the host
-using a cryptographically relevant quantum computer (CRQC)-resistant
-trust anchor and  MUST  negotiate a CRQC-resistant (pure post-quantum or
-hybrid) key agreement. 
-       The header is a near-term, origin-opt-in lever for the dual-trust-store
-phase of PKI migration—primarily the public Web PKI, though the same
-mechanism can be used in enterprise deployments. It is designed to become
-unnecessary once classical trust anchors are retired from the relevant
-trust store. The document also describes, informatively, the longer
-public-Web authentication migration program in which this lever sits. 
+carried separately with its own sticky client state as a Structured
+Fields Dictionary  . When a user agent has noted that policy
+for a host, it  MUST  authenticate using a cryptographically relevant
+quantum computer (CRQC)-resistant trust anchor and  MUST  negotiate
+CRQC-resistant (pure post-quantum or hybrid) key agreement. The header
+is a near-term, origin-opt-in lever for dual-trust-store PKI migration
+and is intended to become unnecessary once classical trust anchors are
+retired. 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="post-quantum migration" name="keyword">
@@ -1103,18 +1099,14 @@ svg {
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>,
 modeled on HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> but
-carried as a separate field with its own sticky client state. The field
-value is a Structured Fields Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>. When a user agent
-(UA) has noted that policy for a host, it <span class="bcp14">MUST</span> authenticate the host
-using a cryptographically relevant quantum computer (CRQC)-resistant
-trust anchor and <span class="bcp14">MUST</span> negotiate a CRQC-resistant (pure post-quantum or
-hybrid) key agreement.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
-<p id="section-abstract-2">The header is a near-term, origin-opt-in lever for the dual-trust-store
-phase of PKI migration—primarily the public Web PKI, though the same
-mechanism can be used in enterprise deployments. It is designed to become
-unnecessary once classical trust anchors are retired from the relevant
-trust store. The document also describes, informatively, the longer
-public-Web authentication migration program in which this lever sits.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+carried separately with its own sticky client state as a Structured
+Fields Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>. When a user agent has noted that policy
+for a host, it <span class="bcp14">MUST</span> authenticate using a cryptographically relevant
+quantum computer (CRQC)-resistant trust anchor and <span class="bcp14">MUST</span> negotiate
+CRQC-resistant (pure post-quantum or hybrid) key agreement. The header
+is a near-term, origin-opt-in lever for dual-trust-store PKI migration
+and is intended to become unnecessary once classical trust anchors are
+retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
