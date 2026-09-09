@@ -4,18 +4,20 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>An HSTS Extension for Secure PQ Migration</title>
+<title>An HSTS-like Header for Secure PQ Migration</title>
 <meta content="Yaron Sheffer" name="author">
 <meta content="Tirumaleswar Reddy.K" name="author">
 <meta content="David Benjamin" name="author">
 <meta content="
-       This document extends HTTP Strict Transport Security (HSTS)  
-with a new  Strict-Transport-Security  directive,  require-pq-ta . When a
-user agent (UA) has noted that policy for a host, it  MUST  authenticate the
-host using a cryptographically relevant quantum computer
-(CRQC)-resistant trust anchor and  MUST  negotiate a CRQC-resistant (pure
-post-quantum or hybrid) key agreement. 
-       The directive is a near-term, origin-opt-in lever for the dual-trust-store
+       This document defines an HTTP response header field,  Require-PQ-Auth ,
+modeled on HTTP Strict Transport Security (HSTS)   but
+carried as a separate field with its own sticky client state. The field
+value is a Structured Fields Dictionary  . When a user agent
+(UA) has noted that policy for a host, it  MUST  authenticate the host
+using a cryptographically relevant quantum computer (CRQC)-resistant
+trust anchor and  MUST  negotiate a CRQC-resistant (pure post-quantum or
+hybrid) key agreement. 
+       The header is a near-term, origin-opt-in lever for the dual-trust-store
 phase of PKI migration—primarily the public Web PKI, though the same
 mechanism can be used in enterprise deployments. It is designed to become
 unnecessary once classical trust anchors are retired from the relevant
@@ -25,21 +27,22 @@ public-Web authentication migration program in which this lever sits.
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="post-quantum migration" name="keyword">
 <meta content="HSTS" name="keyword">
+<meta content="Structured Fields" name="keyword">
 <meta content="draft-sheffer-tls-pq-hsts-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.34.0
-    Python 3.14.5
+    Python 3.14.7
     ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.0
+    platformdirs 4.11.7
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.2
+    wcwidth 0.8.3
 -->
 <link href="draft-sheffer-tls-pq-hsts.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1055,11 +1058,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">PQ-HSTS</td>
-<td class="right">August 2026</td>
+<td class="right">September 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Sheffer, et al.</td>
-<td class="center">Expires 15 February 2027</td>
+<td class="center">Expires 13 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1072,12 +1075,12 @@ svg {
 <dd class="internet-draft">draft-sheffer-tls-pq-hsts-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-14" class="published">14 August 2026</time>
+<time datetime="2026-09-09" class="published">9 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-15">15 February 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-13">13 March 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1095,16 +1098,18 @@ svg {
 </dd>
 </dl>
 </div>
-<h1 id="title">An HSTS Extension for Secure PQ Migration</h1>
+<h1 id="title">An HSTS-like Header for Secure PQ Migration</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document extends HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>
-with a new <code>Strict-Transport-Security</code> directive, <code>require-pq-ta</code>. When a
-user agent (UA) has noted that policy for a host, it <span class="bcp14">MUST</span> authenticate the
-host using a cryptographically relevant quantum computer
-(CRQC)-resistant trust anchor and <span class="bcp14">MUST</span> negotiate a CRQC-resistant (pure
-post-quantum or hybrid) key agreement.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
-<p id="section-abstract-2">The directive is a near-term, origin-opt-in lever for the dual-trust-store
+<p id="section-abstract-1">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>,
+modeled on HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> but
+carried as a separate field with its own sticky client state. The field
+value is a Structured Fields Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>. When a user agent
+(UA) has noted that policy for a host, it <span class="bcp14">MUST</span> authenticate the host
+using a cryptographically relevant quantum computer (CRQC)-resistant
+trust anchor and <span class="bcp14">MUST</span> negotiate a CRQC-resistant (pure post-quantum or
+hybrid) key agreement.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">The header is a near-term, origin-opt-in lever for the dual-trust-store
 phase of PKI migration—primarily the public Web PKI, though the same
 mechanism can be used in enterprise deployments. It is designed to become
 unnecessary once classical trust anchors are retired from the relevant
@@ -1146,7 +1151,7 @@ public-Web authentication migration program in which this lever sits.<a href="#s
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 15 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 13 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1202,7 +1207,7 @@ public-Web authentication migration program in which this lever sits.<a href="#s
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-user-agent-behavior" class="internal xref">User Agent Behavior</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
-                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-noting-the-directive" class="internal xref">Noting the directive</a></p>
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-noting-the-header" class="internal xref">Noting the header</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
                 <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-enforcement" class="internal xref">Enforcement</a></p>
@@ -1257,7 +1262,7 @@ public-Web authentication migration program in which this lever sits.<a href="#s
                     <p id="section-toc.1-1.13.2.1.2.5.1"><a href="#appendix-A.1.5" class="auto internal xref">A.1.5</a>.  <a href="#name-dual-complete-paths-not-mix" class="internal xref">Dual complete paths, not mixed chains</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.6">
-                    <p id="section-toc.1-1.13.2.1.2.6.1"><a href="#appendix-A.1.6" class="auto internal xref">A.1.6</a>.  <a href="#name-why-an-hsts-extension-is-on" class="internal xref">Why an HSTS extension is only a near-term lever</a></p>
+                    <p id="section-toc.1-1.13.2.1.2.6.1"><a href="#appendix-A.1.6" class="auto internal xref">A.1.6</a>.  <a href="#name-why-an-hsts-like-header-is-" class="internal xref">Why an HSTS-like header is only a near-term lever</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.7">
                     <p id="section-toc.1-1.13.2.1.2.7.1"><a href="#appendix-A.1.7" class="auto internal xref">A.1.7</a>.  <a href="#name-pq-secure-signal-embedded-i" class="internal xref">PQ-secure signal embedded in classical certificates</a></p>
@@ -1286,7 +1291,7 @@ public-Web authentication migration program in which this lever sits.<a href="#s
                     <p id="section-toc.1-1.13.2.2.2.6.1"><a href="#appendix-A.2.6" class="auto internal xref">A.2.6</a>.  <a href="#name-stage-5-remove-classical-tr" class="internal xref">Stage 5 — Remove classical trust anchors</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2.2.7">
-                    <p id="section-toc.1-1.13.2.2.2.7.1"><a href="#appendix-A.2.7" class="auto internal xref">A.2.7</a>.  <a href="#name-stage-6-retire-require-pq-t" class="internal xref">Stage 6 — Retire <code>require-pq-ta</code></a></p>
+                    <p id="section-toc.1-1.13.2.2.2.7.1"><a href="#appendix-A.2.7" class="auto internal xref">A.2.7</a>.  <a href="#name-stage-6-retire-require-pq-a" class="internal xref">Stage 6 — Retire <code>Require-PQ-Auth</code></a></p>
 </li>
                 </ul>
 </li>
@@ -1326,25 +1331,27 @@ downgrade; rather, it mitigates the more pressing "harvest now, decrypt
 later" threat model. Once an origin has asserted a post-quantum posture
 via the mechanism in this document, however, allowing a later
 classical-only key agreement would re-open a confidentiality downgrade
-for that host. Therefore, when <code>require-pq-ta</code> is enforced, this document
-also requires CRQC-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document extends HSTS <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>: it adds directives on the
-existing <code>Strict-Transport-Security</code> header field and reuses the Known
-HSTS Host storage model, <code>max-age</code>, and preload lifecycle. It does not
-define a parallel header. Domain scope for the PQ policy is independent
-of HSTS <code>includeSubDomains</code>: a separate <code>PqIncludeSubDomains</code> directive
-controls whether <code>require-pq-ta</code> applies to subdomains. That separation
-allows an apex to keep tree-wide HTTPS-only HSTS without forcing every
-subdomain to be PQ-ready (which would otherwise break non-PQ subdomains
-or, if the operator omitted HSTS <code>includeSubDomains</code> to avoid that,
-re-open HTTP rewrite attacks on those names). Hosts that send
-<code>require-pq-ta</code> must already satisfy HSTS's HTTPS requirements; UAs that
-do not understand the new directives continue to apply ordinary HSTS.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The normative contribution of this document is the near-term opt-in
-<code>require-pq-ta</code> pin and the associated user-agent behavior. Where this
+for that host. Therefore, when <code>Require-PQ-Auth</code> is enforced, this
+document also requires CRQC-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>,
+with HSTS-like semantics but carried separately from
+<code>Strict-Transport-Security</code>, with its own sticky UA state. That
+structure follows HTTP Public Key Pinning <span>[<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>. An industry
+outline of the same migration, including an HSTS-like opt-in stage,
+appears in <span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">HTTPS and PQ readiness often diverge on <code>max-age</code>, subdomain scope, and
+preload, so those knobs cannot usefully share one HSTS policy.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">Noting <code>Require-PQ-Auth</code> requires a securely delivered HTTPS response. It
+does not require the host to be a Known HSTS Host <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>. HSTS and
+<code>Require-PQ-Auth</code> lifecycles are independent. UAs that do not implement
+this document ignore the unknown header field.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">The normative contribution of this document is the near-term opt-in
+<code>Require-PQ-Auth</code> pin and the associated user-agent behavior. Where this
 document uses "PQ" in the title and abbreviation (PQ-HSTS), the
 normative requirement is CRQC-resistant trust-anchor authentication and
-CRQC-resistant key agreement as defined below—not a single algorithm.<a href="#section-1-4" class="pilcrow">¶</a></p>
+CRQC-resistant key agreement as defined below—not a single algorithm.
+The informal name reflects HSTS-like behavior, not an extension of the
+<code>Strict-Transport-Security</code> header field.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <div id="pq-hsts-in-the-broader-migration-context">
 <section id="section-1.1">
         <h3 id="name-pq-hsts-in-the-broader-migr">
@@ -1376,9 +1383,9 @@ in classical certificates, specified elsewhere) can unlock a strict client polic
         </h3>
 <p id="section-1.2-1"><span>[<a href="#I-D.sheffer-tls-pqc-continuity" class="cite xref">I-D.sheffer-tls-pqc-continuity</a>]</span> defines a TLS-layer commitment that a
 server will present a PQC or composite end-entity certificate for a period
-of time. This document instead extends HSTS to pin CRQC-resistant trust
-anchors (and key agreement when the pin is enforced). The two approaches
-address related downgrade problems at different layers.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+of time. This document instead defines an HTTP sticky policy that pins
+CRQC-resistant trust anchors (and key agreement when the pin is enforced).
+The two approaches address related downgrade problems at different layers.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
 <p id="section-1.2-2">Physically large post-quantum certificates motivate new certificate
 distribution mechanisms. This document is intended to work with that
 evolution, including Merkle Tree Certificates (MTC)
@@ -1395,11 +1402,11 @@ for this ecosystem.<a href="#section-1.2-3.1.1" class="pilcrow">¶</a></p>
             <p id="section-1.2-3.2.1">Enterprise PKI may use X.509 post-quantum certificate chains (pure PQ
 and/or composite under CRQC-resistant trust anchors) rather than MTC.
 Enterprises set their own migration timelines; this document neither
-drives nor constrains them. The <code>require-pq-ta</code> mechanism remains
+drives nor constrains them. The <code>Require-PQ-Auth</code> mechanism remains
 available where an enterprise origin and its clients choose to use it.<a href="#section-1.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.2-4">Both forms of CRQC-resistant trust anchor can satisfy <code>require-pq-ta</code>.<a href="#section-1.2-4" class="pilcrow">¶</a></p>
+<p id="section-1.2-4">Both forms of CRQC-resistant trust anchor can satisfy <code>Require-PQ-Auth</code>.<a href="#section-1.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1458,26 +1465,17 @@ CRQC-resistant), not to a single encoding.<a href="#section-2-5.4.1" class="pilc
         <dd class="break"></dd>
 <dt id="section-2-5.5">HSTS terms:</dt>
         <dd style="margin-left: 1.5em" id="section-2-5.6">
-          <p id="section-2-5.6.1">This document uses Known HSTS Host, HSTS Policy, Note,
-<code>max-age</code>, <code>includeSubDomains</code>, and related terminology as in
-<span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>. HSTS <code>includeSubDomains</code> continues to govern only the
-HTTPS-only (and related RFC 6797) domain scope.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
+          <p id="section-2-5.6.1">This document refers to Known HSTS Host, HSTS Policy, and related
+terminology from <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> only for comparison. HSTS state is
+independent of the policy defined here.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-5.7">PQ policy bit / <code>require-pq-ta</code>:</dt>
+<dt id="section-2-5.7">Known PQ Host / PQ Policy:</dt>
         <dd style="margin-left: 1.5em" id="section-2-5.8">
-          <p id="section-2-5.8.1">An additional boolean associated with a Known HSTS Host
-policy indicating that the <code>require-pq-ta</code> directive is in effect for
-that host until the policy expires or is superseded.<a href="#section-2-5.8.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="section-2-5.9">PQ domain scope / <code>PqIncludeSubDomains</code>:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-5.10">
-          <p id="section-2-5.10.1">When present together with <code>require-pq-ta</code>, indicates that the PQ
-policy bit also applies to subdomains of the Known HSTS Host, analogous
-to—but independent of—HSTS <code>includeSubDomains</code>. Absent
-<code>PqIncludeSubDomains</code>, <code>require-pq-ta</code> applies only to the host that
-asserted the policy.<a href="#section-2-5.10.1" class="pilcrow">¶</a></p>
+          <p id="section-2-5.8.1">A host for which the UA has noted a valid <code>Require-PQ-Auth</code> policy
+(<a href="#syntax" class="auto internal xref">Section 4</a>, <a href="#ua-behavior" class="auto internal xref">Section 6</a>), including expiry derived from <code>max-age</code>
+and whether <code>include-subdomains</code> applies. Storage is parallel to—not
+part of—HSTS Policy storage.<a href="#section-2-5.8.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1499,9 +1497,9 @@ authentication, and presents that credential to a dual-accepting UA.<a href="#se
 </li>
         <li class="normal" id="section-3-2.2">
           <p id="section-3-2.2.1">Classical-only key-agreement downgrade after pin: Once a host has
-asserted post-quantum posture via <code>require-pq-ta</code>, an attacker that can
-force classical-only key agreement would undermine confidentiality for
-subsequent visits even if authentication remains CRQC-resistant.<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
+asserted post-quantum posture via <code>Require-PQ-Auth</code>, an attacker that
+can force classical-only key agreement would undermine confidentiality
+for subsequent visits even if authentication remains CRQC-resistant.<a href="#section-3-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-3-3">Trust-on-first-use (TOFU) limits apply as for HSTS: the first successful
@@ -1509,8 +1507,8 @@ HTTPS visit that delivers the policy is not itself protected by the pin.
 Preload closes that gap for configured names, as it does for HSTS today.
 It is especially important for origins that are often visited in private
 browsing (incognito) modes, where UAs typically do not retain durable
-HSTS / <code>require-pq-ta</code> state—preload is then the only way to obtain the
-pin's protection. Preload semantics are outlined in <a href="#preload" class="auto internal xref">Section 7</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
+sticky policy state—preload is then the only way to obtain the pin's
+protection. Preload semantics are outlined in <a href="#preload" class="auto internal xref">Section 7</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="syntax">
@@ -1518,11 +1516,62 @@ pin's protection. Preload semantics are outlined in <a href="#preload" class="au
       <h2 id="name-syntax">
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-syntax" class="section-name selfRef">Syntax</a>
       </h2>
-<p id="section-4-1"><span class="cref">TODO Syntax: ABNF / grammar delta to {{RFC6797}} for
-`require-pq-ta` and `PqIncludeSubDomains` (valueless directives);
-interaction with `max-age`, `includeSubDomains`, and `preload`;
-unknown-directive handling unchanged; examples of host-only PQ vs
-tree-wide PQ.</span><a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-1"><code>Require-PQ-Auth</code> is an HTTP Structured Header field <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>. Its
+value <span class="bcp14">MUST</span> be a Dictionary. Recipients that cannot parse the field value
+as a Dictionary <span class="bcp14">MUST NOT</span> update any Noted PQ Policy for the host based on
+that field (any previously Noted policy remains unchanged).<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">The following Dictionary members are defined. Keys are lowercase as
+required by Structured Fields. Unknown members <span class="bcp14">MUST</span> be ignored.
+Recognized members are processed as specified below when the Dictionary
+parses successfully.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-4-3">
+        <dt id="section-4-3.1">max-age:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-3.2">
+          <p id="section-4-3.2.1">Integer (required). Non-negative number of seconds after receipt
+during which the UA regards the host as a Known PQ Host with this
+policy. A value of 0 signals the UA to delete any Noted PQ Policy for
+the host (including subdomain scope learned from this host).<a href="#section-4-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-3.3">include-subdomains:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-3.4">
+          <p id="section-4-3.4.1">Boolean true if present as a bare Dictionary member (optional). If
+present, the PQ Policy applies to the host and to hosts whose domain
+names are subdomains of that host's domain name, analogous to HSTS
+<code>includeSubDomains</code> <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> but applying only to this PQ Policy.
+Absence means host-only scope.<a href="#section-4-3.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-4-3.5">preload:</dt>
+        <dd style="margin-left: 1.5em" id="section-4-3.6">
+          <p id="section-4-3.6.1">Boolean true if present as a bare Dictionary member (optional). Presence
+does not change how the UA enforces a Noted PQ Policy. It only indicates
+that the operator wants this host considered for inclusion on a PQ
+preload list (the same role the HSTS <code>preload</code> token plays for HSTS
+preload submission; see <a href="https://hstspreload.org/">https://hstspreload.org/</a>). Whether and how
+such a list is operated is out of scope (see <a href="#preload" class="auto internal xref">Section 7</a>).<a href="#section-4-3.6.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="section-4-4">If the Dictionary does not include a usable <code>max-age</code>, or if any present
+member is malformed for its type, the UA <span class="bcp14">MUST NOT</span> update Noted PQ Policy
+from this field.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">Examples:<a href="#section-4-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4-6">
+<pre>
+Require-PQ-Auth: max-age=86400
+</pre><a href="#section-4-6" class="pilcrow">¶</a>
+</div>
+<div class="alignLeft art-text artwork" id="section-4-7">
+<pre>
+Require-PQ-Auth: max-age=31536000, include-subdomains
+</pre><a href="#section-4-7" class="pilcrow">¶</a>
+</div>
+<div class="alignLeft art-text artwork" id="section-4-8">
+<pre>
+Require-PQ-Auth: max-age=31536000, include-subdomains, preload
+</pre><a href="#section-4-8" class="pilcrow">¶</a>
+</div>
 </section>
 </div>
 <div id="server">
@@ -1530,12 +1579,13 @@ tree-wide PQ.</span><a href="#section-4-1" class="pilcrow">¶</a></p>
       <h2 id="name-server-processing">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-server-processing" class="section-name selfRef">Server Processing</a>
       </h2>
-<p id="section-5-1"><span class="cref">TODO Server processing: emit `require-pq-ta` only when the origin
+<p id="section-5-1"><span class="cref">TODO Server processing: emit `Require-PQ-Auth` only when the origin
 can serve a CRQC-resistant-TA credential and complete PQ/hybrid key
-agreement for the commitment window; emit `PqIncludeSubDomains` only when
-the entire covered subdomain tree is similarly ready; staged `max-age`;
-relation to ordinary HSTS HTTPS requirements; clearing / omitting
-directives.</span><a href="#section-5-1" class="pilcrow">¶</a></p>
+agreement for the commitment window; emit `include-subdomains` only when
+the entire covered subdomain tree is similarly ready; choose `max-age`
+independently of HSTS; serialize as an RFC 9651 Dictionary; staged
+ramp; noting requires HTTPS but not HSTS; clear Noted policy with
+`max-age` of 0 (omitting the header does not clear).</span><a href="#section-5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ua-behavior">
@@ -1543,40 +1593,42 @@ directives.</span><a href="#section-5-1" class="pilcrow">¶</a></p>
       <h2 id="name-user-agent-behavior">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-user-agent-behavior" class="section-name selfRef">User Agent Behavior</a>
       </h2>
-<p id="section-6-1">This section specifies the UA processing rules associated with
-<code>require-pq-ta</code> and <code>PqIncludeSubDomains</code>. Directive syntax is in
-<a href="#syntax" class="auto internal xref">Section 4</a>; server emission rules are in <a href="#server" class="auto internal xref">Section 5</a>; preload is in
-<a href="#preload" class="auto internal xref">Section 7</a>. The rules below assume the directives have been conveyed as
-part of an HSTS Policy.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="noting-the-directive">
+<p id="section-6-1">This section defines how UAs note and enforce <code>Require-PQ-Auth</code> policy.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="noting-the-header">
 <section id="section-6.1">
-        <h3 id="name-noting-the-directive">
-<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-noting-the-directive" class="section-name selfRef">Noting the directive</a>
+        <h3 id="name-noting-the-header">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-noting-the-header" class="section-name selfRef">Noting the header</a>
         </h3>
-<p id="section-6.1-1">When a UA notes an HSTS Policy for a host per <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> and that policy
-includes <code>require-pq-ta</code>, the UA <span class="bcp14">MUST</span>:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-1">Upon receipt of a <code>Require-PQ-Auth</code> header field in an HTTP response, the
+UA <span class="bcp14">MUST NOT</span> note a PQ Policy unless all of the following hold:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.1-2">
 <li id="section-6.1-2.1">
-            <p id="section-6.1-2.1.1">Record that the PQ policy bit is set for the Known HSTS Host, with the
-same expiry (<code>max-age</code>) as that HSTS Policy.<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-2.1.1">The response was received over an error-free TLS connection
+(HTTPS).<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.1-2.2">
-            <p id="section-6.1-2.2.1">Record a separate PQ domain-scope flag: set if and only if the same
-policy also includes <code>PqIncludeSubDomains</code>; otherwise clear (host-only
-PQ scope).<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-2.2.1">The field value parses as a Structured Fields Dictionary per
+<a href="#syntax" class="auto internal xref">Section 4</a>, including a valid <code>max-age</code> member.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.1-3">HSTS <code>includeSubDomains</code> <span class="bcp14">MUST NOT</span> be treated as implying PQ subdomain
-scope, and <code>PqIncludeSubDomains</code> <span class="bcp14">MUST NOT</span> be treated as implying HSTS
-subdomain scope.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
-<p id="section-6.1-4">If a subsequent valid HSTS Policy for the host omits <code>require-pq-ta</code>, the
-UA <span class="bcp14">MUST</span> clear the PQ policy bit and the PQ domain-scope flag (while
-applying any updated <code>max-age</code> and other HSTS directives as usual). If the
-policy includes <code>require-pq-ta</code> but omits <code>PqIncludeSubDomains</code>, the UA
-<span class="bcp14">MUST</span> clear the PQ domain-scope flag while retaining the PQ policy bit.
-<code>PqIncludeSubDomains</code> without <code>require-pq-ta</code> has no effect. UAs that do
-not implement this document ignore the unknown directives and apply
-ordinary HSTS.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">The host need not be a Known HSTS Host. Noting PQ Policy <span class="bcp14">MUST NOT</span> modify
+HSTS Policy storage.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4">When noting, the UA <span class="bcp14">MUST</span>:<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.1-5">
+<li id="section-6.1-5.1">
+            <p id="section-6.1-5.1.1">Store a PQ Policy for the host as a Known PQ Host, with expiry derived
+from <code>max-age</code> (or delete the policy if <code>max-age</code> is 0).<a href="#section-6.1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.1-5.2">
+            <p id="section-6.1-5.2.1">Record subdomain scope from <code>include-subdomains</code> when that member is
+usable; otherwise host-only scope.<a href="#section-6.1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-6.1-6">If a subsequent valid <code>Require-PQ-Auth</code> field is noted for the host, it
+replaces the prior PQ Policy (including subdomain scope) for that host.
+Absence of the header field on a later response does not by itself clear
+PQ Policy before expiry; servers clear state with <code>max-age</code> of 0.<a href="#section-6.1-6" class="pilcrow">¶</a></p>
+<p id="section-6.1-7">UAs that do not implement this document ignore the unknown header field.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="enforcement">
@@ -1584,49 +1636,43 @@ ordinary HSTS.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
         <h3 id="name-enforcement">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
         </h3>
-<p id="section-6.2-1">When establishing a connection to a host for which the noted HSTS Policy
-includes <code>require-pq-ta</code>—either because the host itself is a Known HSTS
-Host with that bit set, or because an ancestor Known HSTS Host has the PQ
-policy bit set with PQ domain scope (<code>PqIncludeSubDomains</code>) covering this
-host—the UA <span class="bcp14">MUST</span>:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">When establishing a connection to a host covered by an unexpired Noted PQ
+Policy—either because the host itself is a Known PQ Host, or because an
+ancestor Known PQ Host has <code>include-subdomains</code> covering this host—the UA
+<span class="bcp14">MUST</span>:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.2-2">
 <li id="section-6.2-2.1">
-            <p id="section-6.2-2.1.1">Apply all UA requirements of <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> unchanged (including HTTPS-only
-behavior and failure handling).<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-6.2-2.2">
-            <p id="section-6.2-2.2.1">Authenticate the server such that the trust anchor that caused
+            <p id="section-6.2-2.1.1">Authenticate the server such that the trust anchor that caused
 acceptance is CRQC-resistant (pure post-quantum or composite per local
 policy), whether that trust anchor is an X.509 trust anchor or an MTC
-trust base / cosigner.<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
+trust base / cosigner.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-6.2-2.3">
-            <p id="section-6.2-2.3.1">Ensure the accepted certification path is not mixed: every hop is
+          <li id="section-6.2-2.2">
+            <p id="section-6.2-2.2.1">Ensure the accepted certification path is not mixed: every hop is
 classical, or every hop is CRQC-resistant, consistent with local
 policy. (Detailed mixed-path rejection may be refined here or by
-reference to a dedicated path-validation document.)<a href="#section-6.2-2.3.1" class="pilcrow">¶</a></p>
+reference to a dedicated path-validation document.)<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-6.2-2.4">
-            <p id="section-6.2-2.4.1">Negotiate a CRQC-resistant key agreement (hybrid or pure
+          <li id="section-6.2-2.3">
+            <p id="section-6.2-2.3.1">Negotiate a CRQC-resistant key agreement (hybrid or pure
 post-quantum per local policy). Classical-only key agreement <span class="bcp14">MUST</span> cause
-failure of the connection attempt.<a href="#section-6.2-2.4.1" class="pilcrow">¶</a></p>
+failure of the connection attempt.<a href="#section-6.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-6.2-3">If any of the above checks fail, the UA <span class="bcp14">MUST</span> fail the connection in a
-manner consistent with HSTS hard failure (no click-through bypass).<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+manner consistent with HSTS hard failure (no click-through bypass)
+(<span><a href="https://rfc-editor.org/rfc/rfc6797#section-8.4" class="relref">Section 8.4</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <p id="section-6.2-4">This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate TLS NamedGroup codepoints or MTC validation
 procedures; those remain matters for TLS/IANA policy and
 <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>, respectively.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
-<p id="section-6.2-5">Absent <code>require-pq-ta</code>, behavior is ordinary HSTS, including whatever key
-agreement the UA would negotiate for that connection.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
-<p id="section-6.2-6">Once classical trust anchors are no longer accepted for authentication
-(Stage 5 of <a href="#migration" class="auto internal xref">Appendix A</a>), <code>require-pq-ta</code> is redundant (Stage 6). UAs <span class="bcp14">MAY</span>
-clear the PQ policy bit for Known HSTS Hosts
-(including any preloaded equivalent) when local policy determines that the
-pin is obsolete. Servers <span class="bcp14">SHOULD</span> stop sending the directive in that
-environment. Base HSTS policy <span class="bcp14">MAY</span> remain.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
+<p id="section-6.2-5">Once classical trust anchors are no longer accepted for authentication
+(Stage 5 of <a href="#migration" class="auto internal xref">Appendix A</a>), <code>Require-PQ-Auth</code> is redundant (Stage 6). UAs
+<span class="bcp14">MAY</span> clear PQ Policy for Known PQ Hosts (including any preloaded
+equivalent) when local policy determines that the pin is obsolete.
+Servers <span class="bcp14">SHOULD</span> stop sending the header in that environment. HSTS policy,
+if any, is unaffected.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1637,13 +1683,14 @@ environment. Base HSTS policy <span class="bcp14">MAY</span> remain.<a href="#se
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-preload" class="section-name selfRef">Preload</a>
       </h2>
 <p id="section-7-1"><span class="cref">TODO Preload: semantics only—configured/preloaded names may be
-treated as already Noted with `require-pq-ta` (and optional
-`PqIncludeSubDomains`) before first visit, closing the TOFU gap as for
-HSTS today; informative submission expectations (evidence of STS+PQ
-directives, CRQC-resistant-TA serving, PQ/hybrid KE). Do not prescribe
-one shared list vs a parallel list (implementation/operations detail).
-Stage 6: UAs MAY drop preloaded PQ enforcement when the pin is
-obsolete.</span><a href="#section-7-1" class="pilcrow">¶</a></p>
+treated as already Noted Known PQ Hosts (with optional
+`include-subdomains`) before first visit, closing the TOFU gap as for
+HSTS today; the `preload` Dictionary member signals submission intent for
+a PQ preload list and is independent of HSTS `preload`; informative
+submission expectations (evidence of `Require-PQ-Auth`,
+CRQC-resistant-TA serving, PQ/hybrid KE). Do not prescribe one shared
+list vs a parallel list (implementation/operations detail). Stage 6: UAs
+MAY drop preloaded PQ enforcement when the pin is obsolete.</span><a href="#section-7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ops">
@@ -1652,10 +1699,11 @@ obsolete.</span><a href="#section-7-1" class="pilcrow">¶</a></p>
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-operational-considerations" class="section-name selfRef">Operational Considerations</a>
       </h2>
 <p id="section-8-1"><span class="cref">TODO Operational considerations: CDN / multi-CDN consistency;
-staged `max-age`; independent HSTS `includeSubDomains` vs
-`PqIncludeSubDomains`; HTTPS-only prerequisites; enterprise TLS
-interception; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
-evolving; do not assert the pin before hybrid/PQ KE is solid for the
+staged `max-age` independent of HSTS; independent HSTS
+`includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
+HSTS not required; enterprise TLS interception; public Web ≈ MTC vs
+enterprise ≈ X.509 PQ chains; MTC evolving; SFV serialization (lowercase
+keys, commas); do not assert the pin before hybrid/PQ KE is solid for the
 served audience.</span><a href="#section-8-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1664,10 +1712,9 @@ served audience.</span><a href="#section-8-1" class="pilcrow">¶</a></p>
       <h2 id="name-security-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-9-1"><span class="cref">TODO Security Considerations (HSTS inheritance; independent
-`PqIncludeSubDomains` vs HSTS `includeSubDomains`; trust-anchor and
-key-agreement downgrade; unknown-directive UAs; enterprise interception;
-cookie scoping / `__Host-` and related Stage 2 risks from
+<p id="section-9-1"><span class="cref">TODO Security Considerations (orthogonal HSTS vs PQ state;
+trust-anchor and key-agreement downgrade; unknown-header UAs; enterprise
+interception; cookie scoping / `__Host-` and related Stage 2 risks from
 {{ChromiumPQAuthRoadmap}}; MTC evolving).</span><a href="#section-9-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1676,9 +1723,9 @@ cookie scoping / `__Host-` and related Stage 2 risks from
       <h2 id="name-privacy-considerations">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
       </h2>
-<p id="section-10-1"><span class="cref">TODO Privacy Considerations (sticky state equivalent to HSTS; private
-browsing alignment; preload privacy profile; no additional tracking
-surface beyond the HSTS PQ policy bit).</span><a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-1"><span class="cref">TODO Privacy Considerations (sticky state parallel to HSTS; private
+browsing alignment; preload privacy profile; subdomain bitvectors;
+residual `max-age` TTL entropy without overselling oracles).</span><a href="#section-10-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1686,8 +1733,8 @@ surface beyond the HSTS PQ policy bit).</span><a href="#section-10-1" class="pil
       <h2 id="name-iana-considerations">
 <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-11-1"><span class="cref">TODO IANA Considerations (`Strict-Transport-Security` directive
-registration for `require-pq-ta` and `PqIncludeSubDomains`).</span><a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-1"><span class="cref">TODO IANA Considerations: register HTTP field name
+`Require-PQ-Auth` as a Structured Header (Dictionary) per {{RFC9651}}.</span><a href="#section-11-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1708,6 +1755,10 @@ registration for `require-pq-ta` and `PqIncludeSubDomains`).</span><a href="#sec
 <dt id="RFC6797">[RFC6797]</dt>
         <dd>
 <span class="refAuthor">Hodges, J.</span>, <span class="refAuthor">Jackson, C.</span>, and <span class="refAuthor">A. Barth</span>, <span class="refTitle">"HTTP Strict Transport Security (HSTS)"</span>, <span class="seriesInfo">RFC 6797</span>, <span class="seriesInfo">DOI 10.17487/RFC6797</span>, <time datetime="2012-11" class="refDate">November 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6797">https://www.rfc-editor.org/rfc/rfc6797</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9651">[RFC9651]</dt>
+        <dd>
+<span class="refAuthor">Nottingham, M.</span> and <span class="refAuthor">P. Kamp</span>, <span class="refTitle">"Structured Field Values for HTTP"</span>, <span class="seriesInfo">RFC 9651</span>, <span class="seriesInfo">DOI 10.17487/RFC9651</span>, <time datetime="2024-09" class="refDate">September 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9651">https://www.rfc-editor.org/rfc/rfc9651</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -1737,6 +1788,10 @@ registration for `require-pq-ta` and `PqIncludeSubDomains`).</span><a href="#sec
 <dt id="ChromiumPQAuthRoadmap">[ChromiumPQAuthRoadmap]</dt>
         <dd>
 <span class="refAuthor">Benjamin, D.</span> and <span class="refAuthor">J. DeBlasio</span>, <span class="refTitle">"Post-Quantum HTTPS Authentication Roadmap"</span>, <time datetime="2026-02" class="refDate">February 2026</time>, <span>&lt;<a href="https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/">https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7469">[RFC7469]</dt>
+        <dd>
+<span class="refAuthor">Evans, C.</span>, <span class="refAuthor">Palmer, C.</span>, and <span class="refAuthor">R. Sleevi</span>, <span class="refTitle">"Public Key Pinning Extension for HTTP"</span>, <span class="seriesInfo">RFC 7469</span>, <span class="seriesInfo">DOI 10.17487/RFC7469</span>, <time datetime="2015-04" class="refDate">April 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7469">https://www.rfc-editor.org/rfc/rfc7469</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.sheffer-tls-pqc-continuity">[I-D.sheffer-tls-pqc-continuity]</dt>
         <dd>
@@ -1768,12 +1823,13 @@ registration for `require-pq-ta` and `PqIncludeSubDomains`).</span><a href="#sec
       <h2 id="name-the-migration-to-pq-secure-">
 <a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-the-migration-to-pq-secure-" class="section-name selfRef">The Migration to PQ-Secure Authentication in TLS</a>
       </h2>
-<p id="appendix-A-1">This appendix is informative. It situates the <code>require-pq-ta</code> directive
+<p id="appendix-A-1">This appendix is informative. It situates the <code>Require-PQ-Auth</code> header
 in the long-term public Web authentication migration (with notes on
 enterprise use). The normative behavior defined by this document is the
-near-term HSTS extension in <a href="#ua-behavior" class="auto internal xref">Section 6</a>. An industry roadmap for the
-same migration, including the role of an HSTS-like opt-in and later
-PKI-only stages, is described in <span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+near-term HSTS-like mechanism in <a href="#ua-behavior" class="auto internal xref">Section 6</a> and <a href="#syntax" class="auto internal xref">Section 4</a>. An
+industry roadmap for the same migration, including the role of an
+HSTS-like opt-in and later PKI-only stages, is described in
+<span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2"><span class="cref">TODO Appendix material still missing relative to the drafting plan:
 brief comparison with {{I-D.sheffer-tls-pqc-continuity}} beyond
 {{other-work}} if needed; pointer to mixed-path prohibition /
@@ -1825,7 +1881,7 @@ to a small, controlled server set have a much tighter curve.<a href="#appendix-A
 <p id="appendix-A.1.3-1">Post-quantum key agreement (usually hybrid with a classical algorithm)
 continues to roll out independently.
 It does not fix classical trust-anchor authentication downgrade. Under
-<code>require-pq-ta</code>, this document requires CRQC-resistant key
+<code>Require-PQ-Auth</code>, this document requires CRQC-resistant key
 agreement for pinned hosts so that the origin's asserted posture covers
 confidentiality as well as authentication.<a href="#appendix-A.1.3-1" class="pilcrow">¶</a></p>
 </section>
@@ -1846,8 +1902,8 @@ confidentiality as well as authentication.<a href="#appendix-A.1.3-1" class="pil
 chains (pure PQ and/or composite) under CRQC-resistant trust anchors.<a href="#appendix-A.1.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="appendix-A.1.4-3">The HSTS directive is stated using a "trust anchor" abstraction so both
-can use <code>require-pq-ta</code>. The chronological stages below focus on the
+<p id="appendix-A.1.4-3">The PQ policy header is stated using a "trust anchor" abstraction so both
+can use <code>Require-PQ-Auth</code>. The chronological stages below focus on the
 public Web PKI, where industry-wide coordination is the hard problem.
 Enterprise operators migrate on their own schedules; this document does
 not attempt to set or enforce those schedules.<a href="#appendix-A.1.4-3" class="pilcrow">¶</a></p>
@@ -1875,16 +1931,16 @@ paths.
 chains, or should client rejection alone suffice?</span><a href="#appendix-A.1.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="why-an-hsts-extension-is-only-a-near-term-lever">
+<div id="why-an-hsts-like-header-is-only-a-near-term-lever">
 <section id="appendix-A.1.6">
-          <h4 id="name-why-an-hsts-extension-is-on">
-<a href="#appendix-A.1.6" class="section-number selfRef">A.1.6. </a><a href="#name-why-an-hsts-extension-is-on" class="section-name selfRef">Why an HSTS extension is only a near-term lever</a>
+          <h4 id="name-why-an-hsts-like-header-is-">
+<a href="#appendix-A.1.6" class="section-number selfRef">A.1.6. </a><a href="#name-why-an-hsts-like-header-is-" class="section-name selfRef">Why an HSTS-like header is only a near-term lever</a>
           </h4>
-<p id="appendix-A.1.6-1">An HSTS-style pin is attractive: non-participating origins are not broken,
+<p id="appendix-A.1.6-1">An HSTS-like pin is attractive: non-participating origins are not broken,
 and each participating client and server gains clear security value. It is
 also inherently limited. Sticky UA state, TOFU, incomplete preload list
 coverage of the Web, painful rollback, and private-browsing modes that do
-not retain durable HSTS state all constrain reach. Performance costs (CPU
+not retain durable sticky policy state all constrain reach. Performance costs (CPU
 and network bandwidth for CRQC-resistant credentials and key agreement)
 may further discourage adoption by individual servers. True legacy
 single-certificate origins never opt in. Voluntary adoption can keep
@@ -1900,7 +1956,7 @@ aggressive program is needed for the remainder of the Web.<a href="#appendix-A.1
 <p id="appendix-A.1.7-1">A modern client that prefers post-quantum authentication cannot tell, when
 an unknown origin presents only a classical credential, whether the origin
 has no post-quantum path or an attacker stripped it. Sticky
-<code>require-pq-ta</code> helps only after opt-in or preload.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
+<code>Require-PQ-Auth</code> helps only after opt-in or preload.<a href="#appendix-A.1.7-1" class="pilcrow">¶</a></p>
 <p id="appendix-A.1.7-2">A proposed long-term answer is a credential that classical clients can
 still verify as usual, while carrying an embedded PQ-secure indication
 that no post-quantum certificate is available for this end entity—that
@@ -1932,7 +1988,7 @@ relying on classical-only issuance, which forces those origins to
 upgrade or lose modern-client connectivity.<a href="#appendix-A.1.7-4.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="appendix-A.1.7-5"><code>require-pq-ta</code> remains the near-term, easy-to-deploy opt-in lever for
+<p id="appendix-A.1.7-5"><code>Require-PQ-Auth</code> remains the near-term, easy-to-deploy opt-in lever for
 origins that already have a CRQC-resistant path. The PQ-secure signal in
 classical certificates is how the long tail can be brought along without
 weakening the security of origins that have already upgraded.<a href="#appendix-A.1.7-5" class="pilcrow">¶</a></p>
@@ -1949,7 +2005,7 @@ weakening the security of origins that have already upgraded.<a href="#appendix-
 client behavior in the public Web PKI. The sequence is idealized:
 large-scale adoption will be more uneven, with different parts of the
 ecosystem moving at different rates. Enterprise deployments are out of
-scope for this staged narrative; they may reuse <code>require-pq-ta</code> but on
+scope for this staged narrative; they may reuse <code>Require-PQ-Auth</code> but on
 locally chosen timelines.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
 <div id="stage-0-today">
 <section id="appendix-A.2.1">
@@ -1971,7 +2027,7 @@ locally chosen timelines.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">Classical certificates; HSTS common; no <code>require-pq-ta</code>. Hybrid/PQ key agreement rolling out independently.</td>
+                <td class="text-left" rowspan="1" colspan="1">Classical certificates; HSTS common; no <code>Require-PQ-Auth</code>. Hybrid/PQ key agreement rolling out independently.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
@@ -2001,11 +2057,11 @@ locally chosen timelines.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">New servers can obtain CRQC-resistant credentials, support <code>require-pq-ta</code>, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send <code>require-pq-ta</code>.</td>
+                <td class="text-left" rowspan="1" colspan="1">New servers can obtain CRQC-resistant credentials, support <code>Require-PQ-Auth</code>, and may dual-home all-classical and all-CRQC-resistant paths selected by trust-anchor type. Old servers remain classical-only and do not send <code>Require-PQ-Auth</code>.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS <code>signature_algorithms</code> (and related mechanisms). Capable servers may begin asserting <code>require-pq-ta</code>.</td>
+                <td class="text-left" rowspan="1" colspan="1">Most clients accept both classical and CRQC-resistant authentication. Dual accept means "PQ in use" is not yet PQ-secure against active attackers. Clients indicate PQ preference or capability via TLS <code>signature_algorithms</code> (and related mechanisms). Capable servers may begin asserting <code>Require-PQ-Auth</code>.</td>
               </tr>
             </tbody>
           </table>
@@ -2033,11 +2089,11 @@ infrastructure, expected for the public Web to center on MTC.<a href="#appendix-
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">More origins send STS including <code>require-pq-ta</code> once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in.</td>
+                <td class="text-left" rowspan="1" colspan="1">More origins send <code>Require-PQ-Auth</code> once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Still dual-accept by default; for Known HSTS Hosts with <code>require-pq-ta</code> (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines.</td>
+                <td class="text-left" rowspan="1" colspan="1">Still dual-accept by default; for Known PQ Hosts (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines.</td>
               </tr>
             </tbody>
           </table>
@@ -2097,7 +2153,7 @@ infrastructure, expected for the public Web to center on MTC.<a href="#appendix-
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Deploy strict policy: classical only with PQ assurance that classical is required for this origin; otherwise CRQC-resistant only. Opt-in <code>require-pq-ta</code> still helps early PQ origins; the PQ-secure signal covers the long tail.</td>
+                <td class="text-left" rowspan="1" colspan="1">Deploy strict policy: classical only with PQ assurance that classical is required for this origin; otherwise CRQC-resistant only. Opt-in <code>Require-PQ-Auth</code> still helps early PQ origins; the PQ-secure signal covers the long tail.</td>
               </tr>
             </tbody>
           </table>
@@ -2133,10 +2189,10 @@ infrastructure, expected for the public Web to center on MTC.<a href="#appendix-
           </table>
 </section>
 </div>
-<div id="stage-6-retire-require-pq-ta">
+<div id="stage-6-retire-require-pq-auth">
 <section id="appendix-A.2.7">
-          <h4 id="name-stage-6-retire-require-pq-t">
-<a href="#appendix-A.2.7" class="section-number selfRef">A.2.7. </a><a href="#name-stage-6-retire-require-pq-t" class="section-name selfRef">Stage 6 — Retire <code>require-pq-ta</code></a>
+          <h4 id="name-stage-6-retire-require-pq-a">
+<a href="#appendix-A.2.7" class="section-number selfRef">A.2.7. </a><a href="#name-stage-6-retire-require-pq-a" class="section-name selfRef">Stage 6 — Retire <code>Require-PQ-Auth</code></a>
           </h4>
 <table class="center" id="table-7">
             <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
@@ -2153,11 +2209,11 @@ infrastructure, expected for the public Web to center on MTC.<a href="#appendix-
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">Stop sending <code>require-pq-ta</code>; base HSTS may remain.</td>
+                <td class="text-left" rowspan="1" colspan="1">Stop sending <code>Require-PQ-Auth</code>; HSTS may remain.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Clear <code>require-pq-ta</code> state (including preload) and eventually remove PQ-HSTS enforcement; the pin is redundant. The extension succeeds by becoming unnecessary.</td>
+                <td class="text-left" rowspan="1" colspan="1">Clear <code>Require-PQ-Auth</code> state (including preload) and eventually remove enforcement; the pin is redundant. The mechanism succeeds by becoming unnecessary.</td>
               </tr>
             </tbody>
           </table>
