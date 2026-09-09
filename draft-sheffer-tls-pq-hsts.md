@@ -124,7 +124,7 @@ HTTPS and PQ readiness often diverge on `max-age`, subdomain scope, and
 preload, so those knobs cannot usefully share one HSTS policy.
 
 Noting `Require-PQ-Auth` requires a securely delivered HTTPS response. It
-does not require the host to be a Known HSTS Host {{!RFC6797}}. HSTS and
+does not require the host to be a Known HSTS Host {{?RFC6797}}. HSTS and
 `Require-PQ-Auth` lifecycles are independent. UAs that do not implement
 this document ignore the unknown header field.
 
@@ -225,7 +225,7 @@ trust anchor:
 
 HSTS terms:
 : This document refers to Known HSTS Host, HSTS Policy, and related
-  terminology from {{!RFC6797}} only for comparison. HSTS state is
+  terminology from {{?RFC6797}} only for comparison. HSTS state is
   independent of the policy defined here.
 
 Known PQ Host / PQ Policy:
@@ -279,7 +279,7 @@ include-subdomains:
 : Boolean true if present as a bare Dictionary member (optional). If
   present, the PQ Policy applies to the host and to hosts whose domain
   names are subdomains of that host's domain name, analogous to HSTS
-  `includeSubDomains` {{!RFC6797}} but applying only to this PQ Policy.
+  `includeSubDomains` {{?RFC6797}} but applying only to this PQ Policy.
   Absence means host-only scope.
 
 preload:
@@ -370,7 +370,7 @@ MUST:
 
 If any of the above checks fail, the UA MUST fail the connection in a
 manner consistent with HSTS hard failure (no click-through bypass)
-({{Section 8.4 of !RFC6797}}).
+({{Section 8.4 of ?RFC6797}}).
 
 This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
