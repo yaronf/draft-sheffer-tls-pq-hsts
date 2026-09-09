@@ -480,11 +480,6 @@ Table of Contents
               IANA, "Transport Layer Security (TLS) Parameters",
               <https://www.iana.org/assignments/tls-parameters>.
 
-   [RFC6797]  Hodges, J., Jackson, C., and A. Barth, "HTTP Strict
-              Transport Security (HSTS)", RFC 6797,
-              DOI 10.17487/RFC6797, November 2012,
-              <https://www.rfc-editor.org/rfc/rfc6797>.
-
    [RFC9651]  Nottingham, M. and P. Kamp, "Structured Field Values for
               HTTP", RFC 9651, DOI 10.17487/RFC9651, September 2024,
               <https://www.rfc-editor.org/rfc/rfc9651>.
@@ -515,6 +510,11 @@ Table of Contents
               Authentication Roadmap", February 2026,
               <https://www.chromium.org/Home/chromium-security/post-
               quantum-auth-roadmap/>.
+
+   [RFC6797]  Hodges, J., Jackson, C., and A. Barth, "HTTP Strict
+              Transport Security (HSTS)", RFC 6797,
+              DOI 10.17487/RFC6797, November 2012,
+              <https://www.rfc-editor.org/rfc/rfc6797>.
 
    [RFC7469]  Evans, C., Palmer, C., and R. Sleevi, "Public Key Pinning
               Extension for HTTP", RFC 7469, DOI 10.17487/RFC7469, April
