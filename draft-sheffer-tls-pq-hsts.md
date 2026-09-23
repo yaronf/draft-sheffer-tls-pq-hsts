@@ -310,13 +310,41 @@ Require-PQ-Auth: max-age=31536000, include-subdomains, preload
 
 # Server Processing {#server}
 
-<cref>TODO Server processing: emit `Require-PQ-Auth` only when the origin
-can serve a CRQC-resistant-TA credential and complete PQ/hybrid key
-agreement for the commitment window; emit `include-subdomains` only when
-the entire covered subdomain tree is similarly ready; choose `max-age`
-independently of HSTS; serialize as an RFC 9651 Dictionary; staged
-ramp; noting requires HTTPS but not HSTS; clear Noted policy with
-`max-age` of 0 (omitting the header does not clear).</cref>
+Servers MUST emit `Require-PQ-Auth` only when they can keep the following
+commitment for the lifetime conveyed by `max-age` (and for any hosts
+covered by `include-subdomains`):
+
+1. Serve a certification path anchored at a CRQC-resistant trust anchor
+   (pure post-quantum or composite per the server's deployment), with no
+   mixed classical/CRQC-resistant path; and
+2. Complete CRQC-resistant key agreement (hybrid or pure post-quantum)
+   with clients that implement this document.
+
+The server MUST send `Require-PQ-Auth` only over HTTPS. Otherwise UAs
+will not note the field ({{ua-behavior}}).
+
+## Choosing policy parameters
+
+`max-age` SHOULD reflect how long the operator is willing to keep the
+commitment above. Operators are expected to start with a short `max-age` while
+gaining confidence, then increase it.
+
+`include-subdomains` MUST NOT be sent unless every host that would be
+covered can likewise satisfy the commitment for the same window.
+
+`preload` MAY be sent when the operator intends to seek inclusion on a
+PQ preload list ({{preload}}). It does not relax the commitment rules
+above.
+
+## Updating and clearing policy
+
+A valid `Require-PQ-Auth` field replaces any previously Noted PQ Policy
+for that host when the UA notes it ({{ua-behavior}}).
+
+To delete client state before expiry, the server sends `max-age` with
+value 0. That clear reaches only clients that still fetch and note the
+header; others keep sticky state until expiry and will typically refuse
+to connect. Omitting the header does not clear Noted policy.
 
 # User Agent Behavior {#ua-behavior}
 
