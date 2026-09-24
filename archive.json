@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-22T02:01:11.073371+00:00",
+  "timestamp": "2026-09-24T01:48:14.202851+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -50,5 +50,32 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOT2GSC88AAAABEvqEHQ",
+      "title": "Complete Server Processing section",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/1",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n- Replaces the Server Processing TODO with normative server commitment rules for `Require-PQ-Auth` (CRQC-resistant trust-anchor path + key agreement).\n- Adds guidance for `max-age`, `include-subdomains`, and `preload`, plus HTTPS-only emission and `max-age=0` clearing caveats.\n\n@davidben @tireddy2 \u2014 please review.",
+      "createdAt": "2026-09-23T12:09:52Z",
+      "updatedAt": "2026-09-23T12:12:50Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "c2ea04d375e79324cb59690394b6c49bc317cd7d",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "ys-server-processing",
+      "headRefOid": "24b655a6e0ae4432bfb96ef441a59526ecf8e228",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    }
+  ]
 }
