@@ -320,13 +320,22 @@ covered by `include-subdomains`):
 2. Complete CRQC-resistant key agreement (hybrid or pure post-quantum)
    with clients that implement this document.
 
+The commitment applies to every server that answers for each covered
+hostname, not only the instance that sent the header—including all
+CDN edges, failover or backup providers, and HTTP/3 endpoints advertised
+via Alt-Svc {{?RFC7838}}. If any such endpoint cannot meet the policy,
+UAs that reach it will fail to connect.
+
 The server MUST send `Require-PQ-Auth` only over HTTPS. Otherwise UAs
-will not note the field ({{ua-behavior}}).
+will not note the field ({{ua-behavior}}). The server SHOULD include the
+header on every HTTPS response, unless it omits the header for
+performance reasons (which typically does not make sense given the
+header's small size).
 
 ## Choosing policy parameters
 
-`max-age` SHOULD reflect how long the operator is willing to keep the
-commitment above. Operators are expected to start with a short `max-age` while
+`max-age` should reflect how long the operator is willing to keep the
+commitment above. Operators typically start with a short `max-age` while
 gaining confidence, then increase it.
 
 `include-subdomains` MUST NOT be sent unless every host that would be
@@ -339,12 +348,18 @@ above.
 ## Updating and clearing policy
 
 A valid `Require-PQ-Auth` field replaces any previously Noted PQ Policy
-for that host when the UA notes it ({{ua-behavior}}).
+for that host when the UA notes it ({{ua-behavior}}). Omitting the header
+does not clear Noted policy.
 
 To delete client state before expiry, the server sends `max-age` with
-value 0. That clear reaches only clients that still fetch and note the
-header; others keep sticky state until expiry and will typically refuse
-to connect. Omitting the header does not clear Noted policy.
+value 0. UAs that successfully note that response MUST delete the Noted
+PQ Policy ({{ua-behavior}}). That escape hatch is useful only
+in laboratory or similar conditions, where the client population is small
+and individually identifiable. It works only while the server can still
+meet the commitment: enforcing UAs reject connections that do not, and so
+never see the clear. Operators should keep meeting the commitment until
+outstanding pins expire. If the server loses that ability first, those
+UAs stay locked out until expiry or manual action.
 
 # User Agent Behavior {#ua-behavior}
 
