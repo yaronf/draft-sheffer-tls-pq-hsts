@@ -5,10 +5,10 @@
 Transport Layer Security                                      Y. Sheffer
 Internet-Draft                                               Independent
 Intended status: Standards Track                              T. Reddy.K
-Expires: 13 March 2027                                             Nokia
+Expires: 10 April 2027                                             Nokia
                                                              D. Benjamin
                                                               Google LLC
-                                                        9 September 2026
+                                                          7 October 2026
 
 
               An HSTS-like Header for Secure PQ Migration
@@ -59,7 +59,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 March 2027.
+   This Internet-Draft will expire on 10 April 2027.
 
 Copyright Notice
 
@@ -84,6 +84,8 @@ Table of Contents
    3.  Threat Model
    4.  Syntax
    5.  Server Processing
+     5.1.  Choosing policy parameters
+     5.2.  Updating and clearing policy
    6.  User Agent Behavior
      6.1.  Noting the header
      6.2.  Enforcement
@@ -342,15 +344,58 @@ Table of Contents
 
 5.  Server Processing
 
+   Servers MUST emit Require-PQ-Auth only when they can keep the
+   following commitment for the lifetime conveyed by max-age (and for
+   any hosts covered by include-subdomains):
 
-   // TODO Server processing: emit `Require-PQ-Auth` only when the
-   // origin can serve a CRQC-resistant-TA credential and complete PQ/
-   // hybrid key agreement for the commitment window; emit `include-
-   // subdomains` only when the entire covered subdomain tree is
-   // similarly ready; choose `max-age` independently of HSTS; serialize
-   // as an RFC 9651 Dictionary; staged ramp; noting requires HTTPS but
-   // not HSTS; clear Noted policy with `max-age` of 0 (omitting the
-   // header does not clear).
+   1.  Serve a certification path anchored at a CRQC-resistant trust
+       anchor (pure post-quantum or composite per the server's
+       deployment), with no mixed classical/CRQC-resistant path; and
+
+   2.  Complete CRQC-resistant key agreement (hybrid or pure post-
+       quantum) with clients that implement this document.
+
+   The commitment applies to every server that answers for each covered
+   hostname, not only the instance that sent the header—including all
+   CDN edges, failover or backup providers, and HTTP/3 endpoints
+   advertised via Alt-Svc [RFC7838].  If any such endpoint cannot meet
+   the policy, UAs that reach it will fail to connect.
+
+   The server MUST send Require-PQ-Auth only over HTTPS.  Otherwise UAs
+   will not note the field (Section 6).  The server SHOULD include the
+   header on every HTTPS response, unless it omits the header for
+   performance reasons (which typically does not make sense given the
+   header's small size).
+
+5.1.  Choosing policy parameters
+
+   max-age should reflect how long the operator is willing to keep the
+   commitment above.  Operators typically start with a short max-age
+   while gaining confidence, then increase it.
+
+   include-subdomains MUST NOT be sent unless every host that would be
+   covered can likewise satisfy the commitment for the same window.
+
+   preload MAY be sent when the operator intends to seek inclusion on a
+   PQ preload list (Section 7).  It does not relax the commitment rules
+   above.
+
+5.2.  Updating and clearing policy
+
+   A valid Require-PQ-Auth field replaces any previously Noted PQ Policy
+   for that host when the UA notes it (Section 6).  Omitting the header
+   does not clear Noted policy.
+
+   To delete client state before expiry, the server sends max-age with
+   value 0.  UAs that successfully note that response MUST delete the
+   Noted PQ Policy (Section 6).  That escape hatch is useful only in
+   laboratory or similar conditions, where the client population is
+   small and individually identifiable.  It works only while the server
+   can still meet the commitment: enforcing UAs reject connections that
+   do not, and so never see the clear.  Operators should keep meeting
+   the commitment until outstanding pins expire.  If the server loses
+   that ability first, those UAs stay locked out until expiry or manual
+   action.
 
 6.  User Agent Behavior
 
@@ -532,9 +577,9 @@ Table of Contents
               Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
               and F. Valsorda, "Merkle Tree Certificates", Work in
               Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-05, 6 July 2026,
+              certs-06, 21 September 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-05>.
+              merkle-tree-certs-06>.
 
    [I-D.ietf-lamps-pq-composite-sigs]
               Ounsworth, M., Gray, J., Pala, M., Klaußner, J., and S.
@@ -551,12 +596,16 @@ Table of Contents
               (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
               <https://www.rfc-editor.org/rfc/rfc5280>.
 
+   [RFC7838]  Nottingham, M., McManus, P., and J. Reschke, "HTTP
+              Alternative Services", RFC 7838, DOI 10.17487/RFC7838,
+              April 2016, <https://www.rfc-editor.org/rfc/rfc7838>.
+
    [I-D.ietf-tls-trust-anchor-ids]
               Beck, B., Benjamin, D., O'Brien, D., and K. Nekritz, "TLS
               Trust Anchor Identifiers", Work in Progress, Internet-
-              Draft, draft-ietf-tls-trust-anchor-ids-04, 30 April 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-tls-
-              trust-anchor-ids-04>.
+              Draft, draft-ietf-tls-trust-anchor-ids-06, 30 September
+              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              tls-trust-anchor-ids-06>.
 
 Appendix A.  The Migration to PQ-Secure Authentication in TLS
 
