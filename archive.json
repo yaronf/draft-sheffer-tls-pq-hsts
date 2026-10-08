@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-06T03:28:39.678945+00:00",
+  "timestamp": "2026-10-08T03:09:49.354788+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -56,26 +56,122 @@
       "id": "PR_kwDOT2GSC88AAAABEvqEHQ",
       "title": "Complete Server Processing section",
       "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/1",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "yaronf",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "## Summary\n- Replaces the Server Processing TODO with normative server commitment rules for `Require-PQ-Auth` (CRQC-resistant trust-anchor path + key agreement).\n- Adds guidance for `max-age`, `include-subdomains`, and `preload`, plus HTTPS-only emission and `max-age=0` clearing caveats.\n\n@davidben @tireddy2 \u2014 please review.",
       "createdAt": "2026-09-23T12:09:52Z",
-      "updatedAt": "2026-09-23T12:12:50Z",
+      "updatedAt": "2026-10-07T14:43:24Z",
       "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
       "baseRefName": "main",
       "baseRefOid": "c2ea04d375e79324cb59690394b6c49bc317cd7d",
       "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
       "headRefName": "ys-server-processing",
-      "headRefOid": "24b655a6e0ae4432bfb96ef441a59526ecf8e228",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "headRefOid": "6f8efb02681874529e6db53bf7df81b94f2b6a4b",
+      "closedAt": "2026-10-07T14:43:24Z",
+      "mergedAt": "2026-10-07T14:43:23Z",
+      "mergedBy": "yaronf",
+      "mergeCommit": {
+        "oid": "a712e091397c5511239d66f13cdd1aaf8c7e07de"
+      },
+      "comments": [
+        {
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The text on clearing the policy with max-age=0 is misleading. A browser that has noted the policy rejects any connection that doesn't meet it. So the browser can only receive max-age=0 over a connection that still meets the policy.\r\n\r\nExample: a server sends max-age of one year. Three months later it loses its PQ certificate and can only serve a classical one. It now sends max-age=0, but every browser that noted the policy rejects the connection before any HTTP response arrives. None of them ever sees the max-age=0, so they cannot reach the server for the next nine months.\r\n\r\nSo:\r\n\r\nmax-age=0 only works if the server sends it while it can still meet the policy. The server should keep meeting the policy until the pins it already sent have expired.\r\nIf the server loses that ability first, there is no way to recover. Browsers stay locked out until the policy expires.",
+          "createdAt": "2026-10-06T06:34:44Z",
+          "updatedAt": "2026-10-06T06:34:44Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABQ1X70A",
+          "commit": {
+            "abbreviatedOid": "24b655a"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-06T06:38:37Z",
+          "updatedAt": "2026-10-06T06:51:51Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "The promise should cover every server that answers for the hostname, not just the one that sent the header. That includes all CDN edges, failover or backup providers, and HTTP/3 endpoints advertised via Alt-Svc. If any of them cannot meet the policy, UAs that reach it will fail to connect.",
+              "createdAt": "2026-10-06T06:38:38Z",
+              "updatedAt": "2026-10-06T06:51:51Z"
+            },
+            {
+              "originalPosition": 21,
+              "body": "The text says where to send the header, but not how often. Suggest saying the server should send it on every HTTPS response, as is common practice for HSTS.",
+              "createdAt": "2026-10-06T06:49:19Z",
+              "updatedAt": "2026-10-06T06:51:52Z"
+            },
+            {
+              "originalPosition": 26,
+              "body": "The exception needs to be justified. ",
+              "createdAt": "2026-10-06T06:51:46Z",
+              "updatedAt": "2026-10-06T06:51:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABQ4f4hw",
+          "commit": {
+            "abbreviatedOid": "24b655a"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-06T11:57:30Z",
+          "updatedAt": "2026-10-06T11:57:30Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "what do you mean by \"exception\", is it SHOULD vs. MUST?",
+              "createdAt": "2026-10-06T11:57:30Z",
+              "updatedAt": "2026-10-06T11:57:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABQ5W2Aw",
+          "commit": {
+            "abbreviatedOid": "24b655a"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-06T13:10:52Z",
+          "updatedAt": "2026-10-06T13:10:53Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "Yes. If \u201cSHOULD\u201d is used, the document should provide justification for the exception and specify when it can be ignored.",
+              "createdAt": "2026-10-06T13:10:53Z",
+              "updatedAt": "2026-10-06T13:10:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABRG0unw",
+          "commit": {
+            "abbreviatedOid": "6f8efb0"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-07T13:25:22Z",
+          "updatedAt": "2026-10-07T13:25:22Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
