@@ -460,11 +460,9 @@ to `Require-PQ-Auth`. This section covers where they differ.
 
 ## Underlying Secure Transport Considerations
 
-Unlike HSTS, this document requires TLS 1.3 {{!RFC8446}} or later. If a
-UA accepts traditional authentication for a host, a CRQC attacker can
-forge a server end-entity certificate and the server's signature over
-the handshake transcript, and impersonate the server {{?RFC9958}}. For
-a Known PQ Host, this document requires CRQC-resistant authentication.
+CRQC-resistant key exchange and authentication are specified for TLS
+1.3 {{!RFC8446}} and not for earlier versions. `Require-PQ-Auth` can
+therefore be used only with TLS 1.3 or later.
 
 ## Non-Conformant User Agent Implications
 
@@ -477,10 +475,6 @@ the server offers a CRQC-resistant one.
 
 As with HSTS, PQ Policy is trust on first use. The first connection to
 a host is not protected ({{preload}}).
-
-<cref>Open: Denial of Service (header injection, self-inflicted
-lockout); whether the UA notes the header only over a connection with
-CRQC-resistant authentication; cookie scoping.</cref>
 
 
 # Privacy Considerations
