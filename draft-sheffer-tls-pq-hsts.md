@@ -455,10 +455,32 @@ served audience.</cref>
 
 # Security Considerations
 
-<cref>TODO Security Considerations (orthogonal HSTS vs PQ state;
-trust-anchor and key-agreement downgrade; unknown-header UAs; enterprise
-interception; cookie scoping / `__Host-` and related Stage 2 risks from
-{{ChromiumPQAuthRoadmap}}; MTC evolving).</cref>
+The security considerations of HSTS ({{Section 14 of ?RFC6797}}) apply
+to `Require-PQ-Auth`. This section covers where they differ.
+
+## Underlying Secure Transport Considerations
+
+Unlike HSTS, this document requires TLS 1.3 {{!RFC8446}} or later. If a
+UA accepts traditional authentication for a host, a CRQC attacker can
+forge a server end-entity certificate and the server's signature over
+the handshake transcript, and impersonate the server {{?RFC9958}}. For
+a Known PQ Host, this document requires CRQC-resistant authentication.
+
+## Non-Conformant User Agent Implications
+
+UAs that do not implement this document ignore the header field. If
+such a UA accepts both traditional and CRQC-resistant authentication, a
+CRQC attacker can present a forged traditional certificate even when
+the server offers a CRQC-resistant one.
+
+## Bootstrap Vulnerability
+
+As with HSTS, PQ Policy is trust on first use. The first connection to
+a host is not protected ({{preload}}).
+
+<cref>Open: Denial of Service (header injection, self-inflicted
+lockout); whether the UA notes the header only over a connection with
+CRQC-resistant authentication; cookie scoping.</cref>
 
 
 # Privacy Considerations
