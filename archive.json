@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-13T04:05:40.050157+00:00",
+  "timestamp": "2026-10-15T02:00:24.506159+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -170,6 +170,126 @@
           "createdAt": "2026-10-07T13:25:22Z",
           "updatedAt": "2026-10-07T13:25:22Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "PR_kwDOT2GSC88AAAABIIR0jA",
+      "title": "Update to Security Considerations",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/2",
+      "state": "OPEN",
+      "author": "tireddy2",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-10-13T08:29:10Z",
+      "updatedAt": "2026-10-13T12:17:54Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "a712e091397c5511239d66f13cdd1aaf8c7e07de",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "tireddy2-patch-1",
+      "headRefOid": "f0e3a4d40861608044933261f954c8fae45374c1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABR-8u1A",
+          "commit": {
+            "abbreviatedOid": "f0e3a4d"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-13T09:58:17Z",
+          "updatedAt": "2026-10-13T09:58:17Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "The sections below are fine but I think there's more. Specifically hijacked TLS-terminating proxies as an attack vector - I think the highest risk is when they *add* a PQ-HSTS header and cause a server to be effectively bricked for a large client population.",
+              "createdAt": "2026-10-13T09:58:17Z",
+              "updatedAt": "2026-10-13T09:58:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABR-83AA",
+          "commit": {
+            "abbreviatedOid": "f0e3a4d"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2026-10-13T09:58:28Z",
+          "updatedAt": "2026-10-13T09:58:28Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABSAFxYg",
+          "commit": {
+            "abbreviatedOid": "f0e3a4d"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-13T11:48:23Z",
+          "updatedAt": "2026-10-13T11:48:24Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Agreed, this is the main risk. Today the UA notes the header over any error-free TLS connection, including one with traditional authentication. So a hijacked proxy that has only a traditional certificate can add the header, and the host is bricked immediately.\r\n\r\nProposal: the UA notes Require-PQ-Auth only over a connection that satisfies the enforcement rules, that is, with CRQC-resistant authentication. This is similar to HPKP, which only noted pins that matched the connection\u2019s validated chain (RFC 7469, Section 2.5). A proxy without a CRQC-resistant path can then no longer set the policy. \r\nThe remaining risk is a proxy with a CRQC-resistant path setting a long max-age.\r\n\r\nIf you agree, I\u2019ll update the UA noting rules and add a Denial of Service subsection covering both points.",
+              "createdAt": "2026-10-13T11:48:24Z",
+              "updatedAt": "2026-10-13T11:48:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABSAWVgg",
+          "commit": {
+            "abbreviatedOid": "f0e3a4d"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-13T12:11:28Z",
+          "updatedAt": "2026-10-13T12:11:28Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "I agree and this is a bug. In fact I thought we already had this rule. So yes, please add it and the DoS subsection.\r\n\r\nThere's a residual risk of a malicious proxy presenting a PQC cert that it obtained temporarily from an ACME server and then bricking the server after deleting the cert. But that's easy to detect and easy to mitigate.\r\n\r\n",
+              "createdAt": "2026-10-13T12:11:28Z",
+              "updatedAt": "2026-10-13T12:11:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABSAa0-Q",
+          "commit": {
+            "abbreviatedOid": "f0e3a4d"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-13T12:17:54Z",
+          "updatedAt": "2026-10-13T12:17:54Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "And my AI adds for the DoS discussion:\r\n\r\n1. Noting = full enforcement, not auth-only \u2014 You wrote \u201cCRQC-resistant authentication.\u201d Enforcement also needs non-mixed path + CRQC-resistant KE. Noting should require the same trio; otherwise a MitM with a PQ cert but classical-only KE can still set the pin and brick KE-incapable origin edges.\r\n\r\n1. include-subdomains amplifies injection \u2014 One injected header with subdomain scope can pin the whole tree; call that out in DoS.\r\n\r\n1. Preload is out of band \u2014 The noting fix does not help a poisoned PQ preload list; say so if DoS discusses preload.\r\n\r\n1. Enterprise interception (availability, not injection) \u2014 After a legitimate pin, a non-PQ TLS middlebox breaks clients; different threat from hijacked-proxy injection, but operators care.",
+              "createdAt": "2026-10-13T12:17:54Z",
+              "updatedAt": "2026-10-13T12:17:54Z"
+            }
+          ]
         }
       ]
     }
