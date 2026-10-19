@@ -1875,8 +1875,38 @@ residual `max-age` TTL entropy without overselling oracles).</span><a href="#sec
       <h2 id="name-iana-considerations">
 <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-11-1"><span class="cref">TODO IANA Considerations: register HTTP field name
-`Require-PQ-Auth` as a Structured Header (Dictionary) per {{RFC9651}}.</span><a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-1">IANA is requested to register the following entry in the "Hypertext
+Transfer Protocol (HTTP) Field Name Registry" defined in
+<span><a href="https://rfc-editor.org/rfc/rfc9110#section-16.3.1" class="relref">Section 16.3.1</a> of [<a href="#RFC9110" class="cite xref">RFC9110</a>]</span>. The registration is:<a href="#section-11-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-11-2">
+        <dt id="section-11-2.1">Field name:</dt>
+        <dd style="margin-left: 1.5em" id="section-11-2.2">
+          <p id="section-11-2.2.1"><code>Require-PQ-Auth</code><a href="#section-11-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-11-2.3">Status:</dt>
+        <dd style="margin-left: 1.5em" id="section-11-2.4">
+          <p id="section-11-2.4.1">permanent<a href="#section-11-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-11-2.5">Structured Type:</dt>
+        <dd style="margin-left: 1.5em" id="section-11-2.6">
+          <p id="section-11-2.6.1">Dictionary<a href="#section-11-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-11-2.7">Specification document(s):</dt>
+        <dd style="margin-left: 1.5em" id="section-11-2.8">
+          <p id="section-11-2.8.1">this document; see <a href="#syntax" class="auto internal xref">Section 4</a><a href="#section-11-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-11-2.9">Comments:</dt>
+        <dd style="margin-left: 1.5em" id="section-11-2.10">
+          <p id="section-11-2.10.1">Defined for the header section of HTTP responses. Not defined for
+use as a trailer field. The field value is a Structured Fields
+Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a href="#section-11-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1907,8 +1937,12 @@ residual `max-age` TTL entropy without overselling oracles).</span><a href="#sec
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9846">[RFC9846]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 9846</span>, <span class="seriesInfo">DOI 10.17487/RFC9846</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9846">https://www.rfc-editor.org/rfc/rfc9846</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9110">[RFC9110]</dt>
+      <dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Semantics"</span>, <span class="seriesInfo">STD 97</span>, <span class="seriesInfo">RFC 9110</span>, <span class="seriesInfo">DOI 10.17487/RFC9110</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9110">https://www.rfc-editor.org/rfc/rfc9110</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
