@@ -371,7 +371,7 @@ Upon receipt of a `Require-PQ-Auth` header field in an HTTP response, the
 UA MUST NOT note a PQ Policy unless all of the following hold:
 
 1. The response was received over an error-free TLS connection
-   (HTTPS).
+   (HTTPS) that satisfies the requirements of {{enforcement}}.
 2. The field value parses as a Structured Fields Dictionary per
    {{syntax}}, including a valid `max-age` member.
 
@@ -392,7 +392,7 @@ PQ Policy before expiry; servers clear state with `max-age` of 0.
 
 UAs that do not implement this document ignore the unknown header field.
 
-## Enforcement
+## Enforcement {#enforcement}
 
 When establishing a connection to a host covered by an unexpired Noted PQ
 Policy—either because the host itself is a Known PQ Host, or because an
@@ -475,6 +475,16 @@ the server offers a CRQC-resistant one.
 
 As with HSTS, PQ Policy is trust on first use. The first connection to
 a host is not protected ({{preload}}).
+
+## Denial of Service
+
+An attacker that controls a TLS-terminating proxy for a host can add
+`Require-PQ-Auth` only if the proxy satisfies the requirements of
+{{enforcement}}. If the attacker sets a large `max-age` and later stops
+satisfying them, UAs that noted the policy cannot connect to the host,
+or to its subdomains if `include-subdomains` is set, until the policy
+expires or the server sends `max-age` of 0 over a connection that
+satisfies them ({{server}}).
 
 
 # Privacy Considerations
