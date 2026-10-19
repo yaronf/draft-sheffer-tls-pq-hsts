@@ -228,11 +228,16 @@ HSTS terms:
   terminology from {{?RFC6797}} only for comparison. HSTS state is
   independent of the policy defined here.
 
-Known PQ Host / PQ Policy:
+known PQ host / PQ Policy:
 : A host for which the UA has noted a valid `Require-PQ-Auth` policy
   ({{syntax}}, {{ua-behavior}}), including expiry derived from `max-age`
   and whether `include-subdomains` applies. Storage is parallel to—not
   part of—HSTS Policy storage.
+
+superdomain:
+: As in {{?RFC6797}}, a domain name of which another domain name is a
+  subdomain. For example, `example.com` is a superdomain of
+  `www.example.com`.
 
 
 # Threat Model
@@ -271,7 +276,7 @@ parses successfully.
 
 max-age:
 : Integer (required). Non-negative number of seconds after receipt
-  during which the UA regards the host as a Known PQ Host with this
+  during which the UA regards the host as a known PQ host with this
   policy. A value of 0 signals the UA to delete any Noted PQ Policy for
   the host (including subdomain scope learned from this host).
 
@@ -365,14 +370,16 @@ UAs stay locked out until expiry or manual action.
 
 This section defines how UAs note and enforce `Require-PQ-Auth` policy.
 
-## Noting the header
+## Noting the header {#noting}
 
 Upon receipt of a `Require-PQ-Auth` header field in an HTTP response, the
 UA MUST NOT note a PQ Policy unless all of the following hold:
 
-1. The response was received over an error-free TLS connection
-   (HTTPS) that satisfies the requirements of {{enforcement}}.
-2. The field value parses as a Structured Fields Dictionary per
+1. The response was received over an error-free HTTPS connection that
+   uses TLS 1.3 {{!RFC9846}} or later.
+2. That connection meets the checks in {{pq-checks}}, whether or not a
+   PQ Policy is already Noted for the host.
+3. The field value parses as a Structured Fields Dictionary per
    {{syntax}}, including a valid `max-age` member.
 
 The host need not be a Known HSTS Host. Noting PQ Policy MUST NOT modify
@@ -380,7 +387,7 @@ HSTS Policy storage.
 
 When noting, the UA MUST:
 
-1. Store a PQ Policy for the host as a Known PQ Host, with expiry derived
+1. Store a PQ Policy for the host as a known PQ host, with expiry derived
    from `max-age` (or delete the policy if `max-age` is 0).
 2. Record subdomain scope from `include-subdomains` when that member is
    usable; otherwise host-only scope.
@@ -392,27 +399,31 @@ PQ Policy before expiry; servers clear state with `max-age` of 0.
 
 UAs that do not implement this document ignore the unknown header field.
 
+## Connection checks {#pq-checks}
+
+A connection meets the checks of this section when all of the following
+hold. These checks apply to the connection itself. They do not depend on
+a PQ Policy already being Noted.
+
+1. The trust anchor that caused acceptance is CRQC-resistant (pure
+   post-quantum or composite per local policy), whether that trust anchor
+   is an X.509 trust anchor or an MTC trust base / cosigner.
+2. The accepted certification path is entirely CRQC-resistant: no hop is
+   classical. (Detailed mixed-path rejection may be refined here or by
+   reference to a dedicated path-validation document.)
+3. The negotiated key agreement is CRQC-resistant (hybrid or pure
+   post-quantum per local policy).
+
 ## Enforcement {#enforcement}
 
 When establishing a connection to a host covered by an unexpired Noted PQ
-Policy—either because the host itself is a Known PQ Host, or because an
-ancestor Known PQ Host has `include-subdomains` covering this host—the UA
-MUST:
+Policy — either because the host itself is a known PQ host, or because a
+known PQ host that is a superdomain of this host has `include-subdomains`
+— the connection MUST meet the checks in {{pq-checks}}, and MUST use
+TLS 1.3 {{!RFC9846}} or later.
 
-1. Authenticate the server such that the trust anchor that caused
-   acceptance is CRQC-resistant (pure post-quantum or composite per local
-   policy), whether that trust anchor is an X.509 trust anchor or an MTC
-   trust base / cosigner.
-2. Ensure the accepted certification path is not mixed: every hop is
-   classical, or every hop is CRQC-resistant, consistent with local
-   policy. (Detailed mixed-path rejection may be refined here or by
-   reference to a dedicated path-validation document.)
-3. Negotiate a CRQC-resistant key agreement (hybrid or pure
-   post-quantum per local policy). Classical-only key agreement MUST cause
-   failure of the connection attempt.
-
-If any of the above checks fail, the UA MUST fail the connection in a
-manner consistent with HSTS hard failure (no click-through bypass)
+If the connection does not meet those requirements, the UA MUST fail it
+in a manner consistent with HSTS hard failure (no click-through bypass)
 ({{Section 8.4 of ?RFC6797}}).
 
 This document does not impose separate end-entity signature-algorithm
@@ -423,7 +434,7 @@ procedures; those remain matters for TLS/IANA policy and
 
 Once classical trust anchors are no longer accepted for authentication
 (Stage 5 of {{migration}}), `Require-PQ-Auth` is redundant (Stage 6). UAs
-MAY clear PQ Policy for Known PQ Hosts (including any preloaded
+MAY clear PQ Policy for known PQ hosts (including any preloaded
 equivalent) when local policy determines that the pin is obsolete.
 Servers SHOULD stop sending the header in that environment. HSTS policy,
 if any, is unaffected.
@@ -432,7 +443,7 @@ if any, is unaffected.
 # Preload {#preload}
 
 <cref>TODO Preload: semantics only—configured/preloaded names may be
-treated as already Noted Known PQ Hosts (with optional
+treated as already Noted known PQ hosts (with optional
 `include-subdomains`) before first visit, closing the TOFU gap as for
 HSTS today; the `preload` Dictionary member signals submission intent for
 a PQ preload list and is independent of HSTS `preload`; informative
@@ -461,30 +472,44 @@ to `Require-PQ-Auth`. This section covers where they differ.
 ## Underlying Secure Transport Considerations
 
 CRQC-resistant key exchange and authentication are specified for TLS
-1.3 {{!RFC8446}} and not for earlier versions. `Require-PQ-Auth` can
+1.3 {{!RFC9846}} and not for earlier versions. `Require-PQ-Auth` can
 therefore be used only with TLS 1.3 or later.
 
 ## Non-Conformant User Agent Implications
 
 UAs that do not implement this document ignore the header field. If
-such a UA accepts both traditional and CRQC-resistant authentication, a
-CRQC attacker can present a forged traditional certificate even when
+such a UA accepts both classical and CRQC-resistant authentication, a
+CRQC attacker can present a forged classical certificate even when
 the server offers a CRQC-resistant one.
 
 ## Bootstrap Vulnerability
 
-As with HSTS, PQ Policy is trust on first use. The first connection to
-a host is not protected ({{preload}}).
+As with HSTS, noting a PQ Policy is trust on first use. An attacker who
+can modify that first response can strip `Require-PQ-Auth`, and the UA
+never notes the policy. Preload is how that first connection is
+protected ({{preload}}).
 
 ## Denial of Service
 
-An attacker that controls a TLS-terminating proxy for a host can add
-`Require-PQ-Auth` only if the proxy satisfies the requirements of
-{{enforcement}}. If the attacker sets a large `max-age` and later stops
-satisfying them, UAs that noted the policy cannot connect to the host,
-or to its subdomains if `include-subdomains` is set, until the policy
-expires or the server sends `max-age` of 0 over a connection that
-satisfies them ({{server}}).
+An attacker that controls a TLS-terminating proxy can cause a UA to note
+`Require-PQ-Auth` only when the connection meets {{pq-checks}}. A proxy
+that cannot meet those checks cannot set the policy.
+
+If the attacker can meet the checks and sets a large `max-age`, UAs that
+note the policy require {{pq-checks}} until the policy expires.
+`include-subdomains` extends that requirement to every covered name.
+Sending `max-age` of 0 does not remove the policy unless some endpoint
+the UA will accept can still meet {{pq-checks}} and deliver that value
+({{server}}). If the attacker was the only such endpoint and then stops
+meeting the checks, the origin stays unreachable until the policy
+expires.
+
+A PQ preload entry is configured out of band. The noting rule does not
+stop a poisoned preload list ({{preload}}).
+
+After a policy is legitimately Noted, a TLS interceptor that cannot meet
+{{pq-checks}} causes the same hard failure. That is an availability
+problem for deployments that intercept TLS, separate from injection.
 
 
 # Privacy Considerations
@@ -675,7 +700,7 @@ infrastructure, expected for the public Web to center on MTC.
 |---|---|
 | CA | Growing CRQC-resistant issuance; classical credentials still widely available. |
 | Server | More origins send `Require-PQ-Auth` once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in. |
-| Client | Still dual-accept by default; for Known PQ Hosts (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
+| Client | Still dual-accept by default; for known PQ hosts (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
 
 ### Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates
 
