@@ -5,10 +5,10 @@
 Transport Layer Security                                      Y. Sheffer
 Internet-Draft                                               Independent
 Intended status: Standards Track                              T. Reddy.K
-Expires: 16 April 2027                                             Nokia
+Expires: 22 April 2027                                             Nokia
                                                              D. Benjamin
                                                               Google LLC
-                                                         13 October 2026
+                                                         19 October 2026
 
 
               An HSTS-like Header for Secure PQ Migration
@@ -59,7 +59,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 April 2027.
+   This Internet-Draft will expire on 22 April 2027.
 
 Copyright Notice
 
@@ -95,6 +95,7 @@ Table of Contents
      9.1.  Underlying Secure Transport Considerations
      9.2.  Non-Conformant User Agent Implications
      9.3.  Bootstrap Vulnerability
+     9.4.  Denial of Service
    10. Privacy Considerations
    11. IANA Considerations
    12. References
@@ -410,7 +411,7 @@ Table of Contents
    the UA MUST NOT note a PQ Policy unless all of the following hold:
 
    1.  The response was received over an error-free TLS connection
-       (HTTPS).
+       (HTTPS) that satisfies the requirements of Section 6.2.
 
    2.  The field value parses as a Structured Fields Dictionary per
        Section 4, including a valid max-age member.
@@ -520,6 +521,16 @@ Table of Contents
 
    As with HSTS, PQ Policy is trust on first use.  The first connection
    to a host is not protected (Section 7).
+
+9.4.  Denial of Service
+
+   An attacker that controls a TLS-terminating proxy for a host can add
+   Require-PQ-Auth only if the proxy satisfies the requirements of
+   Section 6.2.  If the attacker sets a large max-age and later stops
+   satisfying them, UAs that noted the policy cannot connect to the
+   host, or to its subdomains if include-subdomains is set, until the
+   policy expires or the server sends max-age of 0 over a connection
+   that satisfies them (Section 5).
 
 10.  Privacy Considerations
 
