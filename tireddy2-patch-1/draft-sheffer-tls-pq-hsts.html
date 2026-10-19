@@ -1675,7 +1675,8 @@ UAs stay locked out until expiry or manual action.<a href="#section-5.2-2" class
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-noting-the-header" class="section-name selfRef">Noting the header</a>
         </h3>
 <p id="section-6.1-1">Upon receipt of a <code>Require-PQ-Auth</code> header field in an HTTP response, the
-UA <span class="bcp14">MUST NOT</span> note a PQ Policy unless all of the following hold:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+UA notes a PQ Policy when all of the following hold, and <span class="bcp14">MUST NOT</span> note
+one otherwise:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.1-2">
 <li id="section-6.1-2.1">
             <p id="section-6.1-2.1.1">The response was received over an error-free HTTPS connection that
@@ -1746,9 +1747,10 @@ Policy — either because the host itself is a known PQ host, or because a
 known PQ host that is a superdomain of this host has <code>include-subdomains</code>
 — the connection <span class="bcp14">MUST</span> meet the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>, and <span class="bcp14">MUST</span> use
 TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">If the connection does not meet those requirements, the UA <span class="bcp14">MUST</span> fail it
-in a manner consistent with HSTS hard failure (no click-through bypass)
-(<span><a href="https://rfc-editor.org/rfc/rfc6797#section-8.4" class="relref">Section 8.4</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">If the connection does not meet those requirements, the UA <span class="bcp14">MUST</span> abort the
+TLS handshake with a fatal "handshake_failure" alert (<span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>,
+Section 6.2). The UA <span class="bcp14">MUST NOT</span> offer the user a way to proceed
+(<span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.1" class="relref">Section 12.1</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
 <p id="section-6.3-3">This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate TLS NamedGroup codepoints or MTC validation

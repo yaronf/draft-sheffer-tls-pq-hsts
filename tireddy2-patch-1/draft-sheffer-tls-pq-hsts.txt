@@ -413,7 +413,8 @@ Table of Contents
 6.1.  Noting the header
 
    Upon receipt of a Require-PQ-Auth header field in an HTTP response,
-   the UA MUST NOT note a PQ Policy unless all of the following hold:
+   the UA notes a PQ Policy when all of the following hold, and MUST NOT
+   note one otherwise:
 
    1.  The response was received over an error-free HTTPS connection
        that uses TLS 1.3 [RFC9846] or later.
@@ -469,9 +470,10 @@ Table of Contents
    include-subdomains — the connection MUST meet the checks in
    Section 6.2, and MUST use TLS 1.3 [RFC9846] or later.
 
-   If the connection does not meet those requirements, the UA MUST fail
-   it in a manner consistent with HSTS hard failure (no click-through
-   bypass) (Section 8.4 of [RFC6797]).
+   If the connection does not meet those requirements, the UA MUST abort
+   the TLS handshake with a fatal "handshake_failure" alert ([RFC9846],
+   Section 6.2).  The UA MUST NOT offer the user a way to proceed
+   (Section 12.1 of [RFC6797]).
 
    This document does not impose separate end-entity signature-algorithm
    requirements beyond the trust-anchor class and path-consistency rules
