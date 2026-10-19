@@ -523,8 +523,26 @@ residual `max-age` TTL entropy without overselling oracles).</cref>
 
 # IANA Considerations
 
-<cref>TODO IANA Considerations: register HTTP field name
-`Require-PQ-Auth` as a Structured Header (Dictionary) per {{!RFC9651}}.</cref>
+IANA is requested to register the following entry in the "Hypertext
+Transfer Protocol (HTTP) Field Name Registry" defined in
+{{Section 16.3.1 of !RFC9110}}. The registration is:
+
+Field name:
+: `Require-PQ-Auth`
+
+Status:
+: permanent
+
+Structured Type:
+: Dictionary
+
+Specification document(s):
+: this document; see {{syntax}}
+
+Comments:
+: Defined for the header section of HTTP responses. Not defined for
+  use as a trailer field. The field value is a Structured Fields
+  Dictionary {{!RFC9651}}.
 
 
 --- back
