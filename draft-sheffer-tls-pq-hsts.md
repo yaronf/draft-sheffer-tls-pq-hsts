@@ -228,7 +228,7 @@ HSTS terms:
   terminology from {{?RFC6797}} only for comparison. HSTS state is
   independent of the policy defined here.
 
-known PQ host / PQ Policy:
+Known PQ Host / PQ Policy:
 : A host for which the UA has noted a valid `Require-PQ-Auth` policy
   ({{syntax}}, {{ua-behavior}}), including expiry derived from `max-age`
   and whether `include-subdomains` applies. Storage is parallel to—not
@@ -276,7 +276,7 @@ parses successfully.
 
 max-age:
 : Integer (required). Non-negative number of seconds after receipt
-  during which the UA regards the host as a known PQ host with this
+  during which the UA regards the host as a Known PQ Host with this
   policy. A value of 0 signals the UA to delete any Noted PQ Policy for
   the host (including subdomain scope learned from this host).
 
@@ -388,7 +388,7 @@ HSTS Policy storage.
 
 When noting, the UA MUST:
 
-1. Store a PQ Policy for the host as a known PQ host, with expiry derived
+1. Store a PQ Policy for the host as a Known PQ Host, with expiry derived
    from `max-age` (or delete the policy if `max-age` is 0).
 2. Record subdomain scope from `include-subdomains` when that member is
    usable; otherwise host-only scope.
@@ -418,8 +418,8 @@ a PQ Policy already being Noted.
 ## Enforcement {#enforcement}
 
 When establishing a connection to a host covered by an unexpired Noted PQ
-Policy — either because the host itself is a known PQ host, or because a
-known PQ host that is a superdomain of this host has `include-subdomains`
+Policy — either because the host itself is a Known PQ Host, or because a
+Known PQ Host that is a superdomain of this host has `include-subdomains`
 — the connection MUST meet the checks in {{pq-checks}}, and MUST use
 TLS 1.3 {{!RFC9846}} or later.
 
@@ -436,7 +436,7 @@ procedures; those remain matters for TLS/IANA policy and
 
 Once classical trust anchors are no longer accepted for authentication
 (Stage 5 of {{migration}}), `Require-PQ-Auth` is redundant (Stage 6). UAs
-MAY clear PQ Policy for known PQ hosts (including any preloaded
+MAY clear PQ Policy for Known PQ Hosts (including any preloaded
 equivalent) when local policy determines that the pin is obsolete.
 Servers SHOULD stop sending the header in that environment. HSTS policy,
 if any, is unaffected.
@@ -445,7 +445,7 @@ if any, is unaffected.
 # Preload {#preload}
 
 <cref>TODO Preload: semantics only—configured/preloaded names may be
-treated as already Noted known PQ hosts (with optional
+treated as already Noted Known PQ Hosts (with optional
 `include-subdomains`) before first visit, closing the TOFU gap as for
 HSTS today; the `preload` Dictionary member signals submission intent for
 a PQ preload list and is independent of HSTS `preload`; informative
@@ -702,7 +702,7 @@ infrastructure, expected for the public Web to center on MTC.
 |---|---|
 | CA | Growing CRQC-resistant issuance; classical credentials still widely available. |
 | Server | More origins send `Require-PQ-Auth` once they reliably serve an all-CRQC-resistant path and complete PQ/hybrid key agreement; they may still dual-home for legacy clients. Old servers still never opt in. |
-| Client | Still dual-accept by default; for known PQ hosts (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
+| Client | Still dual-accept by default; for Known PQ Hosts (including names learned via preload), reject classical trust anchors and classical-only key agreement. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
 
 ### Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates
 
