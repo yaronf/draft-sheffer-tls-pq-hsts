@@ -34,11 +34,11 @@ retired.
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.12.2
+    platformdirs 4.13.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.9.1
+    wcwidth 0.9.2
 -->
 <link href="draft-sheffer-tls-pq-hsts.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1058,7 +1058,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Sheffer, et al.</td>
-<td class="center">Expires 10 April 2027</td>
+<td class="center">Expires 22 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg {
 <dd class="internet-draft">draft-sheffer-tls-pq-hsts-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-07" class="published">7 October 2026</time>
+<time datetime="2026-10-19" class="published">19 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-10">10 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-22">22 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1143,7 +1143,7 @@ retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 10 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1210,7 +1210,10 @@ retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
                 <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-noting-the-header" class="internal xref">Noting the header</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
-                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-enforcement" class="internal xref">Enforcement</a></p>
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-connection-checks" class="internal xref">Connection checks</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-enforcement" class="internal xref">Enforcement</a></p>
 </li>
             </ul>
 </li>
@@ -1222,6 +1225,20 @@ retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
             <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-underlying-secure-transport" class="internal xref">Underlying Secure Transport Considerations</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-non-conformant-user-agent-i" class="internal xref">Non-Conformant User Agent Implications</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-bootstrap-vulnerability" class="internal xref">Bootstrap Vulnerability</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-denial-of-service" class="internal xref">Denial of Service</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
             <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-privacy-considerations" class="internal xref">Privacy Considerations</a></p>
@@ -1477,6 +1494,13 @@ independent of the policy defined here.<a href="#section-2-5.6.1" class="pilcrow
 and whether <code>include-subdomains</code> applies. Storage is parallel to—not
 part of—HSTS Policy storage.<a href="#section-2-5.8.1" class="pilcrow">¶</a></p>
 </dd>
+        <dd class="break"></dd>
+<dt id="section-2-5.9">superdomain:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-5.10">
+          <p id="section-2-5.10.1">As in <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>, a domain name of which another domain name is a
+subdomain. For example, <code>example.com</code> is a superdomain of
+<code>www.example.com</code>.<a href="#section-2-5.10.1" class="pilcrow">¶</a></p>
+</dd>
       <dd class="break"></dd>
 </dl>
 </section>
@@ -1645,21 +1669,26 @@ UAs stay locked out until expiry or manual action.<a href="#section-5.2-2" class
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-user-agent-behavior" class="section-name selfRef">User Agent Behavior</a>
       </h2>
 <p id="section-6-1">This section defines how UAs note and enforce <code>Require-PQ-Auth</code> policy.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="noting-the-header">
+<div id="noting">
 <section id="section-6.1">
         <h3 id="name-noting-the-header">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-noting-the-header" class="section-name selfRef">Noting the header</a>
         </h3>
 <p id="section-6.1-1">Upon receipt of a <code>Require-PQ-Auth</code> header field in an HTTP response, the
-UA <span class="bcp14">MUST NOT</span> note a PQ Policy unless all of the following hold:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+UA notes a PQ Policy when all of the following hold, and <span class="bcp14">MUST NOT</span> note
+one otherwise:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.1-2">
 <li id="section-6.1-2.1">
-            <p id="section-6.1-2.1.1">The response was received over an error-free TLS connection
-(HTTPS).<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-2.1.1">The response was received over an error-free HTTPS connection that
+uses TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later.<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.1-2.2">
-            <p id="section-6.1-2.2.1">The field value parses as a Structured Fields Dictionary per
-<a href="#syntax" class="auto internal xref">Section 4</a>, including a valid <code>max-age</code> member.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-2.2.1">That connection meets the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>, whether or not a
+PQ Policy is already Noted for the host.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.1-2.3">
+            <p id="section-6.1-2.3.1">The field value parses as a Structured Fields Dictionary per
+<a href="#syntax" class="auto internal xref">Section 4</a>, including a valid <code>max-age</code> member.<a href="#section-6.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-6.1-3">The host need not be a Known HSTS Host. Noting PQ Policy <span class="bcp14">MUST NOT</span> modify
@@ -1682,48 +1711,57 @@ PQ Policy before expiry; servers clear state with <code>max-age</code> of 0.<a h
 <p id="section-6.1-7">UAs that do not implement this document ignore the unknown header field.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="enforcement">
+<div id="pq-checks">
 <section id="section-6.2">
-        <h3 id="name-enforcement">
-<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
+        <h3 id="name-connection-checks">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-connection-checks" class="section-name selfRef">Connection checks</a>
         </h3>
-<p id="section-6.2-1">When establishing a connection to a host covered by an unexpired Noted PQ
-Policy—either because the host itself is a Known PQ Host, or because an
-ancestor Known PQ Host has <code>include-subdomains</code> covering this host—the UA
-<span class="bcp14">MUST</span>:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">A connection meets the checks of this section when all of the following
+hold. These checks apply to the connection itself. They do not depend on
+a PQ Policy already being Noted.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.2-2">
 <li id="section-6.2-2.1">
-            <p id="section-6.2-2.1.1">Authenticate the server such that the trust anchor that caused
-acceptance is CRQC-resistant (pure post-quantum or composite per local
-policy), whether that trust anchor is an X.509 trust anchor or an MTC
-trust base / cosigner.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.2-2.1.1">The trust anchor that caused acceptance is CRQC-resistant (pure
+post-quantum or composite per local policy), whether that trust anchor
+is an X.509 trust anchor or an MTC trust base / cosigner.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.2-2.2">
-            <p id="section-6.2-2.2.1">Ensure the accepted certification path is not mixed: every hop is
-classical, or every hop is CRQC-resistant, consistent with local
-policy. (Detailed mixed-path rejection may be refined here or by
+            <p id="section-6.2-2.2.1">The accepted certification path is entirely CRQC-resistant: no hop is
+classical. (Detailed mixed-path rejection may be refined here or by
 reference to a dedicated path-validation document.)<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.2-2.3">
-            <p id="section-6.2-2.3.1">Negotiate a CRQC-resistant key agreement (hybrid or pure
-post-quantum per local policy). Classical-only key agreement <span class="bcp14">MUST</span> cause
-failure of the connection attempt.<a href="#section-6.2-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-6.2-2.3.1">The negotiated key agreement is CRQC-resistant (hybrid or pure
+post-quantum per local policy).<a href="#section-6.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.2-3">If any of the above checks fail, the UA <span class="bcp14">MUST</span> fail the connection in a
-manner consistent with HSTS hard failure (no click-through bypass)
-(<span><a href="https://rfc-editor.org/rfc/rfc6797#section-8.4" class="relref">Section 8.4</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.2-3" class="pilcrow">¶</a></p>
-<p id="section-6.2-4">This document does not impose separate end-entity signature-algorithm
+</section>
+</div>
+<div id="enforcement">
+<section id="section-6.3">
+        <h3 id="name-enforcement">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
+        </h3>
+<p id="section-6.3-1">When establishing a connection to a host covered by an unexpired Noted PQ
+Policy — either because the host itself is a Known PQ Host, or because a
+Known PQ Host that is a superdomain of this host has <code>include-subdomains</code>
+— the connection <span class="bcp14">MUST</span> meet the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>, and <span class="bcp14">MUST</span> use
+TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">If the connection does not meet those requirements, the UA <span class="bcp14">MUST</span> abort the
+TLS handshake with a fatal "handshake_failure" alert (<span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>,
+Section 6.2). The UA <span class="bcp14">MUST NOT</span> offer the user a way to proceed
+(<span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.1" class="relref">Section 12.1</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate TLS NamedGroup codepoints or MTC validation
 procedures; those remain matters for TLS/IANA policy and
-<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>, respectively.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
-<p id="section-6.2-5">Once classical trust anchors are no longer accepted for authentication
+<span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>, respectively.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">Once classical trust anchors are no longer accepted for authentication
 (Stage 5 of <a href="#migration" class="auto internal xref">Appendix A</a>), <code>Require-PQ-Auth</code> is redundant (Stage 6). UAs
 <span class="bcp14">MAY</span> clear PQ Policy for Known PQ Hosts (including any preloaded
 equivalent) when local policy determines that the pin is obsolete.
 Servers <span class="bcp14">SHOULD</span> stop sending the header in that environment. HSTS policy,
-if any, is unaffected.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+if any, is unaffected.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1763,10 +1801,63 @@ served audience.</span><a href="#section-8-1" class="pilcrow">¶</a></p>
       <h2 id="name-security-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-9-1"><span class="cref">TODO Security Considerations (orthogonal HSTS vs PQ state;
-trust-anchor and key-agreement downgrade; unknown-header UAs; enterprise
-interception; cookie scoping / `__Host-` and related Stage 2 risks from
-{{ChromiumPQAuthRoadmap}}; MTC evolving).</span><a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-1">The security considerations of HSTS (<span><a href="https://rfc-editor.org/rfc/rfc6797#section-14" class="relref">Section 14</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>) apply
+to <code>Require-PQ-Auth</code>. This section covers where they differ.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<div id="underlying-secure-transport-considerations">
+<section id="section-9.1">
+        <h3 id="name-underlying-secure-transport">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-underlying-secure-transport" class="section-name selfRef">Underlying Secure Transport Considerations</a>
+        </h3>
+<p id="section-9.1-1">CRQC-resistant key exchange and authentication are specified for TLS
+1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> and not for earlier versions. <code>Require-PQ-Auth</code> can
+therefore be used only with TLS 1.3 or later.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="non-conformant-user-agent-implications">
+<section id="section-9.2">
+        <h3 id="name-non-conformant-user-agent-i">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-non-conformant-user-agent-i" class="section-name selfRef">Non-Conformant User Agent Implications</a>
+        </h3>
+<p id="section-9.2-1">UAs that do not implement this document ignore the header field. If
+such a UA accepts both classical and CRQC-resistant authentication, a
+CRQC attacker can present a forged classical certificate even when
+the server offers a CRQC-resistant one.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="bootstrap-vulnerability">
+<section id="section-9.3">
+        <h3 id="name-bootstrap-vulnerability">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-bootstrap-vulnerability" class="section-name selfRef">Bootstrap Vulnerability</a>
+        </h3>
+<p id="section-9.3-1">As with HSTS, noting a PQ Policy is trust on first use. An attacker who
+can modify that first response can strip <code>Require-PQ-Auth</code>, and the UA
+never notes the policy. Preload is how that first connection is
+protected (<a href="#preload" class="auto internal xref">Section 7</a>).<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="denial-of-service">
+<section id="section-9.4">
+        <h3 id="name-denial-of-service">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-denial-of-service" class="section-name selfRef">Denial of Service</a>
+        </h3>
+<p id="section-9.4-1">An attacker that controls a TLS-terminating proxy can cause a UA to note
+<code>Require-PQ-Auth</code> only when the connection meets <a href="#pq-checks" class="auto internal xref">Section 6.2</a>. A proxy
+that cannot meet those checks cannot set the policy.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-2">If the attacker can meet the checks and sets a large <code>max-age</code>, UAs that
+note the policy require <a href="#pq-checks" class="auto internal xref">Section 6.2</a> until the policy expires.
+<code>include-subdomains</code> extends that requirement to every covered name.
+Sending <code>max-age</code> of 0 does not remove the policy unless some endpoint
+the UA will accept can still meet <a href="#pq-checks" class="auto internal xref">Section 6.2</a> and deliver that value
+(<a href="#server" class="auto internal xref">Section 5</a>). If the attacker was the only such endpoint and then stops
+meeting the checks, the origin stays unreachable until the policy
+expires.<a href="#section-9.4-2" class="pilcrow">¶</a></p>
+<p id="section-9.4-3">A PQ preload entry is configured out of band. The noting rule does not
+stop a poisoned preload list (<a href="#preload" class="auto internal xref">Section 7</a>).<a href="#section-9.4-3" class="pilcrow">¶</a></p>
+<p id="section-9.4-4">After a policy is legitimately Noted, a TLS interceptor that cannot meet
+<a href="#pq-checks" class="auto internal xref">Section 6.2</a> causes the same hard failure. That is an availability
+problem for deployments that intercept TLS, separate from injection.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="privacy-considerations">
@@ -1812,8 +1903,12 @@ residual `max-age` TTL entropy without overselling oracles).</span><a href="#sec
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9846">[RFC9846]</dt>
+      <dd>
+<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 9846</span>, <span class="seriesInfo">DOI 10.17487/RFC9846</span>, <time datetime="2026-07" class="refDate">July 2026</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9846">https://www.rfc-editor.org/rfc/rfc9846</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -1850,7 +1945,7 @@ residual `max-age` TTL entropy without overselling oracles).</span><a href="#sec
 <dd class="break"></dd>
 <dt id="I-D.ietf-plants-merkle-tree-certs">[I-D.ietf-plants-merkle-tree-certs]</dt>
         <dd>
-<span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-06</span>, <time datetime="2026-09-21" class="refDate">21 September 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-06">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-06</a>&gt;</span>. </dd>
+<span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-07</span>, <time datetime="2026-10-07" class="refDate">7 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-07">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-07</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-lamps-pq-composite-sigs">[I-D.ietf-lamps-pq-composite-sigs]</dt>
         <dd>
