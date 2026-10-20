@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-18T01:42:18.977384+00:00",
+  "timestamp": "2026-10-20T02:17:18.130188+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -178,24 +178,26 @@
       "id": "PR_kwDOT2GSC88AAAABIIR0jA",
       "title": "Update to Security Considerations",
       "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/2",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "tireddy2",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2026-10-13T08:29:10Z",
-      "updatedAt": "2026-10-13T12:17:54Z",
+      "updatedAt": "2026-10-19T13:50:00Z",
       "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
       "baseRefName": "main",
       "baseRefOid": "a712e091397c5511239d66f13cdd1aaf8c7e07de",
       "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
       "headRefName": "tireddy2-patch-1",
-      "headRefOid": "f0e3a4d40861608044933261f954c8fae45374c1",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "d82de7838611c5e0e1211f96b37303bba62a68b9",
+      "closedAt": "2026-10-19T13:50:00Z",
+      "mergedAt": "2026-10-19T13:50:00Z",
+      "mergedBy": "yaronf",
+      "mergeCommit": {
+        "oid": "fb66a1d7289b11731ea3089540a8f9b2a960e6e4"
+      },
       "comments": [],
       "reviews": [
         {
@@ -290,8 +292,56 @@
               "updatedAt": "2026-10-13T12:17:54Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABS938ZA",
+          "commit": {
+            "abbreviatedOid": "f0e3a4d"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-19T06:45:53Z",
+          "updatedAt": "2026-10-19T06:45:53Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Fixed.",
+              "createdAt": "2026-10-19T06:45:53Z",
+              "updatedAt": "2026-10-19T06:45:53Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOT2GSC88AAAABJXDzZw",
+      "title": "Register Require-PQ-Auth",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/3",
+      "state": "MERGED",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n- Replace the IANA placeholder with a permanent HTTP Field Name Registry entry for `Require-PQ-Auth`.\n- Record it as a response-header Structured Fields Dictionary, per RFC 9110 and RFC 9651.\n\n\nMade with [Cursor](https://cursor.com)",
+      "createdAt": "2026-10-19T15:09:45Z",
+      "updatedAt": "2026-10-19T15:12:06Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "fb66a1d7289b11731ea3089540a8f9b2a960e6e4",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "yaron-ianareg",
+      "headRefOid": "20edef60f0770ed9453c6aa417bee350d531b5c1",
+      "closedAt": "2026-10-19T15:12:05Z",
+      "mergedAt": "2026-10-19T15:12:05Z",
+      "mergedBy": "yaronf",
+      "mergeCommit": {
+        "oid": "3ba7d9fab32b25a40f082a0108a696c70e33a021"
+      },
+      "comments": [],
+      "reviews": []
     }
   ]
 }
