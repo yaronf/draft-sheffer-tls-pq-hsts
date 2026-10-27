@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-25T01:54:48.665828+00:00",
+  "timestamp": "2026-10-27T02:34:20.293286+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -340,6 +340,58 @@
       "mergeCommit": {
         "oid": "3ba7d9fab32b25a40f082a0108a696c70e33a021"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOT2GSC88AAAABK47ZPg",
+      "title": "CQRC-resistant -> quantum-resistant",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/4",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Having to expand the acronym is unwieldy. RFC 9794 uses quantum-resistant.\n\nFinally got through this document. I have a *ton* more comments to drain into PRs and such, but here's an easy one.",
+      "createdAt": "2026-10-26T22:41:57Z",
+      "updatedAt": "2026-10-26T22:41:58Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "3ba7d9fab32b25a40f082a0108a696c70e33a021",
+      "headRepository": "davidben/draft-sheffer-tls-pq-hsts",
+      "headRefName": "crqc-resistant",
+      "headRefOid": "94118935aea249fc32c9ba39679e7e6256abd44a",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOT2GSC88AAAABK5CnQg",
+      "title": "Retitle the document",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/5",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The RFC editor is going to ask for PQ and HSTS to be expanded. Expanding the former is pretty reasonable. The latter would be unwieldy. Let's get ahead of that and pick a less fraught title.\n\n(It's OK to leave HTTP as an acronym. That's marked as \"well-known\" in the abbreviations list in\nhttps://rpc-wiki.rfc-editor.org/doku.php?id=abbrev_list )",
+      "createdAt": "2026-10-26T22:54:21Z",
+      "updatedAt": "2026-10-26T22:54:22Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "3ba7d9fab32b25a40f082a0108a696c70e33a021",
+      "headRepository": "davidben/draft-sheffer-tls-pq-hsts",
+      "headRefName": "retitle",
+      "headRefOid": "d9c3fc3ebb68f07630e1e9fa2ada0ff8e1a1d1b3",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
