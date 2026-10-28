@@ -98,14 +98,6 @@ only a classical one. A client that still accepts classical paths will
 treat that forged credential as valid, as if the origin had never
 upgraded.
 
-Key agreement is on a different track. Hybrid and pure post-quantum key
-agreement are already being deployed independently of authentication
-migration. That work mitigates harvest-now-decrypt-later and related
-confidentiality threats; it does not by itself prevent classical
-trust-anchor impersonation. This document does not require
-quantum-resistant key agreement when enforcing `Require-PQ-Auth`
-({{security-ke}}).
-
 This document defines an HTTP response header field, `Require-PQ-Auth`,
 with HSTS-like semantics but carried separately from
 `Strict-Transport-Security`, with its own sticky UA state. That
@@ -121,18 +113,10 @@ does not require the host to be a Known HSTS Host {{?RFC6797}}. HSTS and
 `Require-PQ-Auth` lifecycles are independent. UAs that do not implement
 this document ignore the unknown header field.
 
-The normative contribution of this document is the near-term opt-in
-`Require-PQ-Auth` pin and the associated user-agent behavior. Where this
-document uses "PQ" in the title and abbreviation (PQ-HSTS), the
-normative requirement is quantum-resistant trust-anchor authentication as
-defined below—not a single algorithm. The informal name reflects
-HSTS-like behavior, not an extension of the
-`Strict-Transport-Security` header field.
-
 ## PQ-HSTS in the Broader Migration Context
 
-This mechanism addresses a specific, comparatively well-understood threat:
-classical trust-anchor impersonation during the dual-trust-store period.
+This mechanism addresses classical trust-anchor impersonation during the
+dual-trust-store period.
 
 The harder problem is coordinating a three-sided ecosystem of clients,
 servers, and certificate authorities (or other trust-anchor operators)
@@ -228,9 +212,8 @@ superdomain:
 
 This document addresses classical trust-anchor impersonation during the
 dual-trust-store migration period. An attacker forges a classical
-certificate (for example with a CRQC) or otherwise obtains acceptance
-under a classical trust anchor for a name whose operator intends to use
-only quantum-resistant authentication, and presents that credential to a
+certificate with a CRQC for a name whose operator intends to use only
+quantum-resistant authentication, and presents that credential to a
 dual-accepting UA. The negotiated key agreement does not matter for this
 attack: the holder of the forged credential can impersonate the server
 whether key agreement is classical or quantum-resistant.
@@ -444,25 +427,24 @@ keys, commas).</cref>
 The security considerations of HSTS ({{Section 14 of ?RFC6797}}) apply
 to `Require-PQ-Auth`. This section covers where they differ.
 
-## Underlying Secure Transport Considerations
-
-Quantum-resistant authentication for TLS is specified for TLS 1.3
-{{!RFC9846}} and not for earlier versions. `Require-PQ-Auth` can
-therefore be used only with TLS 1.3 or later.
-
 ## Key Agreement {#security-ke}
 
-Complete quantum resistance for a TLS session also requires
-quantum-resistant key agreement. Hybrid and pure post-quantum key
-agreement are already being deployed independently of this mechanism.
+Quantum resistance for a TLS session also requires a quantum-resistant
+key agreement mechanism. While `Require-PQ-Auth` does not directly
+constrain the key agreement, the TLS handshake provides downgrade
+protection when the authentication itself is secure
+({{Appendix F.1 of !RFC9846}}). Provided the Known PQ Host's TLS server
+is correctly configured to prefer quantum-resistant key agreement
+methods, a CRQC cannot downgrade the TLS session to a classical key
+agreement mechanism.
 
-This document does not require quantum-resistant key agreement when
-enforcing `Require-PQ-Auth`. Classical trust-anchor impersonation during
-the dual-trust-store period does not depend on the negotiated key
-agreement. A CRQC can forge a classical certificate offline; the holder
-presents it as the server whether key agreement is classical or
-quantum-resistant. The authentication pin still blocks that
-impersonation for Known PQ Hosts even if key agreement is misconfigured.
+The authentication pin still mitigates the threat this document
+targets even if key agreement remains classical. Classical trust-anchor
+impersonation is offline certificate forgery with a CRQC, then
+presentation of that credential. Breaking a live classical Diffie-Hellman
+key agreement to recover session keys requires a real-time
+CRQC attack on that handshake. That is a harder, later capability than
+the dual-trust-store impersonation this pin blocks for Known PQ Hosts.
 
 ## Non-Conformant User Agent Implications
 
@@ -578,13 +560,6 @@ tolerate, that implies timelines measured in years or even
 decades if nothing accelerates the program. Specialized clients that talk
 to a small, controlled server set have a much tighter curve.
 
-### Key agreement proceeds in parallel
-
-Post-quantum key agreement (usually hybrid with a classical algorithm)
-continues to roll out independently. It does not fix classical
-trust-anchor impersonation, and this document does not require it under
-`Require-PQ-Auth` ({{security-ke}}).
-
 ### Public Web versus enterprise PKI
 
 Long-term credential forms differ by deployment:
@@ -627,11 +602,11 @@ and each participating client and server gains clear security value. It is
 also inherently limited. Sticky UA state, TOFU, incomplete preload list
 coverage of the Web, painful rollback, and private-browsing modes that do
 not retain durable sticky policy state all constrain reach. Performance costs (CPU
-and network bandwidth for CRQC-resistant credentials and key agreement)
-may further discourage adoption by individual servers. True legacy
-single-certificate origins never opt in. Voluntary adoption can keep
-growing, but too slowly to meet industry post-quantum timelines. A more
-aggressive program is needed for the remainder of the Web.
+and network bandwidth for CRQC-resistant credentials) may further
+discourage adoption by individual servers. True legacy single-certificate
+origins never opt in. Voluntary adoption can keep growing, but too slowly
+to meet industry post-quantum timelines. A more aggressive program is
+needed for the remainder of the Web.
 
 ### PQ-secure signal embedded in classical certificates
 
@@ -685,8 +660,8 @@ locally chosen timelines.
 | Role | State |
 |---|---|
 | CA | Classical issuance only (Web PKI). |
-| Server | Classical certificates; HSTS common; no `Require-PQ-Auth`. Hybrid/PQ key agreement rolling out independently. |
-| Client | Accepts classical authentication. Hybrid/PQ key agreement rolling out independently. |
+| Server | Classical certificates; HSTS common; no `Require-PQ-Auth`. |
+| Client | Accepts classical authentication. |
 
 ### Stage 1 — Early PQ issuance, dual accept
 
@@ -704,7 +679,7 @@ infrastructure, expected for the public Web to center on MTC.
 | Role | State |
 |---|---|
 | CA | Growing CRQC-resistant issuance; classical credentials still widely available. |
-| Server | More origins send `Require-PQ-Auth` once they reliably serve an all-quantum-resistant path; they may still dual-home for legacy clients. Old servers still never opt in. Hybrid/PQ key agreement continues independently. |
+| Server | More origins send `Require-PQ-Auth` once they reliably serve an all-quantum-resistant path; they may still dual-home for legacy clients. Old servers still never opt in. |
 | Client | Still dual-accept by default; for Known PQ Hosts (including names learned via preload), reject classical trust anchors. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
 
 ### Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates
