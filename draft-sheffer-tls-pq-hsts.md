@@ -88,15 +88,11 @@ informative:
 
 --- abstract
 
-This document defines an HTTP response header field, `Require-PQ-Auth`,
-modeled on HTTP Strict Transport Security (HSTS) {{?RFC6797}} but
-carried separately with its own sticky client state as a Structured
-Fields Dictionary {{!RFC9651}}. When a user agent has noted that policy
-for a host, it MUST authenticate using a quantum-resistant trust anchor and
-MUST negotiate quantum-resistant key agreement. The header
-is a near-term, origin-opt-in lever for dual-trust-store PKI migration
-and is intended to become unnecessary once classical trust anchors are
-retired.
+This document defines an HTTP response header field, `Require-PQ-Auth`, that
+instructs user agents to require a quantum-resistant certificate chain in
+subsequent connections. This is a short-term, opt-in mechanism for HTTP
+origins to protect against legacy classical trust anchors. It will become
+unnecessary when UAs remove these trust anchors.
 
 
 --- middle
@@ -104,48 +100,21 @@ retired.
 # Introduction
 
 Migrating TLS authentication to post-quantum cryptography cannot be done
-by flipping a single switch. For a long period, relying parties will keep
-classical trust anchors in their trust stores alongside
-quantum-resistant ones, and
-many origins will still present only
-classical credentials. Under active attack, what matters is not whether
-a server can present a post-quantum credential, but whether the client
-accepts a classical path. An attacker able to forge certificates that
-chain to a classical CA can strip a post-quantum credential and present
-only a classical one. A client that still accepts classical paths will
-treat that forged credential as valid, as if the origin had never
-upgraded.
-
-Key agreement is on a different track. Hybrid and pure post-quantum key
-agreement are already being deployed independently of authentication
-migration. That work does not by itself prevent classical trust-anchor
-downgrade; rather, it mitigates the more pressing "harvest now, decrypt
-later" threat model. Once an origin has asserted a post-quantum posture
-via the mechanism in this document, however, allowing a later
-classical-only key agreement would re-open a confidentiality downgrade
-for that host. Therefore, when `Require-PQ-Auth` is enforced, this
-document also requires quantum-resistant key agreement for that host.
+by flipping a single switch. For a long period, many origins will still
+present classical certificate chains, so user agents (UAs) will need to trust
+classical trust anchors alongside quantum-resistant ones.
+This allows an attacker able to forge classical certificates to downgrade the
+connection. Whether or not the origin had actually upgraded, a client that
+still accepts classical paths will treat that forged credential as valid.
 
 This document defines an HTTP response header field, `Require-PQ-Auth`,
-with HSTS-like semantics but carried separately from
-`Strict-Transport-Security`, with its own sticky UA state. That
-structure follows HTTP Public Key Pinning {{?RFC7469}}. An industry
-outline of the same migration, including an HSTS-like opt-in stage,
-appears in {{ChromiumPQAuthRoadmap}}.
+which allows an origin to indicate to the user agent to only accept chains
+from quantum-resistant trust anchors in subsequent connections.
 
-Noting `Require-PQ-Auth` requires a securely delivered HTTPS response. It
-does not require the host to be a Known HSTS Host {{?RFC6797}}. HSTS and
-`Require-PQ-Auth` lifecycles are independent. UAs that do not implement
-this document ignore the unknown header field.
-
-The normative contribution of this document is the near-term opt-in
-`Require-PQ-Auth` pin and the associated user-agent behavior. Where this
-document uses "PQ" in the title and abbreviation (PQ-HSTS), the
-normative requirement is quantum-resistant trust-anchor authentication and
-quantum-resistant key agreement as defined below—not a single algorithm.
-The informal name reflects HSTS-like behavior, not an extension of the
-`Strict-Transport-Security` header field.
-
+This is a near-term mechanism with several limitations described in
+{{limitations}}. It is intended to be temporary, for use until classical trust
+anchors are removed. {{ChromiumPQAuthRoadmap}} describes an example roadmap to
+do so.
 
 # Conventions and Definitions
 
