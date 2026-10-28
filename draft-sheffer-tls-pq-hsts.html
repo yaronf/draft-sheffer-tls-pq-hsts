@@ -13,9 +13,8 @@
 modeled on HTTP Strict Transport Security (HSTS)   but
 carried separately with its own sticky client state as a Structured
 Fields Dictionary  . When a user agent has noted that policy
-for a host, it  MUST  authenticate using a cryptographically relevant
-quantum computer (CRQC)-resistant trust anchor and  MUST  negotiate
-CRQC-resistant (pure post-quantum or hybrid) key agreement. The header
+for a host, it  MUST  authenticate using a quantum-resistant trust anchor and
+ MUST  negotiate quantum-resistant key agreement. The header
 is a near-term, origin-opt-in lever for dual-trust-store PKI migration
 and is intended to become unnecessary once classical trust anchors are
 retired. 
@@ -1058,7 +1057,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Sheffer, et al.</td>
-<td class="center">Expires 22 April 2027</td>
+<td class="center">Expires 1 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1070,12 @@ svg {
 <dd class="internet-draft">draft-sheffer-tls-pq-hsts-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-19" class="published">19 October 2026</time>
+<time datetime="2026-10-28" class="published">28 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-22">22 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-01">1 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1101,9 +1100,8 @@ svg {
 modeled on HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> but
 carried separately with its own sticky client state as a Structured
 Fields Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>. When a user agent has noted that policy
-for a host, it <span class="bcp14">MUST</span> authenticate using a cryptographically relevant
-quantum computer (CRQC)-resistant trust anchor and <span class="bcp14">MUST</span> negotiate
-CRQC-resistant (pure post-quantum or hybrid) key agreement. The header
+for a host, it <span class="bcp14">MUST</span> authenticate using a quantum-resistant trust anchor and
+<span class="bcp14">MUST</span> negotiate quantum-resistant key agreement. The header
 is a near-term, origin-opt-in lever for dual-trust-store PKI migration
 and is intended to become unnecessary once classical trust anchors are
 retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
@@ -1143,7 +1141,7 @@ retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 1 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1332,7 +1330,7 @@ retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-1-1">Migrating TLS authentication to post-quantum cryptography cannot be done
 by flipping a single switch. For a long period, relying parties will keep
 classical trust anchors in their trust stores alongside
-CRQC-resistant ones, and
+quantum-resistant ones, and
 many origins will still present only
 classical credentials. Under active attack, what matters is not whether
 a server can present a post-quantum credential, but whether the client
@@ -1349,7 +1347,7 @@ later" threat model. Once an origin has asserted a post-quantum posture
 via the mechanism in this document, however, allowing a later
 classical-only key agreement would re-open a confidentiality downgrade
 for that host. Therefore, when <code>Require-PQ-Auth</code> is enforced, this
-document also requires CRQC-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
+document also requires quantum-resistant key agreement for that host.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>,
 with HSTS-like semantics but carried separately from
 <code>Strict-Transport-Security</code>, with its own sticky UA state. That
@@ -1365,8 +1363,8 @@ this document ignore the unknown header field.<a href="#section-1-5" class="pilc
 <p id="section-1-6">The normative contribution of this document is the near-term opt-in
 <code>Require-PQ-Auth</code> pin and the associated user-agent behavior. Where this
 document uses "PQ" in the title and abbreviation (PQ-HSTS), the
-normative requirement is CRQC-resistant trust-anchor authentication and
-CRQC-resistant key agreement as defined below—not a single algorithm.
+normative requirement is quantum-resistant trust-anchor authentication and
+quantum-resistant key agreement as defined below—not a single algorithm.
 The informal name reflects HSTS-like behavior, not an extension of the
 <code>Strict-Transport-Security</code> header field.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <div id="pq-hsts-in-the-broader-migration-context">
@@ -1381,7 +1379,7 @@ post-quantum posture.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <p id="section-1.1-2">The harder problem is coordinating a three-sided ecosystem of clients,
 servers, and certificate authorities (or other trust-anchor operators)
 from today's set of acceptable authentication algorithms to a
-CRQC-resistant set on a compressed timeline
+quantum-resistant set on a compressed timeline
 <span>[<a href="#RescorlaPQEmergency" class="cite xref">RescorlaPQEmergency</a>]</span>.
 <span class="cref">TODO: add references to government/industry post-quantum migration
 directives.</span><a href="#section-1.1-2" class="pilcrow">¶</a></p>
@@ -1401,7 +1399,7 @@ in classical certificates, specified elsewhere) can unlock a strict client polic
 <p id="section-1.2-1"><span>[<a href="#I-D.sheffer-tls-pqc-continuity" class="cite xref">I-D.sheffer-tls-pqc-continuity</a>]</span> defines a TLS-layer commitment that a
 server will present a PQC or composite end-entity certificate for a period
 of time. This document instead defines an HTTP sticky policy that pins
-CRQC-resistant trust anchors (and key agreement when the pin is enforced).
+quantum-resistant trust anchors (and key agreement when the pin is enforced).
 The two approaches address related downgrade problems at different layers.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
 <p id="section-1.2-2">Physically large post-quantum certificates motivate new certificate
 distribution mechanisms. This document is intended to work with that
@@ -1417,13 +1415,13 @@ for this ecosystem.<a href="#section-1.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.2-3.2">
             <p id="section-1.2-3.2.1">Enterprise PKI may use X.509 post-quantum certificate chains (pure PQ
-and/or composite under CRQC-resistant trust anchors) rather than MTC.
+and/or composite under quantum-resistant trust anchors) rather than MTC.
 Enterprises set their own migration timelines; this document neither
 drives nor constrains them. The <code>Require-PQ-Auth</code> mechanism remains
 available where an enterprise origin and its clients choose to use it.<a href="#section-1.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.2-4">Both forms of CRQC-resistant trust anchor can satisfy <code>Require-PQ-Auth</code>.<a href="#section-1.2-4" class="pilcrow">¶</a></p>
+<p id="section-1.2-4">Both forms of quantum-resistant trust anchor can satisfy <code>Require-PQ-Auth</code>.<a href="#section-1.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1442,27 +1440,27 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
         <dt id="section-2-3.1">classical:</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.2">
           <p id="section-2-3.2.1">Cryptography or credentials that are not designed to remain secure
-against a CRQC (for example, RSA or elliptic-curve public-key algorithms
-in wide use on the Web today). A classical trust anchor is a trust
+against a cryptographically-relevant quantum computer (CQRC), such as RSA
+or elliptic-curve public-key algorithms. A classical trust anchor is a trust
 anchor that authenticates only classical paths.<a href="#section-2-3.2.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-3.3">CRQC-resistant (signatures / trust anchors):</dt>
+<dt id="section-2-3.3">quantum-resistant (signatures / trust anchors):</dt>
         <dd style="margin-left: 1.5em" id="section-2-3.4">
           <p id="section-2-3.4.1">Not classical-only. For authentication material, this document treats
 pure post-quantum algorithms and composite algorithms
 <span>[<a href="#I-D.ietf-lamps-pq-composite-sigs" class="cite xref">I-D.ietf-lamps-pq-composite-sigs</a>]</span> as one class, consistent with the
 PQC end-entity classification in
 <span>[<a href="#I-D.sheffer-tls-pqc-continuity" class="cite xref">I-D.sheffer-tls-pqc-continuity</a>]</span>. Which algorithms a UA accepts as
-CRQC-resistant is a matter of local policy and the relevant algorithm
+quantum-resistant is a matter of local policy and the relevant algorithm
 specifications;
 this document states the property, not a closed algorithm list.<a href="#section-2-3.4.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
-<p id="section-2-4"><span class="cref">TODO: add a more precise definition of CRQC-resistance for MTC.</span><a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-4"><span class="cref">TODO: add a more precise definition of quantum-resistance for MTC.</span><a href="#section-2-4" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-2-5">
-        <dt id="section-2-5.1">CRQC-resistant (key agreement):</dt>
+        <dt id="section-2-5.1">quantum-resistant (key agreement):</dt>
         <dd style="margin-left: 1.5em" id="section-2-5.2">
           <p id="section-2-5.2.1">Not classical-only. Hybrid key agreement (classical combined with a
 post-quantum KEM) and pure post-quantum key agreement both satisfy
@@ -1477,7 +1475,7 @@ policy and the TLS Supported Groups registry
 <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span> or an MTC trust base / cosigner trust as defined by
 <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>. Normative requirements in this
 document refer to the class of trust anchor (classical vs
-CRQC-resistant), not to a single encoding.<a href="#section-2-5.4.1" class="pilcrow">¶</a></p>
+quantum-resistant), not to a single encoding.<a href="#section-2-5.4.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-5.5">HSTS terms:</dt>
@@ -1608,12 +1606,12 @@ commitment for the lifetime conveyed by <code>max-age</code> (and for any hosts
 covered by <code>include-subdomains</code>):<a href="#section-5-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-5-2">
 <li id="section-5-2.1">
-          <p id="section-5-2.1.1">Serve a certification path anchored at a CRQC-resistant trust anchor
+          <p id="section-5-2.1.1">Serve a certification path anchored at a quantum-resistant trust anchor
 (pure post-quantum or composite per the server's deployment), with no
-mixed classical/CRQC-resistant path; and<a href="#section-5-2.1.1" class="pilcrow">¶</a></p>
+mixed classical/quantum-resistant path; and<a href="#section-5-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-5-2.2">
-          <p id="section-5-2.2.1">Complete CRQC-resistant key agreement (hybrid or pure post-quantum)
+          <p id="section-5-2.2.1">Complete quantum-resistant key agreement (hybrid or pure post-quantum)
 with clients that implement this document.<a href="#section-5-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
@@ -1721,17 +1719,17 @@ hold. These checks apply to the connection itself. They do not depend on
 a PQ Policy already being Noted.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.2-2">
 <li id="section-6.2-2.1">
-            <p id="section-6.2-2.1.1">The trust anchor that caused acceptance is CRQC-resistant (pure
+            <p id="section-6.2-2.1.1">The trust anchor that caused acceptance is quantum-resistant (pure
 post-quantum or composite per local policy), whether that trust anchor
 is an X.509 trust anchor or an MTC trust base / cosigner.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.2-2.2">
-            <p id="section-6.2-2.2.1">The accepted certification path is entirely CRQC-resistant: no hop is
+            <p id="section-6.2-2.2.1">The accepted certification path is entirely quantum-resistant: no hop is
 classical. (Detailed mixed-path rejection may be refined here or by
 reference to a dedicated path-validation document.)<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.2-2.3">
-            <p id="section-6.2-2.3.1">The negotiated key agreement is CRQC-resistant (hybrid or pure
+            <p id="section-6.2-2.3.1">The negotiated key agreement is quantum-resistant (hybrid or pure
 post-quantum per local policy).<a href="#section-6.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
@@ -1777,7 +1775,7 @@ treated as already Noted Known PQ Hosts (with optional
 HSTS today; the `preload` Dictionary member signals submission intent for
 a PQ preload list and is independent of HSTS `preload`; informative
 submission expectations (evidence of `Require-PQ-Auth`,
-CRQC-resistant-TA serving, PQ/hybrid KE). Do not prescribe one shared
+quantum-resistant-TA serving, PQ/hybrid KE). Do not prescribe one shared
 list vs a parallel list (implementation/operations detail). Stage 6: UAs
 MAY drop preloaded PQ enforcement when the pin is obsolete.</span><a href="#section-7-1" class="pilcrow">¶</a></p>
 </section>
@@ -1808,7 +1806,7 @@ to <code>Require-PQ-Auth</code>. This section covers where they differ.<a href="
         <h3 id="name-underlying-secure-transport">
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-underlying-secure-transport" class="section-name selfRef">Underlying Secure Transport Considerations</a>
         </h3>
-<p id="section-9.1-1">CRQC-resistant key exchange and authentication are specified for TLS
+<p id="section-9.1-1">Quantum-resistant key exchange and authentication are specified for TLS
 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> and not for earlier versions. <code>Require-PQ-Auth</code> can
 therefore be used only with TLS 1.3 or later.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 </section>
@@ -1819,9 +1817,9 @@ therefore be used only with TLS 1.3 or later.<a href="#section-9.1-1" class="pil
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-non-conformant-user-agent-i" class="section-name selfRef">Non-Conformant User Agent Implications</a>
         </h3>
 <p id="section-9.2-1">UAs that do not implement this document ignore the header field. If
-such a UA accepts both classical and CRQC-resistant authentication, a
-CRQC attacker can present a forged classical certificate even when
-the server offers a CRQC-resistant one.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+such a UA accepts both classical and quantum-resistant authentication, a
+quantum attacker can present a forged classical certificate even when
+the server offers a quantum-resistant one.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="bootstrap-vulnerability">
@@ -2363,11 +2361,11 @@ infrastructure, expected for the public Web to center on MTC.<a href="#appendix-
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
-                <td class="text-left" rowspan="1" colspan="1">Serve CRQC-resistant credentials. Residual classical-with-PQ-signal credentials may linger only while last classical-only verifiers remain (deployment-dependent).</td>
+                <td class="text-left" rowspan="1" colspan="1">Serve quantum-resistant credentials. Residual classical-with-PQ-signal credentials may linger only while last classical-only verifiers remain (deployment-dependent).</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Client</td>
-                <td class="text-left" rowspan="1" colspan="1">Successful authentication uses CRQC-resistant trust anchors. Classical credentials without PQ assurance are rejected.</td>
+                <td class="text-left" rowspan="1" colspan="1">Successful authentication uses quantum-resistant trust anchors. Classical credentials without PQ assurance are rejected.</td>
               </tr>
             </tbody>
           </table>
@@ -2389,7 +2387,7 @@ infrastructure, expected for the public Web to center on MTC.<a href="#appendix-
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">CA</td>
-                <td class="text-left" rowspan="1" colspan="1">CRQC-resistant-only trust for the Web PKI.</td>
+                <td class="text-left" rowspan="1" colspan="1">Quantum-resistant-only trust for the Web PKI.</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Server</td>
