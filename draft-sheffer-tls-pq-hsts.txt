@@ -120,6 +120,8 @@ Table of Contents
        A.2.5.  Stage 4 — Strict clients and CA shift
        A.2.6.  Stage 5 — Remove classical trust anchors
        A.2.7.  Stage 6 — Retire Require-PQ-Auth
+   Appendix B.  Document History
+     B.1.  draft-sheffer-tls-pq-hsts-00
    Acknowledgments
    Authors' Addresses
 
@@ -1002,6 +1004,14 @@ A.2.7.  Stage 6 — Retire Require-PQ-Auth
      +--------+------------------------------------------------------+
 
                                   Table 7
+
+Appendix B.  Document History
+
+   RFC Editor: please remove before publication.
+
+B.1.  draft-sheffer-tls-pq-hsts-00
+
+   Initial version.
 
 Acknowledgments
 
