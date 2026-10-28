@@ -1749,17 +1749,22 @@ TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later
 TLS handshake with a fatal "handshake_failure" alert (<span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>,
 Section 6.2). The UA <span class="bcp14">MUST NOT</span> offer the user a way to proceed
 (<span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.1" class="relref">Section 12.1</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-<p id="section-6.3-3">Enterprise deployments often terminate TLS at an interception device whose
-certificate chains to a trust anchor installed locally in the UA or
-platform. If that trust anchor is not quantum-resistant,
-enforcing the checks above on that path would fail closed for
-every Known PQ Host the user visits through the interceptor. A UA <span class="bcp14">MAY</span>
-disable <code>Require-PQ-Auth</code> enforcement for some hosts according to local
-policy. For example, a UA may skip enforcement when the validated
-certificate chain terminates at a user-defined trust anchor rather than a
-trust anchor built into the UA or underlying platform
-(<span><a href="https://rfc-editor.org/rfc/rfc7469#section-2.6" class="relref">Section 2.6</a> of [<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>). Where the UA skips enforcement, this
-mechanism provides no protection on that connection.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">Deployments often place a middlebox (sometimes implemented as on-device software)
+that terminates TLS
+(<span><a href="https://rfc-editor.org/rfc/rfc9846#section-9.3" class="relref">Section 9.3</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>) between the UA and the origin. The
+certificate presented to the UA chains to a trust anchor installed
+locally in the UA or platform. If that trust anchor is not
+quantum-resistant, enforcing the checks above on the UA's connection to
+the middlebox would fail closed for every Known PQ Host reached through
+it. A UA <span class="bcp14">MAY</span> disable <code>Require-PQ-Auth</code> enforcement for some hosts
+according to local policy. For example, a UA may skip enforcement when
+the validated certificate chain terminates at a user-defined trust
+anchor rather than a trust anchor built into the UA or underlying
+platform (<span><a href="https://rfc-editor.org/rfc/rfc7469#section-2.6" class="relref">Section 2.6</a> of [<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>). Where the UA skips enforcement,
+this mechanism provides no protection on the UA's connection to the
+middlebox. The middlebox is the TLS client toward the origin and can
+apply the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a> on that connection, and can note and
+enforce <code>Require-PQ-Auth</code> itself.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 <p id="section-6.3-4">This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate TLS NamedGroup codepoints or MTC validation
@@ -1801,8 +1806,8 @@ staged `max-age` independent of HSTS; independent HSTS
 `includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
 HSTS not required; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
 evolving; SFV serialization (lowercase keys, commas); do not assert the
-pin before hybrid/PQ KE is solid for the served audience. Enterprise
-interception carve-out is in {{enforcement}}.</span><a href="#section-8-1" class="pilcrow">¶</a></p>
+pin before hybrid/PQ KE is solid for the served audience. Middlebox
+carve-out is in {{enforcement}}.</span><a href="#section-8-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
@@ -1849,9 +1854,9 @@ protected (<a href="#preload" class="auto internal xref">Section 7</a>).<a href=
         <h3 id="name-denial-of-service">
 <a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-denial-of-service" class="section-name selfRef">Denial of Service</a>
         </h3>
-<p id="section-9.4-1">An attacker that controls a TLS-terminating proxy can cause a UA to note
-<code>Require-PQ-Auth</code> only when the connection meets <a href="#pq-checks" class="auto internal xref">Section 6.2</a>. A proxy
-that cannot meet those checks cannot set the policy.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-1">An attacker that controls a middlebox that terminates TLS can cause a UA
+to note <code>Require-PQ-Auth</code> only when the connection meets <a href="#pq-checks" class="auto internal xref">Section 6.2</a>. A
+middlebox that cannot meet those checks cannot set the policy.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
 <p id="section-9.4-2">If the attacker can meet the checks and sets a large <code>max-age</code>, UAs that
 note the policy require <a href="#pq-checks" class="auto internal xref">Section 6.2</a> until the policy expires.
 <code>include-subdomains</code> extends that requirement to every covered name.
@@ -1862,12 +1867,14 @@ meeting the checks, the origin stays unreachable until the policy
 expires.<a href="#section-9.4-2" class="pilcrow">¶</a></p>
 <p id="section-9.4-3">A PQ preload entry is configured out of band. The noting rule does not
 stop a poisoned preload list (<a href="#preload" class="auto internal xref">Section 7</a>).<a href="#section-9.4-3" class="pilcrow">¶</a></p>
-<p id="section-9.4-4">After a policy is legitimately Noted, a TLS interceptor whose chain does
-not meet <a href="#pq-checks" class="auto internal xref">Section 6.2</a> causes the same hard failure unless the UA skips
-enforcement under local policy (<a href="#enforcement" class="auto internal xref">Section 6.3</a>)—for example because the
-chain terminates at a user-defined trust anchor. Deployments that
-intercept TLS with a locally installed root typically rely on that
-exception. The pin then does not apply on those connections.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
+<p id="section-9.4-4">After a policy is legitimately Noted, a middlebox that terminates TLS
+whose chain to the UA does not meet <a href="#pq-checks" class="auto internal xref">Section 6.2</a> causes the same hard
+failure unless the UA skips enforcement under local policy
+(<a href="#enforcement" class="auto internal xref">Section 6.3</a>)—for example because the chain terminates at a
+user-defined trust anchor. Deployments that use such a middlebox with a
+locally installed root typically rely on that exception. The pin then
+does not apply on the UA's connection to the middlebox. The middlebox can
+still enforce the policy on its connection to the origin.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
