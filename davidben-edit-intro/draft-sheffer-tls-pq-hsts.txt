@@ -1,0 +1,569 @@
+
+
+
+
+Transport Layer Security                                      Y. Sheffer
+Internet-Draft                                               Independent
+Intended status: Standards Track                              T. Reddy.K
+Expires: 1 May 2027                                                Nokia
+                                                             D. Benjamin
+                                                              Google LLC
+                                                         28 October 2026
+
+
+              An HSTS-like Header for Secure PQ Migration
+                    draft-sheffer-tls-pq-hsts-latest
+
+Abstract
+
+   This document defines an HTTP response header field, Require-PQ-Auth,
+   that instructs user agents to require a quantum-resistant certificate
+   chain in subsequent connections.  This is a short-term, opt-in
+   mechanism for HTTP origins to protect against legacy classical trust
+   anchors.  It will become unnecessary when UAs remove these trust
+   anchors.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://yaronf.github.io/draft-sheffer-tls-pq-hsts/draft-sheffer-tls-
+   pq-hsts.html.  Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-sheffer-tls-pq-hsts/.
+
+   Discussion of this document takes place on the Transport Layer
+   Security Working Group mailing list (mailto:tls@ietf.org), which is
+   archived at https://mailarchive.ietf.org/arch/browse/tls/.  Subscribe
+   at https://www.ietf.org/mailman/listinfo/tls/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/yaronf/draft-sheffer-tls-pq-hsts.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 1 May 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Conventions and Definitions
+   3.  Syntax
+   4.  Server Processing
+     4.1.  Choosing policy parameters
+     4.2.  Updating and clearing policy
+   5.  User Agent Behavior
+     5.1.  Noting the header
+     5.2.  Connection checks
+     5.3.  Enforcement
+   6.  Operational Considerations
+   7.  Security Considerations
+     7.1.  Underlying Secure Transport Considerations
+     7.2.  Non-Conformant User Agent Implications
+     7.3.  Limitations
+     7.4.  Denial of Service
+   8.  Privacy Considerations
+   9.  IANA Considerations
+   10. References
+     10.1.  Normative References
+     10.2.  Informative References
+   Appendix A.  Document History
+     A.1.  draft-sheffer-tls-pq-hsts-00
+   Acknowledgments
+   Authors' Addresses
+
+1.  Introduction
+
+   Migrating TLS authentication to post-quantum cryptography cannot be
+   done by flipping a single switch.  For a long period, many origins
+   will still present classical certificate chains, so user agents (UAs)
+   will need to trust classical trust anchors alongside quantum-
+   resistant ones.  This allows an attacker able to forge classical
+   certificates to downgrade the connection.  Whether or not the origin
+   had actually upgraded, a client that still accepts classical paths
+   will treat that forged credential as valid.
+
+   This document defines an HTTP response header field, Require-PQ-Auth,
+   which allows an origin to indicate to the user agent to only accept
+   chains from quantum-resistant trust anchors in subsequent
+   connections.
+
+   This is a near-term mechanism with several limitations described in
+   Section 7.3.  It is intended to be temporary, for use until classical
+   trust anchors are removed.  [ChromiumPQAuthRoadmap] describes an
+   example roadmap to do so.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The following terms are used in this document:
+
+   classical:  Cryptography or credentials that are not designed to
+      remain secure against a cryptographically-relevant quantum
+      computer (CQRC), such as RSA or elliptic-curve public-key
+      algorithms.  A classical trust anchor is a trust anchor that
+      authenticates only classical paths.
+
+   quantum-resistant (signatures / trust anchors):  Not classical-only.
+      For authentication material, this document treats pure post-
+      quantum algorithms and composite algorithms
+      [I-D.ietf-lamps-pq-composite-sigs] as one class, consistent with
+      the PQC end-entity classification in
+      [I-D.sheffer-tls-pqc-continuity].  Which algorithms a UA accepts
+      as quantum-resistant is a matter of local policy and the relevant
+      algorithm specifications; this document states the property, not a
+      closed algorithm list.
+
+
+   // TODO: add a more precise definition of quantum-resistance for MTC.
+
+   quantum-resistant (key agreement):  Not classical-only.  Hybrid key
+      agreement (classical combined with a post-quantum KEM) and pure
+      post-quantum key agreement both satisfy this document.  Exact
+      NamedGroup / codepoint acceptance is left to UA policy and the TLS
+      Supported Groups registry [IANA.TLS-Parameters].
+
+   trust anchor:  The root of acceptance for a server credential: an
+      X.509 trust anchor [RFC5280] or an MTC trust base / cosigner trust
+      as defined by [I-D.ietf-plants-merkle-tree-certs].  Normative
+      requirements in this document refer to the class of trust anchor
+      (classical vs quantum-resistant), not to a single encoding.
+
+   HSTS terms:  This document refers to Known HSTS Host, HSTS Policy,
+      and related terminology from [RFC6797] only for comparison.  HSTS
+      state is independent of the policy defined here.
+
+   Known PQ Host / PQ Policy:  A host for which the UA has noted a valid
+      Require-PQ-Auth policy (Section 3, Section 5), including expiry
+      derived from max-age and whether include-subdomains applies.
+      Storage is parallel to—not part of—HSTS Policy storage.
+
+   superdomain:  As in [RFC6797], a domain name of which another domain
+      name is a subdomain.  For example, example.com is a superdomain of
+      www.example.com.
+
+3.  Syntax
+
+   Require-PQ-Auth is an HTTP Structured Header field [RFC9651].  Its
+   value MUST be a Dictionary.  Recipients that cannot parse the field
+   value as a Dictionary MUST NOT update any Noted PQ Policy for the
+   host based on that field (any previously Noted policy remains
+   unchanged).
+
+   The following Dictionary members are defined.  Keys are lowercase as
+   required by Structured Fields.  Unknown members MUST be ignored.
+   Recognized members are processed as specified below when the
+   Dictionary parses successfully.
+
+   max-age:  Integer (required).  Non-negative number of seconds after
+      receipt during which the UA regards the host as a Known PQ Host
+      with this policy.  A value of 0 signals the UA to delete any Noted
+      PQ Policy for the host (including subdomain scope learned from
+      this host).
+
+   include-subdomains:  Boolean true if present as a bare Dictionary
+      member (optional).  If present, the PQ Policy applies to the host
+      and to hosts whose domain names are subdomains of that host's
+      domain name, analogous to HSTS includeSubDomains [RFC6797] but
+      applying only to this PQ Policy.  Absence means host-only scope.
+
+   If the Dictionary does not include a usable max-age, or if any
+   present member is malformed for its type, the UA MUST NOT update
+   Noted PQ Policy from this field.
+
+   Examples:
+
+   Require-PQ-Auth: max-age=86400
+   Require-PQ-Auth: max-age=31536000, include-subdomains
+
+4.  Server Processing
+
+   Servers MUST emit Require-PQ-Auth only when they can keep the
+   following commitment for the lifetime conveyed by max-age (and for
+   any hosts covered by include-subdomains):
+
+   1.  Serve a certification path anchored at a quantum-resistant trust
+       anchor (pure post-quantum or composite per the server's
+       deployment), with no mixed classical/quantum-resistant path; and
+
+   2.  Complete quantum-resistant key agreement (hybrid or pure post-
+       quantum) with clients that implement this document.
+
+   The commitment applies to every server that answers for each covered
+   hostname, not only the instance that sent the header—including all
+   CDN edges, failover or backup providers, and HTTP/3 endpoints
+   advertised via Alt-Svc [RFC7838].  If any such endpoint cannot meet
+   the policy, UAs that reach it will fail to connect.
+
+   The server MUST send Require-PQ-Auth only over HTTPS.  Otherwise UAs
+   will not note the field (Section 5).  The server SHOULD include the
+   header on every HTTPS response, unless it omits the header for
+   performance reasons (which typically does not make sense given the
+   header's small size).
+
+4.1.  Choosing policy parameters
+
+   max-age should reflect how long the operator is willing to keep the
+   commitment above.  Operators typically start with a short max-age
+   while gaining confidence, then increase it.
+
+   include-subdomains MUST NOT be sent unless every host that would be
+   covered can likewise satisfy the commitment for the same window.
+
+4.2.  Updating and clearing policy
+
+   A valid Require-PQ-Auth field replaces any previously Noted PQ Policy
+   for that host when the UA notes it (Section 5).  Omitting the header
+   does not clear Noted policy.
+
+   To delete client state before expiry, the server sends max-age with
+   value 0.  UAs that successfully note that response MUST delete the
+   Noted PQ Policy (Section 5).  That escape hatch is useful only in
+   laboratory or similar conditions, where the client population is
+   small and individually identifiable.  It works only while the server
+   can still meet the commitment: enforcing UAs reject connections that
+   do not, and so never see the clear.  Operators should keep meeting
+   the commitment until outstanding pins expire.  If the server loses
+   that ability first, those UAs stay locked out until expiry or manual
+   action.
+
+5.  User Agent Behavior
+
+   This section defines how UAs note and enforce Require-PQ-Auth policy.
+
+5.1.  Noting the header
+
+   Upon receipt of a Require-PQ-Auth header field in an HTTP response,
+   the UA notes a PQ Policy when all of the following hold, and MUST NOT
+   note one otherwise:
+
+   1.  The response was received over an error-free HTTPS connection
+       that uses TLS 1.3 [RFC9846] or later.
+
+   2.  That connection meets the checks in Section 5.2, whether or not a
+       PQ Policy is already Noted for the host.
+
+   3.  The field value parses as a Structured Fields Dictionary per
+       Section 3, including a valid max-age member.
+
+   The host need not be a Known HSTS Host.  Noting PQ Policy MUST NOT
+   modify HSTS Policy storage.
+
+   When noting, the UA MUST:
+
+   1.  Store a PQ Policy for the host as a Known PQ Host, with expiry
+       derived from max-age (or delete the policy if max-age is 0).
+
+   2.  Record subdomain scope from include-subdomains when that member
+       is usable; otherwise host-only scope.
+
+   If a subsequent valid Require-PQ-Auth field is noted for the host, it
+   replaces the prior PQ Policy (including subdomain scope) for that
+   host.  Absence of the header field on a later response does not by
+   itself clear PQ Policy before expiry; servers clear state with max-
+   age of 0.
+
+   UAs MAY additionally configure other hosts as Known PQ Hosts via
+   local policy.  For example, the UA MAY be pre-configured with a list
+   of pre-loaded Known PQ Hosts, similar to Section 12.3 of [RFC6797].
+
+5.2.  Connection checks
+
+   A connection meets the checks of this section when all of the
+   following hold.  These checks apply to the connection itself.  They
+   do not depend on a PQ Policy already being Noted.
+
+   1.  The trust anchor that caused acceptance is quantum-resistant
+       (pure post-quantum or composite per local policy), whether that
+       trust anchor is an X.509 trust anchor or an MTC trust base /
+       cosigner.
+
+   2.  The accepted certification path is entirely quantum-resistant: no
+       hop is classical.  (Detailed mixed-path rejection may be refined
+       here or by reference to a dedicated path-validation document.)
+
+   3.  The negotiated key agreement is quantum-resistant (hybrid or pure
+       post-quantum per local policy).
+
+5.3.  Enforcement
+
+   When establishing a connection to a host covered by an unexpired
+   Noted PQ Policy — either because the host itself is a Known PQ Host,
+   or because a Known PQ Host that is a superdomain of this host has
+   include-subdomains — the connection MUST meet the checks in
+   Section 5.2, and MUST use TLS 1.3 [RFC9846] or later.
+
+   If the connection does not meet those requirements, the UA MUST abort
+   the TLS handshake with a fatal "handshake_failure" alert ([RFC9846],
+   Section 6.2).  The UA MUST NOT offer the user a way to proceed
+   (Section 12.1 of [RFC6797]).
+
+   This document does not impose separate end-entity signature-algorithm
+   requirements beyond the trust-anchor class and path-consistency rules
+   above.  It does not enumerate TLS NamedGroup codepoints or MTC
+   validation procedures; those remain matters for TLS/IANA policy and
+   [I-D.ietf-plants-merkle-tree-certs], respectively.
+
+   Once classical trust anchors are no longer accepted for
+   authentication, Require-PQ-Auth is redundant.  UAs MAY clear PQ
+   Policy for Known PQ Hosts when local policy determines that the pin
+   is obsolete.  Servers SHOULD stop sending the header in that
+   environment.  HSTS policy, if any, is unaffected.
+
+6.  Operational Considerations
+
+
+   // TODO Operational considerations: CDN / multi-CDN consistency;
+   // staged `max-age` independent of HSTS; independent HSTS
+   // `includeSubDomains` vs PQ `include-subdomains`; HTTPS required to
+   // note, HSTS not required; enterprise TLS interception; public Web ≈
+   // MTC vs enterprise ≈ X.509 PQ chains; MTC evolving; SFV
+   // serialization (lowercase keys, commas); do not assert the pin
+   // before hybrid/PQ KE is solid for the served audience.
+
+7.  Security Considerations
+
+   The security considerations of HSTS (Section 14 of [RFC6797]) apply
+   to Require-PQ-Auth.  This section covers where they differ.
+
+7.1.  Underlying Secure Transport Considerations
+
+   Quantum-resistant key exchange and authentication are specified for
+   TLS 1.3 [RFC9846] and not for earlier versions.  Require-PQ-Auth can
+   therefore be used only with TLS 1.3 or later.
+
+7.2.  Non-Conformant User Agent Implications
+
+   UAs that do not implement this document ignore the header field.  If
+   such a UA accepts both classical and quantum-resistant
+   authentication, a quantum attacker can present a forged classical
+   certificate even when the server offers a quantum-resistant one.
+
+7.3.  Limitations
+
+   As with HSTS, noting a PQ Policy does not protect initial visits to
+   an origin.  An attacker who can modify that first response can strip
+   Require-PQ-Auth, and the UA never notes the policy.  Additionally,
+   UAs might limit state set by an origin, e.g. as part of private
+   browsing modes or to protect against cross-sign tracking
+   [ProtectingAgainstHSTSAbuse] [StrictNavigationalSecurity].  When
+   state is limited, there are more "initial" responses for an attacker
+   to intercept.
+
+   Section 5.1 permits UAs to configure other Known PQ Hosts as local
+   policy, such as a pre-configured list.  Which such measures can
+   mitigate this attack, they can introduce other limitations when the
+   number of otherwise quantum-resistant hosts exceeds an
+   implementation's size limits.
+
+   Non-browser clients may be further limited in their ability to both
+   maintain state and include large, pre-configured lists.
+
+   These limitations mean Require-PQ-Auth is only viable as a temporary
+   measure for a limited number of applications.  In many applications,
+   it will still be necessary to trust anchors in the near term.
+   [ChromiumPQAuthRoadmap] describes one such transition plan.
+
+7.4.  Denial of Service
+
+   An attacker that controls a TLS-terminating proxy can cause a UA to
+   note Require-PQ-Auth only when the connection meets Section 5.2.  A
+   proxy that cannot meet those checks cannot set the policy.
+
+   If the attacker can meet the checks and sets a large max-age, UAs
+   that note the policy require Section 5.2 until the policy expires.
+   include-subdomains extends that requirement to every covered name.
+   Sending max-age of 0 does not remove the policy unless some endpoint
+   the UA will accept can still meet Section 5.2 and deliver that value
+   (Section 4).  If the attacker was the only such endpoint and then
+   stops meeting the checks, the origin stays unreachable until the
+   policy expires.
+
+   After a policy is legitimately Noted, a TLS interceptor that cannot
+   meet Section 5.2 causes the same hard failure.  That is an
+   availability problem for deployments that intercept TLS, separate
+   from injection.
+
+8.  Privacy Considerations
+
+
+   // TODO Privacy Considerations (sticky state parallel to HSTS;
+   // private browsing alignment; subdomain bitvectors; residual `max-
+   // age` TTL entropy without overselling oracles).
+
+9.  IANA Considerations
+
+   IANA is requested to register the following entry in the "Hypertext
+   Transfer Protocol (HTTP) Field Name Registry" defined in
+   Section 16.3.1 of [RFC9110].  The registration is:
+
+   Field name:  Require-PQ-Auth
+
+   Status:  permanent
+
+   Structured Type:  Dictionary
+
+   Specification document(s):  this document; see Section 3
+
+   Comments:  Defined for the header section of HTTP responses.  Not
+      defined for use as a trailer field.  The field value is a
+      Structured Fields Dictionary [RFC9651].
+
+10.  References
+
+10.1.  Normative References
+
+   [IANA.TLS-Parameters]
+              IANA, "Transport Layer Security (TLS) Parameters",
+              <https://www.iana.org/assignments/tls-parameters>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC9651]  Nottingham, M. and P. Kamp, "Structured Field Values for
+              HTTP", RFC 9651, DOI 10.17487/RFC9651, September 2024,
+              <https://www.rfc-editor.org/rfc/rfc9651>.
+
+   [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
+              Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
+              <https://www.rfc-editor.org/rfc/rfc9846>.
+
+   [RFC9110]  Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Semantics", STD 97, RFC 9110,
+              DOI 10.17487/RFC9110, June 2022,
+              <https://www.rfc-editor.org/rfc/rfc9110>.
+
+10.2.  Informative References
+
+   [RescorlaPQEmergency]
+              Rescorla, E., "PQ emergency", April 2024,
+              <https://educatedguesswork.org/posts/pq-emergency/>.
+
+   [CABForumSC081v3]
+              CA/Browser Forum, "Ballot SC081v3: Introduce Schedule of
+              Reducing Validity and Data Reuse Periods", April 2025,
+              <https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-
+              schedule-of-reducing-validity-and-data-reuse-periods/>.
+
+   [ChromiumPQAuthRoadmap]
+              Benjamin, D. and J. DeBlasio, "Post-Quantum HTTPS
+              Authentication Roadmap", February 2026,
+              <https://www.chromium.org/Home/chromium-security/post-
+              quantum-auth-roadmap/>.
+
+   [ProtectingAgainstHSTSAbuse]
+              Fulgham, B., "Protecting Against HSTS Abuse", 16 March
+              2018, <https://webkit.org/blog/8146/protecting-against-
+              hsts-abuse/>.
+
+   [StrictNavigationalSecurity]
+              West, M., "Strict Navigational Security", September 2019,
+              <https://github.com/mikewest/strict-navigation-security>.
+
+   [I-D.ietf-lamps-pq-composite-sigs]
+              Ounsworth, M., Gray, J., Pala, M., Klaußner, J., and S.
+              Fluhrer, "Composite Module-Lattice-Based Digital Signature
+              Algorithm (ML-DSA) for use in X.509 Public Key
+              Infrastructure", Work in Progress, Internet-Draft, draft-
+              ietf-lamps-pq-composite-sigs-19, 21 April 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-lamps-
+              pq-composite-sigs-19>.
+
+   [I-D.sheffer-tls-pqc-continuity]
+              Sheffer, Y. and T. Reddy.K, "PQC Continuity: Downgrade
+              Protection for TLS Servers Migrating to PQC", Work in
+              Progress, Internet-Draft, draft-sheffer-tls-pqc-
+              continuity-02, 9 June 2026,
+              <https://datatracker.ietf.org/doc/html/draft-sheffer-tls-
+              pqc-continuity-02>.
+
+   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
+              <https://www.rfc-editor.org/rfc/rfc5280>.
+
+   [I-D.ietf-plants-merkle-tree-certs]
+              Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
+              and F. Valsorda, "Merkle Tree Certificates", Work in
+              Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
+              certs-07, 7 October 2026,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
+              merkle-tree-certs-07>.
+
+   [RFC6797]  Hodges, J., Jackson, C., and A. Barth, "HTTP Strict
+              Transport Security (HSTS)", RFC 6797,
+              DOI 10.17487/RFC6797, November 2012,
+              <https://www.rfc-editor.org/rfc/rfc6797>.
+
+   [RFC7838]  Nottingham, M., McManus, P., and J. Reschke, "HTTP
+              Alternative Services", RFC 7838, DOI 10.17487/RFC7838,
+              April 2016, <https://www.rfc-editor.org/rfc/rfc7838>.
+
+Appendix A.  Document History
+
+   RFC Editor: please remove before publication.
+
+A.1.  draft-sheffer-tls-pq-hsts-00
+
+   Initial version.
+
+Acknowledgments
+
+   [I-D.sheffer-tls-pqc-continuity] defines a similar opt-in mechanism,
+   but at the TLS layer, instead of the HTTP layer.  This document
+   adapts those ideas for the HTTP layer.
+
+Authors' Addresses
+
+   Yaron Sheffer
+   Independent
+   Email: yaronf.ietf@gmail.com
+
+
+   Tirumaleswar Reddy.K
+   Nokia
+   Email: kondtir@gmail.com
+
+
+   David Benjamin
+   Google LLC
+   Email: davidben@google.com
