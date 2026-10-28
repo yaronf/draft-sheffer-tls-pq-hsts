@@ -427,6 +427,18 @@ TLS handshake with a fatal "handshake_failure" alert ({{!RFC9846}},
 Section 6.2). The UA MUST NOT offer the user a way to proceed
 ({{Section 12.1 of ?RFC6797}}).
 
+Enterprise deployments often terminate TLS at an interception device whose
+certificate chains to a trust anchor installed locally in the UA or
+platform. If that trust anchor is not quantum-resistant,
+enforcing the checks above on that path would fail closed for
+every Known PQ Host the user visits through the interceptor. A UA MAY
+disable `Require-PQ-Auth` enforcement for some hosts according to local
+policy. For example, a UA may skip enforcement when the validated
+certificate chain terminates at a user-defined trust anchor rather than a
+trust anchor built into the UA or underlying platform
+({{Section 2.6 of ?RFC7469}}). Where the UA skips enforcement, this
+mechanism provides no protection on that connection.
+
 This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate TLS NamedGroup codepoints or MTC validation
@@ -459,10 +471,10 @@ MAY drop preloaded PQ enforcement when the pin is obsolete.</cref>
 <cref>TODO Operational considerations: CDN / multi-CDN consistency;
 staged `max-age` independent of HSTS; independent HSTS
 `includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
-HSTS not required; enterprise TLS interception; public Web ≈ MTC vs
-enterprise ≈ X.509 PQ chains; MTC evolving; SFV serialization (lowercase
-keys, commas); do not assert the pin before hybrid/PQ KE is solid for the
-served audience.</cref>
+HSTS not required; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
+evolving; SFV serialization (lowercase keys, commas); do not assert the
+pin before hybrid/PQ KE is solid for the served audience. Enterprise
+interception carve-out is in {{enforcement}}.</cref>
 
 
 # Security Considerations
@@ -508,10 +520,12 @@ expires.
 A PQ preload entry is configured out of band. The noting rule does not
 stop a poisoned preload list ({{preload}}).
 
-After a policy is legitimately Noted, a TLS interceptor that cannot meet
-{{pq-checks}} causes the same hard failure. That is an availability
-problem for deployments that intercept TLS, separate from injection.
-
+After a policy is legitimately Noted, a TLS interceptor whose chain does
+not meet {{pq-checks}} causes the same hard failure unless the UA skips
+enforcement under local policy ({{enforcement}})—for example because the
+chain terminates at a user-defined trust anchor. Deployments that
+intercept TLS with a locally installed root typically rely on that
+exception. The pin then does not apply on those connections.
 
 # Privacy Considerations
 
