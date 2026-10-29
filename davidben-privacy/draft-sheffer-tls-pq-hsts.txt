@@ -5,10 +5,10 @@
 Transport Layer Security                                      Y. Sheffer
 Internet-Draft                                               Independent
 Intended status: Standards Track                              T. Reddy.K
-Expires: 1 May 2027                                                Nokia
+Expires: 2 May 2027                                                Nokia
                                                              D. Benjamin
                                                               Google LLC
-                                                         28 October 2026
+                                                         29 October 2026
 
 
               An HSTS-like Header for Secure PQ Migration
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 May 2027.
+   This Internet-Draft will expire on 2 May 2027.
 
 Copyright Notice
 
@@ -478,16 +478,6 @@ Table of Contents
               <https://www.rfc-editor.org/rfc/rfc9110>.
 
 10.2.  Informative References
-
-   [RescorlaPQEmergency]
-              Rescorla, E., "PQ emergency", April 2024,
-              <https://educatedguesswork.org/posts/pq-emergency/>.
-
-   [CABForumSC081v3]
-              CA/Browser Forum, "Ballot SC081v3: Introduce Schedule of
-              Reducing Validity and Data Reuse Periods", April 2025,
-              <https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-
-              schedule-of-reducing-validity-and-data-reuse-periods/>.
 
    [ChromiumPQAuthRoadmap]
               Benjamin, D. and J. DeBlasio, "Post-Quantum HTTPS
