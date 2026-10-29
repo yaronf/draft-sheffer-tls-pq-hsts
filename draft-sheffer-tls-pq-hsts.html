@@ -1178,10 +1178,10 @@ unnecessary when UAs remove these trust anchors.<a href="#section-abstract-1" cl
             <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-server-processing" class="internal xref">Server Processing</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
-                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-choosing-policy-parameters" class="internal xref">Choosing policy parameters</a></p>
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-choosing-policy-parameters" class="internal xref">Choosing Policy Parameters</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
-                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-updating-and-clearing-polic" class="internal xref">Updating and clearing policy</a></p>
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-updating-and-clearing-polic" class="internal xref">Updating and Clearing Policy</a></p>
 </li>
             </ul>
 </li>
@@ -1189,10 +1189,10 @@ unnecessary when UAs remove these trust anchors.<a href="#section-abstract-1" cl
             <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-user-agent-behavior" class="internal xref">User Agent Behavior</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
-                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-noting-the-header" class="internal xref">Noting the header</a></p>
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-noting-the-header" class="internal xref">Noting the Header</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
-                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-connection-checks" class="internal xref">Connection checks</a></p>
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-quantum-resistant-paths" class="internal xref">Quantum-Resistant Paths</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
                 <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-enforcement" class="internal xref">Enforcement</a></p>
@@ -1338,13 +1338,6 @@ independent of the policy defined here.<a href="#section-2-5.4.1" class="pilcrow
 and whether <code>include-subdomains</code> applies. Storage is parallel to—not
 part of—HSTS Policy storage.<a href="#section-2-5.6.1" class="pilcrow">¶</a></p>
 </dd>
-        <dd class="break"></dd>
-<dt id="section-2-5.7">superdomain:</dt>
-        <dd style="margin-left: 1.5em" id="section-2-5.8">
-          <p id="section-2-5.8.1">As in <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>, a domain name of which another domain name is a
-subdomain. For example, <code>example.com</code> is a superdomain of
-<code>www.example.com</code>.<a href="#section-2-5.8.1" class="pilcrow">¶</a></p>
-</dd>
       <dd class="break"></dd>
 </dl>
 </section>
@@ -1372,10 +1365,7 @@ whether key agreement is classical or quantum-resistant.<a href="#section-3-1" c
 value <span class="bcp14">MUST</span> be a Dictionary. Recipients that cannot parse the field value
 as a Dictionary <span class="bcp14">MUST NOT</span> update any Noted PQ Policy for the host based on
 that field (any previously Noted policy remains unchanged).<a href="#section-4-1" class="pilcrow">¶</a></p>
-<p id="section-4-2">The following Dictionary members are defined. Keys are lowercase as
-required by Structured Fields. Unknown members <span class="bcp14">MUST</span> be ignored.
-Recognized members are processed as specified below when the Dictionary
-parses successfully.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-2">The following Dictionary members are defined. Unknown members <span class="bcp14">MUST</span> be ignored.<a href="#section-4-2" class="pilcrow">¶</a></p>
 <span class="break"></span><dl class="dlParallel" id="section-4-3">
         <dt id="section-4-3.1">max-age:</dt>
         <dd style="margin-left: 1.5em" id="section-4-3.2">
@@ -1390,14 +1380,14 @@ the host (including subdomain scope learned from this host).<a href="#section-4-
           <p id="section-4-3.4.1">Boolean true if present as a bare Dictionary member (optional). If
 present, the PQ Policy applies to the host and to hosts whose domain
 names are subdomains of that host's domain name, analogous to HSTS
-<code>includeSubDomains</code> <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> but applying only to this PQ Policy.
+<code>includeSubDomains</code> <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>.
 Absence means host-only scope.<a href="#section-4-3.4.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
-<p id="section-4-4">If the Dictionary does not include a usable <code>max-age</code>, or if any present
-member is malformed for its type, the UA <span class="bcp14">MUST NOT</span> update Noted PQ Policy
-from this field.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-4">If the Dictionary does not include a valid <code>max-age</code> member, or if any
+member is malformed, the UA <span class="bcp14">MUST</span> ignore the entire field. (See
+<span><a href="https://rfc-editor.org/rfc/rfc9651#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.)<a href="#section-4-4" class="pilcrow">¶</a></p>
 <p id="section-4-5">Examples:<a href="#section-4-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4-6">
 <pre>
@@ -1412,27 +1402,30 @@ Require-PQ-Auth: max-age=31536000, include-subdomains
       <h2 id="name-server-processing">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-server-processing" class="section-name selfRef">Server Processing</a>
       </h2>
-<p id="section-5-1">Servers <span class="bcp14">MUST</span> emit <code>Require-PQ-Auth</code> only when they can keep the following
-commitment for the lifetime conveyed by <code>max-age</code> (and for any hosts
-covered by <code>include-subdomains</code>): serve a certification path anchored at
-a quantum-resistant trust anchor (pure post-quantum or composite per the
-server's deployment), with no mixed classical/quantum-resistant path.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">The commitment applies to every server that answers for each covered
-hostname, not only the instance that sent the header—including all
-CDN edges, failover or backup providers, and HTTP/3 endpoints advertised
-via Alt-Svc <span>[<a href="#RFC7838" class="cite xref">RFC7838</a>]</span>. If any such endpoint cannot meet the policy,
-UAs that reach it will fail to connect.<a href="#section-5-2" class="pilcrow">¶</a></p>
-<p id="section-5-3">The server <span class="bcp14">MUST</span> send <code>Require-PQ-Auth</code> only over HTTPS. Otherwise UAs
-will not note the field (<a href="#ua-behavior" class="auto internal xref">Section 6</a>). The server <span class="bcp14">SHOULD</span> include the
-header on every HTTPS response, unless it omits the header for
-performance reasons (which typically does not make sense given the
-header's small size).<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-1">If the server sends a <code>Require-PQ-Auth</code> header, all servers that are
+authoritative for the origin <span class="bcp14">MUST</span>, for at least the period denoted by <code>max-age</code>,
+serve a certification path that meets <a href="#pq-checks" class="auto internal xref">Section 6.2</a> in response to TLS
+connections from post-quantum-capable UAs. If the <code>include-subdomains</code> member
+is true, all servers authoritative for any subdomain of the origin <span class="bcp14">MUST</span> also
+meet this requirement.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">A typical server deployment will need a combination of classical and
+post-quantum certification paths for all its supported UAs, including legacy
+ones that do not support quantum-resistant trust anchors. This header does not
+constrain connections from legacy UAs. Servers <span class="bcp14">MAY</span> continue to serve classical
+certification paths in those cases.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">How legacy and post-quantum-capable UAs are determined is out of scope for this
+document. <span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.5.1.2" class="relref">Section 4.5.1.2</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> describes the general framework for
+TLS certificate selection, but the exact criteria can be application-dependent,
+depending on the ClientHello fields sent by each UA, the trust anchors each UA
+trusts, etc.<a href="#section-5-3" class="pilcrow">¶</a></p>
+<p id="section-5-4">The server <span class="bcp14">MUST</span> send <code>Require-PQ-Auth</code> only over HTTPS. If sent, it <span class="bcp14">SHOULD</span>
+include the header on every HTTPS response.<a href="#section-5-4" class="pilcrow">¶</a></p>
 <div id="choosing-policy-parameters">
 <section id="section-5.1">
         <h3 id="name-choosing-policy-parameters">
-<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-choosing-policy-parameters" class="section-name selfRef">Choosing policy parameters</a>
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-choosing-policy-parameters" class="section-name selfRef">Choosing Policy Parameters</a>
         </h3>
-<p id="section-5.1-1"><code>max-age</code> should reflect how long the operator is willing to keep the
+<p id="section-5.1-1"><code>max-age</code> <span class="bcp14">SHOULD</span> reflect how long the operator is willing to keep the
 commitment above. Operators typically start with a short <code>max-age</code> while
 gaining confidence, then increase it.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <p id="section-5.1-2"><code>include-subdomains</code> <span class="bcp14">MUST NOT</span> be sent unless every host that would be
@@ -1442,20 +1435,17 @@ covered can likewise satisfy the commitment for the same window.<a href="#sectio
 <div id="updating-and-clearing-policy">
 <section id="section-5.2">
         <h3 id="name-updating-and-clearing-polic">
-<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-updating-and-clearing-polic" class="section-name selfRef">Updating and clearing policy</a>
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-updating-and-clearing-polic" class="section-name selfRef">Updating and Clearing Policy</a>
         </h3>
 <p id="section-5.2-1">A valid <code>Require-PQ-Auth</code> field replaces any previously Noted PQ Policy
 for that host when the UA notes it (<a href="#ua-behavior" class="auto internal xref">Section 6</a>). Omitting the header
 does not clear Noted policy.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
 <p id="section-5.2-2">To delete client state before expiry, the server sends <code>max-age</code> with
 value 0. UAs that successfully note that response <span class="bcp14">MUST</span> delete the Noted
-PQ Policy (<a href="#ua-behavior" class="auto internal xref">Section 6</a>). That escape hatch is useful only
-in laboratory or similar conditions, where the client population is small
-and individually identifiable. It works only while the server can still
-meet the commitment: enforcing UAs reject connections that do not, and so
-never see the clear. Operators should keep meeting the commitment until
-outstanding pins expire. If the server loses that ability first, those
-UAs stay locked out until expiry or manual action.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+PQ Policy (<a href="#ua-behavior" class="auto internal xref">Section 6</a>). However, this mechanism is limited. UAs with
+the previous Noted policy will continue to enforce the policy until it is
+cleared. A server that is no longer able to meet the commitment might be
+unable to serve such UAs until the outstanding policies expire.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1469,9 +1459,9 @@ UAs stay locked out until expiry or manual action.<a href="#section-5.2-2" class
 <div id="noting">
 <section id="section-6.1">
         <h3 id="name-noting-the-header">
-<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-noting-the-header" class="section-name selfRef">Noting the header</a>
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-noting-the-header" class="section-name selfRef">Noting the Header</a>
         </h3>
-<p id="section-6.1-1">Upon receipt of a <code>Require-PQ-Auth</code> header field in an HTTP response, the
+<p id="section-6.1-1">Upon receipt of a valid <code>Require-PQ-Auth</code> header field in an HTTP response, the
 UA notes a PQ Policy when all of the following hold, and <span class="bcp14">MUST NOT</span> note
 one otherwise:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.1-2">
@@ -1480,31 +1470,26 @@ one otherwise:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 uses TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later.<a href="#section-6.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.1-2.2">
-            <p id="section-6.1-2.2.1">That connection meets the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>, whether or not a
-PQ Policy is already Noted for the host.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-6.1-2.3">
-            <p id="section-6.1-2.3.1">The field value parses as a Structured Fields Dictionary per
-<a href="#syntax" class="auto internal xref">Section 4</a>, including a valid <code>max-age</code> member.<a href="#section-6.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-2.2.1">That connection meets the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.1-3">The host need not be a Known HSTS Host. Noting PQ Policy <span class="bcp14">MUST NOT</span> modify
-HSTS Policy storage.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
-<p id="section-6.1-4">When noting, the UA <span class="bcp14">MUST</span>:<a href="#section-6.1-4" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-6.1-5">
-<li id="section-6.1-5.1">
-            <p id="section-6.1-5.1.1">Store a PQ Policy for the host as a Known PQ Host, with expiry derived
-from <code>max-age</code> (or delete the policy if <code>max-age</code> is 0).<a href="#section-6.1-5.1.1" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">When noting, the UA <span class="bcp14">MUST</span>:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.1-4">
+<li id="section-6.1-4.1">
+            <p id="section-6.1-4.1.1">Store a PQ Policy for the host as a Known PQ Host, with expiry derived
+from <code>max-age</code> (or delete the policy if <code>max-age</code> is 0).<a href="#section-6.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-6.1-5.2">
-            <p id="section-6.1-5.2.1">Record subdomain scope from <code>include-subdomains</code> when that member is
-usable; otherwise host-only scope.<a href="#section-6.1-5.2.1" class="pilcrow">¶</a></p>
+          <li id="section-6.1-4.2">
+            <p id="section-6.1-4.2.1">Store the value of the <code>include-subdomains</code> member.<a href="#section-6.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.1-6">If a subsequent valid <code>Require-PQ-Auth</code> field is noted for the host, it
-replaces the prior PQ Policy (including subdomain scope) for that host.
-Absence of the header field on a later response does not by itself clear
-PQ Policy before expiry; servers clear state with <code>max-age</code> of 0.<a href="#section-6.1-6" class="pilcrow">¶</a></p>
+<p id="section-6.1-5">If a subsequent valid <code>Require-PQ-Auth</code> field is noted for the host, it
+replaces the prior PQ Policy (including the <code>include-subdomains</code> member) for
+that host. Absence of the header field on a later response does not by itself
+clear PQ Policy before expiry; servers clear state with <code>max-age</code> of 0.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<p id="section-6.1-6">Although this mechanism is similar to HSTS <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>, Known PQ Hosts are
+separate from Known HSTS Hosts, with separate values for <code>max-age</code> and
+<code>include-subdomains</code>.<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <p id="section-6.1-7">UAs <span class="bcp14">MAY</span> additionally configure other hosts as Known PQ Hosts via local policy.
 For example, the UA <span class="bcp14">MAY</span> be pre-configured with a list of pre-loaded Known PQ
 Hosts, similar to <span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.3" class="relref">Section 12.3</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>.<a href="#section-6.1-7" class="pilcrow">¶</a></p>
@@ -1512,24 +1497,24 @@ Hosts, similar to <span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.3
 </div>
 <div id="pq-checks">
 <section id="section-6.2">
-        <h3 id="name-connection-checks">
-<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-connection-checks" class="section-name selfRef">Connection checks</a>
+        <h3 id="name-quantum-resistant-paths">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-quantum-resistant-paths" class="section-name selfRef">Quantum-Resistant Paths</a>
         </h3>
-<p id="section-6.2-1">A connection meets the checks of this section when all of the following
-hold. These checks apply to the connection itself. They do not depend on
-a PQ Policy already being Noted.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">A connection meets the checks of this section when both of the following
+hold. These checks apply when noting a PQ Policy and when enforcing one.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.2-2">
 <li id="section-6.2-2.1">
-            <p id="section-6.2-2.1.1">The trust anchor that caused acceptance is quantum-resistant (pure
-post-quantum or composite per local policy), whether that trust anchor
-is an X.509 trust anchor or an MTC trust base / cosigner.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.2-2.1.1">The trust anchor that caused acceptance is quantum-resistant.<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.2-2.2">
-            <p id="section-6.2-2.2.1">The accepted certification path is entirely quantum-resistant: no hop is
-classical. (Detailed mixed-path rejection may be refined here or by
-reference to a dedicated path-validation document.)<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-6.2-2.2.1">Every signature and public key on the accepted certification path is
+quantum-resistant.<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
+<p id="section-6.2-3">Which trust anchors and algorithms count as quantum-resistant is a matter of
+local policy. The UA is presumed to maintain classical trust anchors alongside
+quantum-resistant ones during the dual-trust-store period. This document
+states the property, not a closed algorithm list.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="enforcement">
@@ -1537,30 +1522,29 @@ reference to a dedicated path-validation document.)<a href="#section-6.2-2.2.1" 
         <h3 id="name-enforcement">
 <a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-enforcement" class="section-name selfRef">Enforcement</a>
         </h3>
-<p id="section-6.3-1">When establishing a connection to a host covered by an unexpired Noted PQ
-Policy — either because the host itself is a Known PQ Host, or because a
-Known PQ Host that is a superdomain of this host has <code>include-subdomains</code>
-— the connection <span class="bcp14">MUST</span> meet the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>, and <span class="bcp14">MUST</span> use
-TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">If the connection does not meet those requirements, the UA <span class="bcp14">MUST</span> abort the
+<p id="section-6.3-1">When a UA establishes a connection to a host, it checks if either:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.3-2.1">
+            <p id="section-6.3-2.1.1">the host is a Known PQ Host<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-6.3-2.2">
+            <p id="section-6.3-2.2.1">the host is a subdomain of a Known PQ Host with <code>include-subdomains</code><a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-6.3-3">If either of these conditions hold, the connection <span class="bcp14">MUST</span> use TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>
+or later, and <span class="bcp14">MUST</span> meet the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a>.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">If the connection does not meet those requirements, the UA <span class="bcp14">MUST</span> abort the
 TLS handshake with a fatal "handshake_failure" alert (<span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>,
-Section 6.2). The UA <span class="bcp14">MUST NOT</span> offer the user a way to proceed
-(<span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.1" class="relref">Section 12.1</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-<p id="section-6.3-3">The UA <span class="bcp14">MAY</span> skip enforcement according to local policy. For example,
+Section 6.2).<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+<p id="section-6.3-5">The UA <span class="bcp14">MAY</span> skip enforcement according to local policy. For example,
 similar to <span><a href="https://rfc-editor.org/rfc/rfc7469#section-2.6" class="relref">Section 2.6</a> of [<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>, the UA <span class="bcp14">MAY</span> skip enforcement if
 the validated certificate chain terminates at a user-defined trust
 anchor, rather than a trust anchor built into the UA (or underlying
 platform). The main use case is a middlebox that terminates TLS using
-such a locally installed trust anchor.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
-<p id="section-6.3-4">This document does not impose separate end-entity signature-algorithm
-requirements beyond the trust-anchor class and path-consistency rules
-above. It does not enumerate MTC validation procedures; those remain
-matters for <span>[<a href="#I-D.ietf-plants-merkle-tree-certs" class="cite xref">I-D.ietf-plants-merkle-tree-certs</a>]</span>.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
-<p id="section-6.3-5">Once classical trust anchors are no longer accepted for authentication,
-<code>Require-PQ-Auth</code> is redundant. UAs <span class="bcp14">MAY</span> clear PQ Policy for Known PQ Hosts when
-local policy determines that the pin is obsolete.
-Servers <span class="bcp14">SHOULD</span> stop sending the header in that environment. HSTS policy,
-if any, is unaffected.<a href="#section-6.3-5" class="pilcrow">¶</a></p>
+such a locally installed trust anchor.<a href="#section-6.3-5" class="pilcrow">¶</a></p>
+<p id="section-6.3-6">Once the UA has removed classical trust anchors, <code>Require-PQ-Auth</code> is redundant.
+Such UAs <span class="bcp14">MAY</span> remove support for this mechanism and stop tracking Known PQ Hosts.
+Once all supported UAs are at this stage, servers <span class="bcp14">MAY</span> stop sending this header.<a href="#section-6.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1787,10 +1771,6 @@ Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a hr
 <dt id="RFC6797">[RFC6797]</dt>
         <dd>
 <span class="refAuthor">Hodges, J.</span>, <span class="refAuthor">Jackson, C.</span>, and <span class="refAuthor">A. Barth</span>, <span class="refTitle">"HTTP Strict Transport Security (HSTS)"</span>, <span class="seriesInfo">RFC 6797</span>, <span class="seriesInfo">DOI 10.17487/RFC6797</span>, <time datetime="2012-11" class="refDate">November 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6797">https://www.rfc-editor.org/rfc/rfc6797</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC7838">[RFC7838]</dt>
-        <dd>
-<span class="refAuthor">Nottingham, M.</span>, <span class="refAuthor">McManus, P.</span>, and <span class="refAuthor">J. Reschke</span>, <span class="refTitle">"HTTP Alternative Services"</span>, <span class="seriesInfo">RFC 7838</span>, <span class="seriesInfo">DOI 10.17487/RFC7838</span>, <time datetime="2016-04" class="refDate">April 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7838">https://www.rfc-editor.org/rfc/rfc7838</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7469">[RFC7469]</dt>
       <dd>
