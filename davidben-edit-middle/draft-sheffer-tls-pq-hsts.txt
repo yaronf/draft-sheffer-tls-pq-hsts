@@ -5,10 +5,10 @@
 Transport Layer Security                                      Y. Sheffer
 Internet-Draft                                               Independent
 Intended status: Standards Track                              T. Reddy.K
-Expires: 1 May 2027                                                Nokia
+Expires: 2 May 2027                                                Nokia
                                                              D. Benjamin
                                                               Google LLC
-                                                         28 October 2026
+                                                         29 October 2026
 
 
               An HSTS-like Header for Secure PQ Migration
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 May 2027.
+   This Internet-Draft will expire on 2 May 2027.
 
 Copyright Notice
 
@@ -169,10 +169,6 @@ Table of Contents
       Require-PQ-Auth policy (Section 3, Section 5), including expiry
       derived from max-age and whether include-subdomains applies.
       Storage is parallel to—not part of—HSTS Policy storage.
-
-   superdomain:  As in [RFC6797], a domain name of which another domain
-      name is a subdomain.  For example, example.com is a superdomain of
-      www.example.com.
 
 3.  Syntax
 
@@ -314,8 +310,7 @@ Table of Contents
 
    *  the host is a Known PQ Host
 
-   *  some superdomain of this host is a Known PQ Host with include-
-      subdomains
+   *  the host is a subdomain of a Known PQ Host with include-subdomains
 
    If either of this conditions hold, the connection MUST use TLS 1.3
    [RFC9846] or later, and the connection MUST be authenticated by a
