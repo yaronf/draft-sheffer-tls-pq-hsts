@@ -41,9 +41,6 @@ author:
     organization: Google LLC
     email: davidben@google.com
 
-normative:
-  IANA.TLS-Parameters: IANA.tls-parameters
-
 informative:
   ChromiumPQAuthRoadmap:
     title: "Post-Quantum HTTPS Authentication Roadmap"
