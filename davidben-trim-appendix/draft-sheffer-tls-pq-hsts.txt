@@ -76,6 +76,7 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction
+     1.1.  PQ-HSTS in the Broader Migration Context
    2.  Conventions and Definitions
    3.  Threat Model
    4.  Syntax
@@ -127,6 +128,22 @@ Table of Contents
    It does not require the host to be a Known HSTS Host [RFC6797].  HSTS
    and Require-PQ-Auth lifecycles are independent.  UAs that do not
    implement this document ignore the unknown header field.
+
+1.1.  PQ-HSTS in the Broader Migration Context
+
+   This mechanism addresses classical trust-anchor impersonation during
+   the dual-trust-store period.  It is one near-term lever within the
+   bigger industry migration.  The harder problem is coordinating
+   clients, servers, and trust-anchor operators onto quantum-resistant
+   authentication on a compressed timeline [RescorlaPQEmergency].
+   [ChromiumPQAuthRoadmap] describes a fuller migration program in which
+   an HSTS-like opt-in is only an early stage.
+
+   As additional context, deployments will use different quantum-
+   resistant credential forms, including Merkle Tree Certificates (MTC).
+   Normative requirements in this document stay at the trust-anchor
+   abstraction so those forms can satisfy Require-PQ-Auth without tying
+   the pin to a single encoding.
 
 2.  Conventions and Definitions
 
@@ -488,6 +505,10 @@ Table of Contents
               <https://www.rfc-editor.org/rfc/rfc9110>.
 
 11.2.  Informative References
+
+   [RescorlaPQEmergency]
+              Rescorla, E., "PQ emergency", April 2024,
+              <https://educatedguesswork.org/posts/pq-emergency/>.
 
    [ChromiumPQAuthRoadmap]
               Benjamin, D. and J. DeBlasio, "Post-Quantum HTTPS
