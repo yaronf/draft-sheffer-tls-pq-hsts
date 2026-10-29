@@ -66,6 +66,20 @@ informative:
         ins: J. DeBlasio
         name: Joe DeBlasio
     date: 2026-02
+  ProtectingAgainstHSTSAbuse:
+    title: Protecting Against HSTS Abuse
+    target: https://webkit.org/blog/8146/protecting-against-hsts-abuse/
+    author:
+      -
+        name: Brent Fulgham
+    date: 2018-03-16
+  StrictNavigationalSecurity:
+    title: Strict Navigational Security
+    target: https://github.com/mikewest/strict-navigation-security
+    author:
+      -
+        name: Mike West
+    date: 2019-09
 
 ...
 
@@ -104,9 +118,6 @@ with HSTS-like semantics but carried separately from
 structure follows HTTP Public Key Pinning {{?RFC7469}}. An industry
 outline of the same migration, including an HSTS-like opt-in stage,
 appears in {{ChromiumPQAuthRoadmap}}.
-
-HTTPS and PQ readiness often diverge on `max-age`, subdomain scope, and
-preload, so those knobs cannot usefully share one HSTS policy.
 
 Noting `Require-PQ-Auth` requires a securely delivered HTTPS response. It
 does not require the host to be a Known HSTS Host {{?RFC6797}}. HSTS and
@@ -207,7 +218,6 @@ superdomain:
   subdomain. For example, `example.com` is a superdomain of
   `www.example.com`.
 
-
 # Threat Model
 
 This document addresses classical trust-anchor impersonation during the
@@ -217,14 +227,6 @@ quantum-resistant authentication, and presents that credential to a
 dual-accepting UA. The negotiated key agreement does not matter for this
 attack: the holder of the forged credential can impersonate the server
 whether key agreement is classical or quantum-resistant.
-
-Trust-on-first-use (TOFU) limits apply as for HSTS: the first successful
-HTTPS visit that delivers the policy is not itself protected by the pin.
-Preload closes that gap for configured names, as it does for HSTS today.
-It is especially important for origins that are often visited in private
-browsing (incognito) modes, where UAs typically do not retain durable
-sticky policy state—preload is then the only way to obtain the pin's
-protection. Preload semantics are outlined in {{preload}}.
 
 # Syntax {#syntax}
 
@@ -251,14 +253,6 @@ include-subdomains:
   `includeSubDomains` {{?RFC6797}} but applying only to this PQ Policy.
   Absence means host-only scope.
 
-preload:
-: Boolean true if present as a bare Dictionary member (optional). Presence
-  does not change how the UA enforces a Noted PQ Policy. It only indicates
-  that the operator wants this host considered for inclusion on a PQ
-  preload list (the same role the HSTS `preload` token plays for HSTS
-  preload submission; see <https://hstspreload.org/>). Whether and how
-  such a list is operated is out of scope (see {{preload}}).
-
 If the Dictionary does not include a usable `max-age`, or if any present
 member is malformed for its type, the UA MUST NOT update Noted PQ Policy
 from this field.
@@ -267,14 +261,7 @@ Examples:
 
 ~~~
 Require-PQ-Auth: max-age=86400
-~~~
-
-~~~
 Require-PQ-Auth: max-age=31536000, include-subdomains
-~~~
-
-~~~
-Require-PQ-Auth: max-age=31536000, include-subdomains, preload
 ~~~
 
 # Server Processing {#server}
@@ -305,10 +292,6 @@ gaining confidence, then increase it.
 
 `include-subdomains` MUST NOT be sent unless every host that would be
 covered can likewise satisfy the commitment for the same window.
-
-`preload` MAY be sent when the operator intends to seek inclusion on a
-PQ preload list ({{preload}}). It does not relax the commitment rules
-above.
 
 ## Updating and clearing policy
 
@@ -358,7 +341,9 @@ replaces the prior PQ Policy (including subdomain scope) for that host.
 Absence of the header field on a later response does not by itself clear
 PQ Policy before expiry; servers clear state with `max-age` of 0.
 
-UAs that do not implement this document ignore the unknown header field.
+UAs MAY additionally configure other hosts as Known PQ Hosts via local policy.
+For example, the UA MAY be pre-configured with a list of pre-loaded Known PQ
+Hosts, similar to {{Section 12.3 of ?RFC6797}}.
 
 ## Connection checks {#pq-checks}
 
@@ -400,23 +385,9 @@ matters for {{?I-D.ietf-plants-merkle-tree-certs}}.
 
 Once classical trust anchors are no longer accepted for authentication
 (Stage 5 of {{migration}}), `Require-PQ-Auth` is redundant (Stage 6). UAs
-MAY clear PQ Policy for Known PQ Hosts (including any preloaded
-equivalent) when local policy determines that the pin is obsolete.
+MAY clear PQ Policy for Known PQ Hosts when local policy determines that the pin is obsolete.
 Servers SHOULD stop sending the header in that environment. HSTS policy,
 if any, is unaffected.
-
-
-# Preload {#preload}
-
-<cref>TODO Preload: semantics only—configured/preloaded names may be
-treated as already Noted Known PQ Hosts (with optional
-`include-subdomains`) before first visit, closing the TOFU gap as for
-HSTS today; the `preload` Dictionary member signals submission intent for
-a PQ preload list and is independent of HSTS `preload`; informative
-submission expectations (evidence of `Require-PQ-Auth`,
-quantum-resistant-TA serving). Do not prescribe one shared list vs a
-parallel list (implementation/operations detail). Stage 6: UAs MAY drop
-preloaded PQ enforcement when the pin is obsolete.</cref>
 
 
 # Operational Considerations {#ops}
@@ -460,12 +431,28 @@ such a UA accepts both classical and quantum-resistant authentication, a
 quantum attacker can present a forged classical certificate even when
 the server offers a quantum-resistant one.
 
-## Bootstrap Vulnerability
+## Limitations
 
-As with HSTS, noting a PQ Policy is trust on first use. An attacker who
-can modify that first response can strip `Require-PQ-Auth`, and the UA
-never notes the policy. Preload is how that first connection is
-protected ({{preload}}).
+As with HSTS, noting a PQ Policy does not protect initial visits to an origin.
+An attacker who can modify that first response can strip `Require-PQ-Auth`,
+and the UA never notes the policy. Additionally, UAs might limit state set by
+an origin, e.g. as part of private browsing modes or to protect against
+cross-sign tracking {{ProtectingAgainstHSTSAbuse}}
+{{StrictNavigationalSecurity}}. When state is limited, there are more "initial"
+responses for an attacker to intercept.
+
+{{noting}} permits UAs to configure other Known PQ Hosts as local policy,
+such as a pre-configured list. While such measures can mitigate this attack,
+they can introduce other limitations when the number of otherwise
+quantum-resistant hosts exceeds an implementation's size limits.
+
+Non-browser clients may be further limited in their ability to both maintain
+state and include large, pre-configured lists.
+
+These limitations mean `Require-PQ-Auth` is only viable as a temporary measure
+for a limited number of applications. In many applications, it will still be
+necessary to trust anchors in the near term. {{ChromiumPQAuthRoadmap}}
+describes one such transition plan.
 
 ## Denial of Service
 
@@ -482,13 +469,10 @@ the UA will accept can still meet {{pq-checks}} and deliver that value
 meeting the checks, the origin stays unreachable until the policy
 expires.
 
-A PQ preload entry is configured out of band. The noting rule does not
-stop a poisoned preload list ({{preload}}).
-
 # Privacy Considerations
 
 <cref>TODO Privacy Considerations (sticky state parallel to HSTS; private
-browsing alignment; preload privacy profile; subdomain bitvectors;
+browsing alignment; subdomain bitvectors;
 residual `max-age` TTL entropy without overselling oracles).</cref>
 
 
@@ -615,7 +599,7 @@ needed for the remainder of the Web.
 A modern client that prefers post-quantum authentication cannot tell, when
 an unknown origin presents only a classical credential, whether the origin
 has no post-quantum path or an attacker stripped it. Sticky
-`Require-PQ-Auth` helps only after opt-in or preload.
+`Require-PQ-Auth` helps only after opt-in.
 
 A proposed long-term answer is a credential that classical clients can
 still verify as usual, while carrying an embedded PQ-secure indication
@@ -682,7 +666,7 @@ infrastructure, expected for the public Web to center on MTC.
 |---|---|
 | CA | Growing CRQC-resistant issuance; classical credentials still widely available. |
 | Server | More origins send `Require-PQ-Auth` once they reliably serve an all-quantum-resistant path; they may still dual-home for legacy clients. Old servers still never opt in. |
-| Client | Still dual-accept by default; for Known PQ Hosts (including names learned via preload), reject classical trust anchors. As with HSTS, preload is part of the deployment story—and for origins often used in private browsing, it is typically the only way to get the pin's protection. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
+| Client | Still dual-accept by default; for Known PQ Hosts, reject classical trust anchors. Coverage grows, but adoption remains too slow for industry post-quantum timelines. |
 
 ### Stage 3 — Accelerate PQ issuance and PQ-secure signal in classical certificates
 
@@ -714,7 +698,7 @@ infrastructure, expected for the public Web to center on MTC.
 |---|---|
 | CA | Quantum-resistant-only trust for the Web PKI. |
 | Server | Stop sending `Require-PQ-Auth`; HSTS may remain. |
-| Client | Clear `Require-PQ-Auth` state (including preload) and eventually remove enforcement; the pin is redundant. The mechanism succeeds by becoming unnecessary. |
+| Client | Clear `Require-PQ-Auth` state and remove enforcement; the pin is redundant. The mechanism succeeds by becoming unnecessary. |
 
 # Document History
 
