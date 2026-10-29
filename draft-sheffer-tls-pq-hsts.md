@@ -427,22 +427,12 @@ TLS handshake with a fatal "handshake_failure" alert ({{!RFC9846}},
 Section 6.2). The UA MUST NOT offer the user a way to proceed
 ({{Section 12.1 of ?RFC6797}}).
 
-Deployments often place a middlebox (sometimes implemented as on-device software)
-that terminates TLS
-({{Section 9.3 of !RFC9846}}) between the UA and the origin. The
-certificate presented to the UA chains to a trust anchor installed
-locally in the UA or platform. If that trust anchor is not
-quantum-resistant, enforcing the checks above on the UA's connection to
-the middlebox would fail closed for every Known PQ Host reached through
-it. A UA MAY disable `Require-PQ-Auth` enforcement for some hosts
-according to local policy. For example, a UA may skip enforcement when
+The UA MAY skip enforcement according to local policy. For example,
+similar to {{Section 2.6 of ?RFC7469}}, the UA MAY skip enforcement if
 the validated certificate chain terminates at a user-defined trust
-anchor rather than a trust anchor built into the UA or underlying
-platform ({{Section 2.6 of ?RFC7469}}). Where the UA skips enforcement,
-this mechanism provides no protection on the UA's connection to the
-middlebox. The middlebox is the TLS client toward the origin and can
-apply the checks in {{pq-checks}} on that connection, and can note and
-enforce `Require-PQ-Auth` itself.
+anchor, rather than a trust anchor built into the UA (or underlying
+platform). The main use case is a middlebox that terminates TLS using
+such a locally installed trust anchor.
 
 This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
@@ -524,15 +514,6 @@ expires.
 
 A PQ preload entry is configured out of band. The noting rule does not
 stop a poisoned preload list ({{preload}}).
-
-After a policy is legitimately Noted, a middlebox that terminates TLS
-whose chain to the UA does not meet {{pq-checks}} causes the same hard
-failure unless the UA skips enforcement under local policy
-({{enforcement}})—for example because the chain terminates at a
-user-defined trust anchor. Deployments that use such a middlebox with a
-locally installed root typically rely on that exception. The pin then
-does not apply on the UA's connection to the middlebox. The middlebox can
-still enforce the policy on its connection to the origin.
 
 # Privacy Considerations
 
