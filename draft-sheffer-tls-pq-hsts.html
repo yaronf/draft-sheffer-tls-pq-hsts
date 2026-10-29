@@ -9,14 +9,11 @@
 <meta content="Tirumaleswar Reddy.K" name="author">
 <meta content="David Benjamin" name="author">
 <meta content="
-       This document defines an HTTP response header field,  Require-PQ-Auth ,
-modeled on HTTP Strict Transport Security (HSTS)   but
-carried separately with its own sticky client state as a Structured
-Fields Dictionary  . When a user agent has noted that policy
-for a host, it  MUST  authenticate using a quantum-resistant trust anchor.
-The header is a near-term, origin-opt-in lever for dual-trust-store PKI
-migration and is intended to become unnecessary once classical trust
-anchors are retired. 
+       This document defines an HTTP response header field,  Require-PQ-Auth , that
+instructs user agents to require a quantum-resistant certificate chain in
+subsequent connections. This is a short-term, opt-in mechanism for HTTP
+origins to protect against legacy classical trust anchors. It will become
+unnecessary when UAs remove these trust anchors. 
     " name="description">
 <meta content="xml2rfc 3.34.1" name="generator">
 <meta content="post-quantum migration" name="keyword">
@@ -1095,14 +1092,11 @@ svg {
 <h1 id="title">An HSTS-like Header for Secure PQ Migration</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>,
-modeled on HTTP Strict Transport Security (HSTS) <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span> but
-carried separately with its own sticky client state as a Structured
-Fields Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>. When a user agent has noted that policy
-for a host, it <span class="bcp14">MUST</span> authenticate using a quantum-resistant trust anchor.
-The header is a near-term, origin-opt-in lever for dual-trust-store PKI
-migration and is intended to become unnecessary once classical trust
-anchors are retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>, that
+instructs user agents to require a quantum-resistant certificate chain in
+subsequent connections. This is a short-term, opt-in mechanism for HTTP
+origins to protect against legacy classical trust anchors. It will become
+unnecessary when UAs remove these trust anchors.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1170,17 +1164,12 @@ anchors are retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <nav class="toc"><ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
             <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
-                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-pq-hsts-in-the-broader-migr" class="internal xref">PQ-HSTS in the Broader Migration Context</a></p>
-</li>
-            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-threat-model" class="internal xref">Threat Model</a></p>
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-threat-model" class="internal xref">Threat Model</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-syntax" class="internal xref">Syntax</a></p>
@@ -1271,45 +1260,25 @@ anchors are retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">Migrating TLS authentication to post-quantum cryptography cannot be done
-by flipping a single switch. For a long period, relying parties will keep
-classical trust anchors in their trust stores alongside
-quantum-resistant ones, and
-many origins will still present only
-classical credentials. Under active attack, what matters is not whether
-a server can present a post-quantum credential, but whether the client
-accepts a classical path. An attacker able to forge certificates that
-chain to a classical CA can strip a post-quantum credential and present
-only a classical one. A client that still accepts classical paths will
-treat that forged credential as valid, as if the origin had never
-upgraded.<a href="#section-1-1" class="pilcrow">¶</a></p>
+by flipping a single switch. For a period, many origins will still
+present classical certificate chains, so user agents (UAs) will need to trust
+classical trust anchors alongside quantum-resistant ones.
+This allows an attacker able to forge classical certificates to downgrade the
+connection. Whether or not the origin had actually upgraded, a client that
+still accepts classical paths will treat that forged credential as valid.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">This document defines an HTTP response header field, <code>Require-PQ-Auth</code>,
-with HSTS-like semantics but carried separately from
-<code>Strict-Transport-Security</code>, with its own sticky UA state. That
-structure follows HTTP Public Key Pinning <span>[<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>. An industry
-outline of the same migration, including an HSTS-like opt-in stage,
-appears in <span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span>.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">Noting <code>Require-PQ-Auth</code> requires a securely delivered HTTPS response. It
-does not require the host to be a Known HSTS Host <span>[<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>. HSTS and
-<code>Require-PQ-Auth</code> lifecycles are independent. UAs that do not implement
-this document ignore the unknown header field.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<div id="pq-hsts-in-the-broader-migration-context">
-<section id="section-1.1">
-        <h3 id="name-pq-hsts-in-the-broader-migr">
-<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-pq-hsts-in-the-broader-migr" class="section-name selfRef">PQ-HSTS in the Broader Migration Context</a>
-        </h3>
-<p id="section-1.1-1">This mechanism addresses classical trust-anchor impersonation during the
-dual-trust-store period. It is one near-term lever within the bigger industry migration. The
-harder problem is coordinating clients, servers, and trust-anchor
-operators onto quantum-resistant authentication on a compressed timeline
-<span>[<a href="#RescorlaPQEmergency" class="cite xref">RescorlaPQEmergency</a>]</span>. <span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span> describes a fuller
-migration program in which an HSTS-like opt-in is only an early stage.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
-<p id="section-1.1-2">As additional context, deployments will use different quantum-resistant
+which allows an origin to indicate to the user agent to only accept chains
+from quantum-resistant trust anchors in subsequent connections.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This is a near-term mechanism with several limitations described in
+<a href="#limitations" class="auto internal xref">Section 8.3</a>. It is intended to be temporary, for use until classical trust
+anchors are removed. <span>[<a href="#ChromiumPQAuthRoadmap" class="cite xref">ChromiumPQAuthRoadmap</a>]</span> describes a
+fuller migration program in which an HSTS-like opt-in is only an early
+stage.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">As additional context, deployments will use different quantum-resistant
 credential forms, including Merkle Tree Certificates (MTC). Normative
 requirements in this document stay at the trust-anchor abstraction so
 those forms can satisfy <code>Require-PQ-Auth</code> without tying the pin to a
-single encoding.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
-</section>
-</div>
+single encoding.<a href="#section-1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1753,10 +1722,6 @@ Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a hr
 <a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
-<dt id="RFC9651">[RFC9651]</dt>
-        <dd>
-<span class="refAuthor">Nottingham, M.</span> and <span class="refAuthor">P. Kamp</span>, <span class="refTitle">"Structured Field Values for HTTP"</span>, <span class="seriesInfo">RFC 9651</span>, <span class="seriesInfo">DOI 10.17487/RFC9651</span>, <time datetime="2024-09" class="refDate">September 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9651">https://www.rfc-editor.org/rfc/rfc9651</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
@@ -1764,6 +1729,10 @@ Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a hr
 <dt id="RFC8174">[RFC8174]</dt>
         <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9651">[RFC9651]</dt>
+        <dd>
+<span class="refAuthor">Nottingham, M.</span> and <span class="refAuthor">P. Kamp</span>, <span class="refTitle">"Structured Field Values for HTTP"</span>, <span class="seriesInfo">RFC 9651</span>, <span class="seriesInfo">DOI 10.17487/RFC9651</span>, <time datetime="2024-09" class="refDate">September 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9651">https://www.rfc-editor.org/rfc/rfc9651</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9846">[RFC9846]</dt>
         <dd>
@@ -1782,10 +1751,6 @@ Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a hr
 <a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
-<dt id="RescorlaPQEmergency">[RescorlaPQEmergency]</dt>
-        <dd>
-<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"PQ emergency"</span>, <time datetime="2024-04" class="refDate">April 2024</time>, <span>&lt;<a href="https://educatedguesswork.org/posts/pq-emergency/">https://educatedguesswork.org/posts/pq-emergency/</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="ChromiumPQAuthRoadmap">[ChromiumPQAuthRoadmap]</dt>
         <dd>
 <span class="refAuthor">Benjamin, D.</span> and <span class="refAuthor">J. DeBlasio</span>, <span class="refTitle">"Post-Quantum HTTPS Authentication Roadmap"</span>, <time datetime="2026-02" class="refDate">February 2026</time>, <span>&lt;<a href="https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/">https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/</a>&gt;</span>. </dd>
@@ -1797,14 +1762,6 @@ Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a hr
 <dt id="StrictNavigationalSecurity">[StrictNavigationalSecurity]</dt>
         <dd>
 <span class="refAuthor">West, M.</span>, <span class="refTitle">"Strict Navigational Security"</span>, <time datetime="2019-09" class="refDate">September 2019</time>, <span>&lt;<a href="https://github.com/mikewest/strict-navigation-security">https://github.com/mikewest/strict-navigation-security</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC6797">[RFC6797]</dt>
-        <dd>
-<span class="refAuthor">Hodges, J.</span>, <span class="refAuthor">Jackson, C.</span>, and <span class="refAuthor">A. Barth</span>, <span class="refTitle">"HTTP Strict Transport Security (HSTS)"</span>, <span class="seriesInfo">RFC 6797</span>, <span class="seriesInfo">DOI 10.17487/RFC6797</span>, <time datetime="2012-11" class="refDate">November 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6797">https://www.rfc-editor.org/rfc/rfc6797</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC7469">[RFC7469]</dt>
-        <dd>
-<span class="refAuthor">Evans, C.</span>, <span class="refAuthor">Palmer, C.</span>, and <span class="refAuthor">R. Sleevi</span>, <span class="refTitle">"Public Key Pinning Extension for HTTP"</span>, <span class="seriesInfo">RFC 7469</span>, <span class="seriesInfo">DOI 10.17487/RFC7469</span>, <time datetime="2015-04" class="refDate">April 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7469">https://www.rfc-editor.org/rfc/rfc7469</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-lamps-pq-composite-sigs">[I-D.ietf-lamps-pq-composite-sigs]</dt>
         <dd>
@@ -1822,9 +1779,17 @@ Dictionary <span>[<a href="#RFC9651" class="cite xref">RFC9651</a>]</span>.<a hr
         <dd>
 <span class="refAuthor">Benjamin, D.</span>, <span class="refAuthor">O'Brien, D.</span>, <span class="refAuthor">Westerbaan, B.</span>, <span class="refAuthor">Valenta, L.</span>, and <span class="refAuthor">F. Valsorda</span>, <span class="refTitle">"Merkle Tree Certificates"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-plants-merkle-tree-certs-07</span>, <time datetime="2026-10-07" class="refDate">7 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-07">https://datatracker.ietf.org/doc/html/draft-ietf-plants-merkle-tree-certs-07</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC6797">[RFC6797]</dt>
+        <dd>
+<span class="refAuthor">Hodges, J.</span>, <span class="refAuthor">Jackson, C.</span>, and <span class="refAuthor">A. Barth</span>, <span class="refTitle">"HTTP Strict Transport Security (HSTS)"</span>, <span class="seriesInfo">RFC 6797</span>, <span class="seriesInfo">DOI 10.17487/RFC6797</span>, <time datetime="2012-11" class="refDate">November 2012</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6797">https://www.rfc-editor.org/rfc/rfc6797</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC7838">[RFC7838]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Nottingham, M.</span>, <span class="refAuthor">McManus, P.</span>, and <span class="refAuthor">J. Reschke</span>, <span class="refTitle">"HTTP Alternative Services"</span>, <span class="seriesInfo">RFC 7838</span>, <span class="seriesInfo">DOI 10.17487/RFC7838</span>, <time datetime="2016-04" class="refDate">April 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7838">https://www.rfc-editor.org/rfc/rfc7838</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7469">[RFC7469]</dt>
+      <dd>
+<span class="refAuthor">Evans, C.</span>, <span class="refAuthor">Palmer, C.</span>, and <span class="refAuthor">R. Sleevi</span>, <span class="refTitle">"Public Key Pinning Extension for HTTP"</span>, <span class="seriesInfo">RFC 7469</span>, <span class="seriesInfo">DOI 10.17487/RFC7469</span>, <time datetime="2015-04" class="refDate">April 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7469">https://www.rfc-editor.org/rfc/rfc7469</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

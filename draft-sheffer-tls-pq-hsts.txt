@@ -17,13 +17,11 @@ Expires: 2 May 2027                                                Nokia
 Abstract
 
    This document defines an HTTP response header field, Require-PQ-Auth,
-   modeled on HTTP Strict Transport Security (HSTS) [RFC6797] but
-   carried separately with its own sticky client state as a Structured
-   Fields Dictionary [RFC9651].  When a user agent has noted that policy
-   for a host, it MUST authenticate using a quantum-resistant trust
-   anchor.  The header is a near-term, origin-opt-in lever for dual-
-   trust-store PKI migration and is intended to become unnecessary once
-   classical trust anchors are retired.
+   that instructs user agents to require a quantum-resistant certificate
+   chain in subsequent connections.  This is a short-term, opt-in
+   mechanism for HTTP origins to protect against legacy classical trust
+   anchors.  It will become unnecessary when UAs remove these trust
+   anchors.
 
 About This Document
 
@@ -76,7 +74,6 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction
-     1.1.  PQ-HSTS in the Broader Migration Context
    2.  Conventions and Definitions
    3.  Threat Model
    4.  Syntax
@@ -106,38 +103,24 @@ Table of Contents
 1.  Introduction
 
    Migrating TLS authentication to post-quantum cryptography cannot be
-   done by flipping a single switch.  For a long period, relying parties
-   will keep classical trust anchors in their trust stores alongside
-   quantum-resistant ones, and many origins will still present only
-   classical credentials.  Under active attack, what matters is not
-   whether a server can present a post-quantum credential, but whether
-   the client accepts a classical path.  An attacker able to forge
-   certificates that chain to a classical CA can strip a post-quantum
-   credential and present only a classical one.  A client that still
-   accepts classical paths will treat that forged credential as valid,
-   as if the origin had never upgraded.
+   done by flipping a single switch.  For a period, many origins will
+   still present classical certificate chains, so user agents (UAs) will
+   need to trust classical trust anchors alongside quantum-resistant
+   ones.  This allows an attacker able to forge classical certificates
+   to downgrade the connection.  Whether or not the origin had actually
+   upgraded, a client that still accepts classical paths will treat that
+   forged credential as valid.
 
    This document defines an HTTP response header field, Require-PQ-Auth,
-   with HSTS-like semantics but carried separately from Strict-
-   Transport-Security, with its own sticky UA state.  That structure
-   follows HTTP Public Key Pinning [RFC7469].  An industry outline of
-   the same migration, including an HSTS-like opt-in stage, appears in
-   [ChromiumPQAuthRoadmap].
+   which allows an origin to indicate to the user agent to only accept
+   chains from quantum-resistant trust anchors in subsequent
+   connections.
 
-   Noting Require-PQ-Auth requires a securely delivered HTTPS response.
-   It does not require the host to be a Known HSTS Host [RFC6797].  HSTS
-   and Require-PQ-Auth lifecycles are independent.  UAs that do not
-   implement this document ignore the unknown header field.
-
-1.1.  PQ-HSTS in the Broader Migration Context
-
-   This mechanism addresses classical trust-anchor impersonation during
-   the dual-trust-store period.  It is one near-term lever within the
-   bigger industry migration.  The harder problem is coordinating
-   clients, servers, and trust-anchor operators onto quantum-resistant
-   authentication on a compressed timeline [RescorlaPQEmergency].
-   [ChromiumPQAuthRoadmap] describes a fuller migration program in which
-   an HSTS-like opt-in is only an early stage.
+   This is a near-term mechanism with several limitations described in
+   Section 8.3.  It is intended to be temporary, for use until classical
+   trust anchors are removed.  [ChromiumPQAuthRoadmap] describes a
+   fuller migration program in which an HSTS-like opt-in is only an
+   early stage.
 
    As additional context, deployments will use different quantum-
    resistant credential forms, including Merkle Tree Certificates (MTC).
@@ -482,10 +465,6 @@ Table of Contents
 
 11.1.  Normative References
 
-   [RFC9651]  Nottingham, M. and P. Kamp, "Structured Field Values for
-              HTTP", RFC 9651, DOI 10.17487/RFC9651, September 2024,
-              <https://www.rfc-editor.org/rfc/rfc9651>.
-
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
@@ -494,6 +473,10 @@ Table of Contents
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC9651]  Nottingham, M. and P. Kamp, "Structured Field Values for
+              HTTP", RFC 9651, DOI 10.17487/RFC9651, September 2024,
+              <https://www.rfc-editor.org/rfc/rfc9651>.
 
    [RFC9846]  Rescorla, E., "The Transport Layer Security (TLS) Protocol
               Version 1.3", RFC 9846, DOI 10.17487/RFC9846, July 2026,
@@ -505,10 +488,6 @@ Table of Contents
               <https://www.rfc-editor.org/rfc/rfc9110>.
 
 11.2.  Informative References
-
-   [RescorlaPQEmergency]
-              Rescorla, E., "PQ emergency", April 2024,
-              <https://educatedguesswork.org/posts/pq-emergency/>.
 
    [ChromiumPQAuthRoadmap]
               Benjamin, D. and J. DeBlasio, "Post-Quantum HTTPS
@@ -524,15 +503,6 @@ Table of Contents
    [StrictNavigationalSecurity]
               West, M., "Strict Navigational Security", September 2019,
               <https://github.com/mikewest/strict-navigation-security>.
-
-   [RFC6797]  Hodges, J., Jackson, C., and A. Barth, "HTTP Strict
-              Transport Security (HSTS)", RFC 6797,
-              DOI 10.17487/RFC6797, November 2012,
-              <https://www.rfc-editor.org/rfc/rfc6797>.
-
-   [RFC7469]  Evans, C., Palmer, C., and R. Sleevi, "Public Key Pinning
-              Extension for HTTP", RFC 7469, DOI 10.17487/RFC7469, April
-              2015, <https://www.rfc-editor.org/rfc/rfc7469>.
 
    [I-D.ietf-lamps-pq-composite-sigs]
               Ounsworth, M., Gray, J., Pala, M., Klaußner, J., and S.
@@ -565,9 +535,18 @@ Table of Contents
               <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
               merkle-tree-certs-07>.
 
+   [RFC6797]  Hodges, J., Jackson, C., and A. Barth, "HTTP Strict
+              Transport Security (HSTS)", RFC 6797,
+              DOI 10.17487/RFC6797, November 2012,
+              <https://www.rfc-editor.org/rfc/rfc6797>.
+
    [RFC7838]  Nottingham, M., McManus, P., and J. Reschke, "HTTP
               Alternative Services", RFC 7838, DOI 10.17487/RFC7838,
               April 2016, <https://www.rfc-editor.org/rfc/rfc7838>.
+
+   [RFC7469]  Evans, C., Palmer, C., and R. Sleevi, "Public Key Pinning
+              Extension for HTTP", RFC 7469, DOI 10.17487/RFC7469, April
+              2015, <https://www.rfc-editor.org/rfc/rfc7469>.
 
 Appendix A.  Document History
 
