@@ -372,10 +372,8 @@ the server offers a quantum-resistant one.
 As with HSTS, noting a PQ Policy does not protect initial visits to an origin.
 An attacker who can modify that first response can strip `Require-PQ-Auth`,
 and the UA never notes the policy. Additionally, UAs might limit state set by
-an origin, e.g. as part of private browsing modes or to protect against
-cross-sign tracking {{ProtectingAgainstHSTSAbuse}}
-{{StrictNavigationalSecurity}}. When state is limited, there are more "initial"
-responses for an attacker to intercept.
+an origin, as described in {{privacy}}. When state is limited, there are more
+"initial" responses for an attacker to intercept.
 
 {{noting}} permits UAs to configure other Known PQ Hosts as local policy,
 such as a pre-configured list. While such measures can mitigate this attack,
@@ -405,12 +403,19 @@ the UA will accept can still meet {{pq-checks}} and deliver that value
 meeting the checks, the origin stays unreachable until the policy
 expires.
 
-# Privacy Considerations
+# Privacy Considerations {#privacy}
 
-<cref>TODO Privacy Considerations (sticky state parallel to HSTS; private
-browsing alignment; subdomain bitvectors;
-residual `max-age` TTL entropy without overselling oracles).</cref>
+The mechanism described in {{noting}} causes a UA to maintain state based on
+user activity in the UA. This state could be used to correlate user activity
+across contexts, such as across sites or between normal and private browsing
+profiles. {{ProtectingAgainstHSTSAbuse}} and {{StrictNavigationalSecurity}}
+discuss analogous issues for HSTS.
 
+UAs SHOULD mitigate this by clearing Known PQ Hosts when the user clears other
+site-specific state, and by partitioning Known PQ Host state across sensitive
+contexts, such as across sites or across browsing profiles. Note that these
+mitigations will limit the effectiveness of this mechanism, as discussed in
+{{limitations}}.
 
 # IANA Considerations
 
