@@ -442,7 +442,7 @@ cross-sign tracking {{ProtectingAgainstHSTSAbuse}}
 responses for an attacker to intercept.
 
 {{noting}} permits UAs to configure other Known PQ Hosts as local policy,
-such as a pre-configured list. Which such measures can mitigate this attack,
+such as a pre-configured list. While such measures can mitigate this attack,
 they can introduce other limitations when the number of otherwise
 quantum-resistant hosts exceeds an implementation's size limits.
 
