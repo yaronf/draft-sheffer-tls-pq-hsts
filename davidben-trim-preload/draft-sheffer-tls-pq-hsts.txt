@@ -5,10 +5,10 @@
 Transport Layer Security                                      Y. Sheffer
 Internet-Draft                                               Independent
 Intended status: Standards Track                              T. Reddy.K
-Expires: 1 May 2027                                                Nokia
+Expires: 2 May 2027                                                Nokia
                                                              D. Benjamin
                                                               Google LLC
-                                                         28 October 2026
+                                                         29 October 2026
 
 
               An HSTS-like Header for Secure PQ Migration
@@ -21,10 +21,9 @@ Abstract
    carried separately with its own sticky client state as a Structured
    Fields Dictionary [RFC9651].  When a user agent has noted that policy
    for a host, it MUST authenticate using a quantum-resistant trust
-   anchor and MUST negotiate quantum-resistant key agreement.  The
-   header is a near-term, origin-opt-in lever for dual-trust-store PKI
-   migration and is intended to become unnecessary once classical trust
-   anchors are retired.
+   anchor.  The header is a near-term, origin-opt-in lever for dual-
+   trust-store PKI migration and is intended to become unnecessary once
+   classical trust anchors are retired.
 
 About This Document
 
@@ -58,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 May 2027.
+   This Internet-Draft will expire on 2 May 2027.
 
 Copyright Notice
 
@@ -80,35 +79,35 @@ Table of Contents
      1.1.  PQ-HSTS in the Broader Migration Context
      1.2.  Relation to Other Work
    2.  Conventions and Definitions
-   3.  Syntax
-   4.  Server Processing
-     4.1.  Choosing policy parameters
-     4.2.  Updating and clearing policy
-   5.  User Agent Behavior
-     5.1.  Noting the header
-     5.2.  Connection checks
-     5.3.  Enforcement
-   6.  Operational Considerations
-   7.  Security Considerations
-     7.1.  Underlying Secure Transport Considerations
-     7.2.  Non-Conformant User Agent Implications
-     7.3.  Limitations
-     7.4.  Denial of Service
-   8.  Privacy Considerations
-   9.  IANA Considerations
-   10. References
-     10.1.  Normative References
-     10.2.  Informative References
+   3.  Threat Model
+   4.  Syntax
+   5.  Server Processing
+     5.1.  Choosing policy parameters
+     5.2.  Updating and clearing policy
+   6.  User Agent Behavior
+     6.1.  Noting the header
+     6.2.  Connection checks
+     6.3.  Enforcement
+   7.  Operational Considerations
+   8.  Security Considerations
+     8.1.  Key Agreement
+     8.2.  Non-Conformant User Agent Implications
+     8.3.  Limitations
+     8.4.  Denial of Service
+   9.  Privacy Considerations
+   10. IANA Considerations
+   11. References
+     11.1.  Normative References
+     11.2.  Informative References
    Appendix A.  The Migration to PQ-Secure Authentication in TLS
      A.1.  Problem Framing
        A.1.1.  Acceptable authentication algorithms versus credentials
                in use
        A.1.2.  Adoption S-curves and break budget
-       A.1.3.  Key agreement proceeds in parallel
-       A.1.4.  Public Web versus enterprise PKI
-       A.1.5.  Dual complete paths, not mixed chains
-       A.1.6.  Why an HSTS-like header is only a near-term lever
-       A.1.7.  PQ-secure signal embedded in classical certificates
+       A.1.3.  Public Web versus enterprise PKI
+       A.1.4.  Dual complete paths, not mixed chains
+       A.1.5.  Why an HSTS-like header is only a near-term lever
+       A.1.6.  PQ-secure signal embedded in classical certificates
      A.2.  Chronological Stages
        A.2.1.  Stage 0 — Today
        A.2.2.  Stage 1 — Early PQ issuance, dual accept
@@ -137,17 +136,6 @@ Table of Contents
    accepts classical paths will treat that forged credential as valid,
    as if the origin had never upgraded.
 
-   Key agreement is on a different track.  Hybrid and pure post-quantum
-   key agreement are already being deployed independently of
-   authentication migration.  That work does not by itself prevent
-   classical trust-anchor downgrade; rather, it mitigates the more
-   pressing "harvest now, decrypt later" threat model.  Once an origin
-   has asserted a post-quantum posture via the mechanism in this
-   document, however, allowing a later classical-only key agreement
-   would re-open a confidentiality downgrade for that host.  Therefore,
-   when Require-PQ-Auth is enforced, this document also requires
-   quantum-resistant key agreement for that host.
-
    This document defines an HTTP response header field, Require-PQ-Auth,
    with HSTS-like semantics but carried separately from Strict-
    Transport-Security, with its own sticky UA state.  That structure
@@ -160,21 +148,10 @@ Table of Contents
    and Require-PQ-Auth lifecycles are independent.  UAs that do not
    implement this document ignore the unknown header field.
 
-   The normative contribution of this document is the near-term opt-in
-   Require-PQ-Auth pin and the associated user-agent behavior.  Where
-   this document uses "PQ" in the title and abbreviation (PQ-HSTS), the
-   normative requirement is quantum-resistant trust-anchor
-   authentication and quantum-resistant key agreement as defined
-   below—not a single algorithm.  The informal name reflects HSTS-like
-   behavior, not an extension of the Strict-Transport-Security header
-   field.
-
 1.1.  PQ-HSTS in the Broader Migration Context
 
-   This mechanism addresses a specific, comparatively well-understood
-   threat: classical trust-anchor downgrade during the dual-trust-store
-   period, and classical-only key-agreement downgrade once a host has
-   asserted a post-quantum posture.
+   This mechanism addresses classical trust-anchor impersonation during
+   the dual-trust-store period.
 
    The harder problem is coordinating a three-sided ecosystem of
    clients, servers, and certificate authorities (or other trust-anchor
@@ -198,9 +175,8 @@ Table of Contents
    [I-D.sheffer-tls-pqc-continuity] defines a TLS-layer commitment that
    a server will present a PQC or composite end-entity certificate for a
    period of time.  This document instead defines an HTTP sticky policy
-   that pins quantum-resistant trust anchors (and key agreement when the
-   pin is enforced).  The two approaches address related downgrade
-   problems at different layers.
+   that pins quantum-resistant trust anchors.  The two approaches
+   address related downgrade problems at different layers.
 
    Physically large post-quantum certificates motivate new certificate
    distribution mechanisms.  This document is intended to work with that
@@ -239,11 +215,10 @@ Table of Contents
       algorithms.  A classical trust anchor is a trust anchor that
       authenticates only classical paths.
 
-   quantum-resistant (signatures / trust anchors):  Not classical-only.
-      For authentication material, this document treats pure post-
-      quantum algorithms and composite algorithms
-      [I-D.ietf-lamps-pq-composite-sigs] as one class, consistent with
-      the PQC end-entity classification in
+   quantum-resistant:  Not classical-only.  For authentication material,
+      this document treats pure post-quantum algorithms and composite
+      algorithms [I-D.ietf-lamps-pq-composite-sigs] as one class,
+      consistent with the PQC end-entity classification in
       [I-D.sheffer-tls-pqc-continuity].  Which algorithms a UA accepts
       as quantum-resistant is a matter of local policy and the relevant
       algorithm specifications; this document states the property, not a
@@ -251,12 +226,6 @@ Table of Contents
 
 
    // TODO: add a more precise definition of quantum-resistance for MTC.
-
-   quantum-resistant (key agreement):  Not classical-only.  Hybrid key
-      agreement (classical combined with a post-quantum KEM) and pure
-      post-quantum key agreement both satisfy this document.  Exact
-      NamedGroup / codepoint acceptance is left to UA policy and the TLS
-      Supported Groups registry [IANA.TLS-Parameters].
 
    trust anchor:  The root of acceptance for a server credential: an
       X.509 trust anchor [RFC5280] or an MTC trust base / cosigner trust
@@ -269,7 +238,7 @@ Table of Contents
       state is independent of the policy defined here.
 
    Known PQ Host / PQ Policy:  A host for which the UA has noted a valid
-      Require-PQ-Auth policy (Section 3, Section 5), including expiry
+      Require-PQ-Auth policy (Section 4, Section 6), including expiry
       derived from max-age and whether include-subdomains applies.
       Storage is parallel to—not part of—HSTS Policy storage.
 
@@ -277,7 +246,18 @@ Table of Contents
       name is a subdomain.  For example, example.com is a superdomain of
       www.example.com.
 
-3.  Syntax
+3.  Threat Model
+
+   This document addresses classical trust-anchor impersonation during
+   the dual-trust-store migration period.  An attacker forges a
+   classical certificate with a CRQC for a name whose operator intends
+   to use only quantum-resistant authentication, and presents that
+   credential to a dual-accepting UA.  The negotiated key agreement does
+   not matter for this attack: the holder of the forged credential can
+   impersonate the server whether key agreement is classical or quantum-
+   resistant.
+
+4.  Syntax
 
    Require-PQ-Auth is an HTTP Structured Header field [RFC9651].  Its
    value MUST be a Dictionary.  Recipients that cannot parse the field
@@ -311,18 +291,14 @@ Table of Contents
    Require-PQ-Auth: max-age=86400
    Require-PQ-Auth: max-age=31536000, include-subdomains
 
-4.  Server Processing
+5.  Server Processing
 
    Servers MUST emit Require-PQ-Auth only when they can keep the
    following commitment for the lifetime conveyed by max-age (and for
-   any hosts covered by include-subdomains):
-
-   1.  Serve a certification path anchored at a quantum-resistant trust
-       anchor (pure post-quantum or composite per the server's
-       deployment), with no mixed classical/quantum-resistant path; and
-
-   2.  Complete quantum-resistant key agreement (hybrid or pure post-
-       quantum) with clients that implement this document.
+   any hosts covered by include-subdomains): serve a certification path
+   anchored at a quantum-resistant trust anchor (pure post-quantum or
+   composite per the server's deployment), with no mixed classical/
+   quantum-resistant path.
 
    The commitment applies to every server that answers for each covered
    hostname, not only the instance that sent the header—including all
@@ -331,12 +307,12 @@ Table of Contents
    the policy, UAs that reach it will fail to connect.
 
    The server MUST send Require-PQ-Auth only over HTTPS.  Otherwise UAs
-   will not note the field (Section 5).  The server SHOULD include the
+   will not note the field (Section 6).  The server SHOULD include the
    header on every HTTPS response, unless it omits the header for
    performance reasons (which typically does not make sense given the
    header's small size).
 
-4.1.  Choosing policy parameters
+5.1.  Choosing policy parameters
 
    max-age should reflect how long the operator is willing to keep the
    commitment above.  Operators typically start with a short max-age
@@ -345,15 +321,15 @@ Table of Contents
    include-subdomains MUST NOT be sent unless every host that would be
    covered can likewise satisfy the commitment for the same window.
 
-4.2.  Updating and clearing policy
+5.2.  Updating and clearing policy
 
    A valid Require-PQ-Auth field replaces any previously Noted PQ Policy
-   for that host when the UA notes it (Section 5).  Omitting the header
+   for that host when the UA notes it (Section 6).  Omitting the header
    does not clear Noted policy.
 
    To delete client state before expiry, the server sends max-age with
    value 0.  UAs that successfully note that response MUST delete the
-   Noted PQ Policy (Section 5).  That escape hatch is useful only in
+   Noted PQ Policy (Section 6).  That escape hatch is useful only in
    laboratory or similar conditions, where the client population is
    small and individually identifiable.  It works only while the server
    can still meet the commitment: enforcing UAs reject connections that
@@ -362,11 +338,11 @@ Table of Contents
    that ability first, those UAs stay locked out until expiry or manual
    action.
 
-5.  User Agent Behavior
+6.  User Agent Behavior
 
    This section defines how UAs note and enforce Require-PQ-Auth policy.
 
-5.1.  Noting the header
+6.1.  Noting the header
 
    Upon receipt of a Require-PQ-Auth header field in an HTTP response,
    the UA notes a PQ Policy when all of the following hold, and MUST NOT
@@ -375,11 +351,11 @@ Table of Contents
    1.  The response was received over an error-free HTTPS connection
        that uses TLS 1.3 [RFC9846] or later.
 
-   2.  That connection meets the checks in Section 5.2, whether or not a
+   2.  That connection meets the checks in Section 6.2, whether or not a
        PQ Policy is already Noted for the host.
 
    3.  The field value parses as a Structured Fields Dictionary per
-       Section 3, including a valid max-age member.
+       Section 4, including a valid max-age member.
 
    The host need not be a Known HSTS Host.  Noting PQ Policy MUST NOT
    modify HSTS Policy storage.
@@ -402,7 +378,7 @@ Table of Contents
    local policy.  For example, the UA MAY be pre-configured with a list
    of pre-loaded Known PQ Hosts, similar to Section 12.3 of [RFC6797].
 
-5.2.  Connection checks
+6.2.  Connection checks
 
    A connection meets the checks of this section when all of the
    following hold.  These checks apply to the connection itself.  They
@@ -417,27 +393,30 @@ Table of Contents
        hop is classical.  (Detailed mixed-path rejection may be refined
        here or by reference to a dedicated path-validation document.)
 
-   3.  The negotiated key agreement is quantum-resistant (hybrid or pure
-       post-quantum per local policy).
-
-5.3.  Enforcement
+6.3.  Enforcement
 
    When establishing a connection to a host covered by an unexpired
    Noted PQ Policy — either because the host itself is a Known PQ Host,
    or because a Known PQ Host that is a superdomain of this host has
    include-subdomains — the connection MUST meet the checks in
-   Section 5.2, and MUST use TLS 1.3 [RFC9846] or later.
+   Section 6.2, and MUST use TLS 1.3 [RFC9846] or later.
 
    If the connection does not meet those requirements, the UA MUST abort
    the TLS handshake with a fatal "handshake_failure" alert ([RFC9846],
    Section 6.2).  The UA MUST NOT offer the user a way to proceed
    (Section 12.1 of [RFC6797]).
 
+   The UA MAY skip enforcement according to local policy.  For example,
+   similar to Section 2.6 of [RFC7469], the UA MAY skip enforcement if
+   the validated certificate chain terminates at a user-defined trust
+   anchor, rather than a trust anchor built into the UA (or underlying
+   platform).  The main use case is a middlebox that terminates TLS
+   using such a locally installed trust anchor.
+
    This document does not impose separate end-entity signature-algorithm
    requirements beyond the trust-anchor class and path-consistency rules
-   above.  It does not enumerate TLS NamedGroup codepoints or MTC
-   validation procedures; those remain matters for TLS/IANA policy and
-   [I-D.ietf-plants-merkle-tree-certs], respectively.
+   above.  It does not enumerate MTC validation procedures; those remain
+   matters for [I-D.ietf-plants-merkle-tree-certs].
 
    Once classical trust anchors are no longer accepted for
    authentication (Stage 5 of Appendix A), Require-PQ-Auth is redundant
@@ -446,36 +425,49 @@ Table of Contents
    sending the header in that environment.  HSTS policy, if any, is
    unaffected.
 
-6.  Operational Considerations
+7.  Operational Considerations
 
 
    // TODO Operational considerations: CDN / multi-CDN consistency;
    // staged `max-age` independent of HSTS; independent HSTS
    // `includeSubDomains` vs PQ `include-subdomains`; HTTPS required to
-   // note, HSTS not required; enterprise TLS interception; public Web ≈
-   // MTC vs enterprise ≈ X.509 PQ chains; MTC evolving; SFV
-   // serialization (lowercase keys, commas); do not assert the pin
-   // before hybrid/PQ KE is solid for the served audience.
+   // note, HSTS not required; public Web ≈ MTC vs enterprise ≈ X.509 PQ
+   // chains; MTC evolving; SFV serialization (lowercase keys, commas).
+   // Middlebox carve-out is in {{enforcement}}.
 
-7.  Security Considerations
+8.  Security Considerations
 
    The security considerations of HSTS (Section 14 of [RFC6797]) apply
    to Require-PQ-Auth.  This section covers where they differ.
 
-7.1.  Underlying Secure Transport Considerations
+8.1.  Key Agreement
 
-   Quantum-resistant key exchange and authentication are specified for
-   TLS 1.3 [RFC9846] and not for earlier versions.  Require-PQ-Auth can
-   therefore be used only with TLS 1.3 or later.
+   Quantum resistance for a TLS session also requires a quantum-
+   resistant key agreement mechanism.  While Require-PQ-Auth does not
+   directly constrain the key agreement, the TLS handshake provides
+   downgrade protection when the authentication itself is secure
+   (Appendix F.1 of [RFC9846]).  Provided the Known PQ Host's TLS server
+   is correctly configured to prefer quantum-resistant key agreement
+   methods, a CRQC cannot downgrade the TLS session to a classical key
+   agreement mechanism.
 
-7.2.  Non-Conformant User Agent Implications
+   The authentication pin still mitigates the threat this document
+   targets even if key agreement remains classical.  Classical trust-
+   anchor impersonation is offline certificate forgery with a CRQC, then
+   presentation of that credential.  Breaking a live classical Diffie-
+   Hellman key agreement to recover session keys requires a real-time
+   CRQC attack on that handshake.  That is a harder, later capability
+   than the dual-trust-store impersonation this pin blocks for Known PQ
+   Hosts.
+
+8.2.  Non-Conformant User Agent Implications
 
    UAs that do not implement this document ignore the header field.  If
    such a UA accepts both classical and quantum-resistant
    authentication, a quantum attacker can present a forged classical
    certificate even when the server offers a quantum-resistant one.
 
-7.3.  Limitations
+8.3.  Limitations
 
    As with HSTS, noting a PQ Policy does not protect initial visits to
    an origin.  An attacker who can modify that first response can strip
@@ -486,7 +478,7 @@ Table of Contents
    state is limited, there are more "initial" responses for an attacker
    to intercept.
 
-   Section 5.1 permits UAs to configure other Known PQ Hosts as local
+   Section 6.1 permits UAs to configure other Known PQ Hosts as local
    policy, such as a pre-configured list.  Which such measures can
    mitigate this attack, they can introduce other limitations when the
    number of otherwise quantum-resistant hosts exceeds an
@@ -500,34 +492,30 @@ Table of Contents
    it will still be necessary to trust anchors in the near term.
    [ChromiumPQAuthRoadmap] describes one such transition plan.
 
-7.4.  Denial of Service
+8.4.  Denial of Service
 
-   An attacker that controls a TLS-terminating proxy can cause a UA to
-   note Require-PQ-Auth only when the connection meets Section 5.2.  A
-   proxy that cannot meet those checks cannot set the policy.
+   An attacker that controls a middlebox that terminates TLS can cause a
+   UA to note Require-PQ-Auth only when the connection meets
+   Section 6.2.  A middlebox that cannot meet those checks cannot set
+   the policy.
 
    If the attacker can meet the checks and sets a large max-age, UAs
-   that note the policy require Section 5.2 until the policy expires.
+   that note the policy require Section 6.2 until the policy expires.
    include-subdomains extends that requirement to every covered name.
    Sending max-age of 0 does not remove the policy unless some endpoint
-   the UA will accept can still meet Section 5.2 and deliver that value
-   (Section 4).  If the attacker was the only such endpoint and then
+   the UA will accept can still meet Section 6.2 and deliver that value
+   (Section 5).  If the attacker was the only such endpoint and then
    stops meeting the checks, the origin stays unreachable until the
    policy expires.
 
-   After a policy is legitimately Noted, a TLS interceptor that cannot
-   meet Section 5.2 causes the same hard failure.  That is an
-   availability problem for deployments that intercept TLS, separate
-   from injection.
-
-8.  Privacy Considerations
+9.  Privacy Considerations
 
 
    // TODO Privacy Considerations (sticky state parallel to HSTS;
    // private browsing alignment; subdomain bitvectors; residual `max-
    // age` TTL entropy without overselling oracles).
 
-9.  IANA Considerations
+10.  IANA Considerations
 
    IANA is requested to register the following entry in the "Hypertext
    Transfer Protocol (HTTP) Field Name Registry" defined in
@@ -539,19 +527,15 @@ Table of Contents
 
    Structured Type:  Dictionary
 
-   Specification document(s):  this document; see Section 3
+   Specification document(s):  this document; see Section 4
 
    Comments:  Defined for the header section of HTTP responses.  Not
       defined for use as a trailer field.  The field value is a
       Structured Fields Dictionary [RFC9651].
 
-10.  References
+11.  References
 
-10.1.  Normative References
-
-   [IANA.TLS-Parameters]
-              IANA, "Transport Layer Security (TLS) Parameters",
-              <https://www.iana.org/assignments/tls-parameters>.
+11.1.  Normative References
 
    [RFC9651]  Nottingham, M. and P. Kamp, "Structured Field Values for
               HTTP", RFC 9651, DOI 10.17487/RFC9651, September 2024,
@@ -575,7 +559,7 @@ Table of Contents
               DOI 10.17487/RFC9110, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9110>.
 
-10.2.  Informative References
+11.2.  Informative References
 
    [RescorlaPQEmergency]
               Rescorla, E., "PQ emergency", April 2024,
@@ -658,7 +642,7 @@ Appendix A.  The Migration to PQ-Secure Authentication in TLS
    This appendix is informative.  It situates the Require-PQ-Auth header
    in the long-term public Web authentication migration (with notes on
    enterprise use).  The normative behavior defined by this document is
-   the near-term HSTS-like mechanism in Section 5 and Section 3.  An
+   the near-term HSTS-like mechanism in Section 6 and Section 4.  An
    industry roadmap for the same migration, including the role of an
    HSTS-like opt-in and later PKI-only stages, is described in
    [ChromiumPQAuthRoadmap].
@@ -698,16 +682,7 @@ A.1.2.  Adoption S-curves and break budget
    the program.  Specialized clients that talk to a small, controlled
    server set have a much tighter curve.
 
-A.1.3.  Key agreement proceeds in parallel
-
-   Post-quantum key agreement (usually hybrid with a classical
-   algorithm) continues to roll out independently.  It does not fix
-   classical trust-anchor authentication downgrade.  Under Require-PQ-
-   Auth, this document requires CRQC-resistant key agreement for pinned
-   hosts so that the origin's asserted posture covers confidentiality as
-   well as authentication.
-
-A.1.4.  Public Web versus enterprise PKI
+A.1.3.  Public Web versus enterprise PKI
 
    Long-term credential forms differ by deployment:
 
@@ -724,7 +699,7 @@ A.1.4.  Public Web versus enterprise PKI
    problem.  Enterprise operators migrate on their own schedules; this
    document does not attempt to set or enforce those schedules.
 
-A.1.5.  Dual complete paths, not mixed chains
+A.1.4.  Dual complete paths, not mixed chains
 
    A path anchored at a CRQC-resistant trust anchor carries post-quantum
    (or composite) signatures.  Classical-only clients cannot verify
@@ -744,7 +719,7 @@ A.1.5.  Dual complete paths, not mixed chains
    // TODO: is a separate draft needed to forbid CAs from issuing mixed
    // chains, or should client rejection alone suffice?
 
-A.1.6.  Why an HSTS-like header is only a near-term lever
+A.1.5.  Why an HSTS-like header is only a near-term lever
 
    An HSTS-like pin is attractive: non-participating origins are not
    broken, and each participating client and server gains clear security
@@ -752,13 +727,13 @@ A.1.6.  Why an HSTS-like header is only a near-term lever
    incomplete preload list coverage of the Web, painful rollback, and
    private-browsing modes that do not retain durable sticky policy state
    all constrain reach.  Performance costs (CPU and network bandwidth
-   for CRQC-resistant credentials and key agreement) may further
-   discourage adoption by individual servers.  True legacy single-
-   certificate origins never opt in.  Voluntary adoption can keep
-   growing, but too slowly to meet industry post-quantum timelines.  A
-   more aggressive program is needed for the remainder of the Web.
+   for CRQC-resistant credentials) may further discourage adoption by
+   individual servers.  True legacy single-certificate origins never opt
+   in.  Voluntary adoption can keep growing, but too slowly to meet
+   industry post-quantum timelines.  A more aggressive program is needed
+   for the remainder of the Web.
 
-A.1.7.  PQ-secure signal embedded in classical certificates
+A.1.6.  PQ-secure signal embedded in classical certificates
 
    A modern client that prefers post-quantum authentication cannot tell,
    when an unknown origin presents only a classical credential, whether
@@ -817,13 +792,10 @@ A.2.1.  Stage 0 — Today
    +========+==========================================================+
    | CA     | Classical issuance only (Web PKI).                       |
    +--------+----------------------------------------------------------+
-   | Server | Classical certificates; HSTS common;                     |
-   |        | no Require-PQ-Auth.  Hybrid/PQ key                       |
-   |        | agreement rolling out independently.                     |
+   | Server | Classical certificates; HSTS                             |
+   |        | common; no Require-PQ-Auth.                              |
    +--------+----------------------------------------------------------+
    | Client | Accepts classical authentication.                        |
-   |        | Hybrid/PQ key agreement rolling out                      |
-   |        | independently.                                           |
    +--------+----------------------------------------------------------+
 
                                   Table 1
@@ -858,24 +830,24 @@ A.2.2.  Stage 1 — Early PQ issuance, dual accept
 
 A.2.3.  Stage 2 — Opt-in pin spreads (this document)
 
-     +========+======================================================+
-     | Role   | State                                                |
-     +========+======================================================+
-     | CA     | Growing CRQC-resistant issuance; classical           |
-     |        | credentials still widely available.                  |
-     +--------+------------------------------------------------------+
-     | Server | More origins send Require-PQ-Auth once they reliably |
-     |        | serve an all-CRQC-resistant path and complete PQ/    |
-     |        | hybrid key agreement; they may still dual-home for   |
-     |        | legacy clients.  Old servers still never opt in.     |
-     +--------+------------------------------------------------------+
-     | Client | Still dual-accept by default; for Known PQ Hosts,    |
-     |        | reject classical trust anchors and classical-only    |
-     |        | key agreement.  Coverage grows, but adoption remains |
-     |        | too slow for industry post-quantum timelines.        |
-     +--------+------------------------------------------------------+
+         +========+=============================================+
+         | Role   | State                                       |
+         +========+=============================================+
+         | CA     | Growing CRQC-resistant issuance; classical  |
+         |        | credentials still widely available.         |
+         +--------+---------------------------------------------+
+         | Server | More origins send Require-PQ-Auth once they |
+         |        | reliably serve an all-quantum-resistant     |
+         |        | path; they may still dual-home for legacy   |
+         |        | clients.  Old servers still never opt in.   |
+         +--------+---------------------------------------------+
+         | Client | Still dual-accept by default; for Known PQ  |
+         |        | Hosts, reject classical trust anchors.      |
+         |        | Coverage grows, but adoption remains too    |
+         |        | slow for industry post-quantum timelines.   |
+         +--------+---------------------------------------------+
 
-                                  Table 3
+                                 Table 3
 
 A.2.4.  Stage 3 — Accelerate PQ issuance and PQ-secure signal in
         classical certificates
@@ -898,8 +870,8 @@ A.2.4.  Stage 3 — Accelerate PQ issuance and PQ-secure signal in
        | Client | Still largely dual-accept, but a path opens to  |
        |        | strict policy once the PQ-secure signal is      |
        |        | widely verifiable.  Reject mixed paths.  For    |
-       |        | pinned names: CRQC-resistant trust-anchor path  |
-       |        | and CRQC-resistant key agreement.               |
+       |        | pinned names: quantum-resistant trust-anchor    |
+       |        | path.                                           |
        +--------+-------------------------------------------------+
 
                                  Table 4
