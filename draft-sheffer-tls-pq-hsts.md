@@ -45,19 +45,6 @@ normative:
   IANA.TLS-Parameters: IANA.tls-parameters
 
 informative:
-  RescorlaPQEmergency:
-    title: "PQ emergency"
-    target: https://educatedguesswork.org/posts/pq-emergency/
-    author:
-      ins: E. Rescorla
-      name: Eric Rescorla
-    date: 2024-04
-  CABForumSC081v3:
-    title: "Ballot SC081v3: Introduce Schedule of Reducing Validity and Data Reuse Periods"
-    target: https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/
-    author:
-      org: CA/Browser Forum
-    date: 2025-04
   ChromiumPQAuthRoadmap:
     title: "Post-Quantum HTTPS Authentication Roadmap"
     target: https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/
