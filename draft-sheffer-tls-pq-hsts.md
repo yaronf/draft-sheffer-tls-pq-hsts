@@ -110,47 +110,19 @@ do so.
 The following terms are used in this document:
 
 classical:
-: Cryptography or credentials that are not designed to remain secure
-  against a cryptographically-relevant quantum computer (CQRC), such as RSA
-  or elliptic-curve public-key algorithms. A classical trust anchor is a trust
-  anchor that authenticates only classical paths.
+: Cryptography that is not designed to remain secure against a
+  cryptographically-relevant quantum computer (CRQC) {{?RFC9958}}.
 
-quantum-resistant (signatures / trust anchors):
-: Not classical-only. For authentication material, this document treats
-  pure post-quantum algorithms and composite algorithms
-  {{?I-D.ietf-lamps-pq-composite-sigs}} as one class, consistent with the
-  PQC end-entity classification in
-  {{?I-D.sheffer-tls-pqc-continuity}}. Which algorithms a UA accepts as
-  quantum-resistant is a matter of local policy and the relevant algorithm
-  specifications;
-  this document states the property, not a closed algorithm list.
-
-<cref>TODO: add a more precise definition of quantum-resistance for MTC.</cref>
-
-quantum-resistant (key agreement):
-: Not classical-only. Hybrid key agreement (classical combined with a
-  post-quantum KEM) and pure post-quantum key agreement both satisfy
-  this document. Exact NamedGroup / codepoint acceptance is left to UA
-  policy and the TLS Supported Groups registry
-  {{IANA.TLS-Parameters}}.
+quantum-resistant:
+: Cryptography that is designed to remain secure against a CRQC.
 
 trust anchor:
-: The root of acceptance for a server credential: an X.509 trust anchor
-  {{?RFC5280}} or an MTC trust base / cosigner trust as defined by
-  {{?I-D.ietf-plants-merkle-tree-certs}}. Normative requirements in this
-  document refer to the class of trust anchor (classical vs
-  quantum-resistant), not to a single encoding.
-
-HSTS terms:
-: This document refers to Known HSTS Host, HSTS Policy, and related
-  terminology from {{?RFC6797}} only for comparison. HSTS state is
-  independent of the policy defined here.
+: The root of acceptance for a certification path, as defined in {{!RFC5280}}
 
 Known PQ Host / PQ Policy:
 : A host for which the UA has noted a valid `Require-PQ-Auth` policy
   ({{syntax}}, {{ua-behavior}}), including expiry derived from `max-age`
-  and whether `include-subdomains` applies. Storage is parallel to—not
-  part of—HSTS Policy storage.
+  and whether `include-subdomains` applies.
 
 # Syntax {#syntax}
 
