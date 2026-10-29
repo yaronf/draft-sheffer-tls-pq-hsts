@@ -386,6 +386,13 @@ TLS handshake with a fatal "handshake_failure" alert ({{!RFC9846}},
 Section 6.2). The UA MUST NOT offer the user a way to proceed
 ({{Section 12.1 of ?RFC6797}}).
 
+The UA MAY skip enforcement according to local policy. For example,
+similar to {{Section 2.6 of ?RFC7469}}, the UA MAY skip enforcement if
+the validated certificate chain terminates at a user-defined trust
+anchor, rather than a trust anchor built into the UA (or underlying
+platform). The main use case is a middlebox that terminates TLS using
+such a locally installed trust anchor.
+
 This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate MTC validation procedures; those remain
@@ -417,9 +424,9 @@ preloaded PQ enforcement when the pin is obsolete.</cref>
 <cref>TODO Operational considerations: CDN / multi-CDN consistency;
 staged `max-age` independent of HSTS; independent HSTS
 `includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
-HSTS not required; enterprise TLS interception; public Web ≈ MTC vs
-enterprise ≈ X.509 PQ chains; MTC evolving; SFV serialization (lowercase
-keys, commas).</cref>
+HSTS not required; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
+evolving; SFV serialization (lowercase keys, commas). Middlebox
+carve-out is in {{enforcement}}.</cref>
 
 
 # Security Considerations
@@ -462,9 +469,9 @@ protected ({{preload}}).
 
 ## Denial of Service
 
-An attacker that controls a TLS-terminating proxy can cause a UA to note
-`Require-PQ-Auth` only when the connection meets {{pq-checks}}. A proxy
-that cannot meet those checks cannot set the policy.
+An attacker that controls a middlebox that terminates TLS can cause a UA
+to note `Require-PQ-Auth` only when the connection meets {{pq-checks}}. A
+middlebox that cannot meet those checks cannot set the policy.
 
 If the attacker can meet the checks and sets a large `max-age`, UAs that
 note the policy require {{pq-checks}} until the policy expires.
@@ -477,11 +484,6 @@ expires.
 
 A PQ preload entry is configured out of band. The noting rule does not
 stop a poisoned preload list ({{preload}}).
-
-After a policy is legitimately Noted, a TLS interceptor that cannot meet
-{{pq-checks}} causes the same hard failure. That is an availability
-problem for deployments that intercept TLS, separate from injection.
-
 
 # Privacy Considerations
 
@@ -713,6 +715,14 @@ infrastructure, expected for the public Web to center on MTC.
 | CA | Quantum-resistant-only trust for the Web PKI. |
 | Server | Stop sending `Require-PQ-Auth`; HSTS may remain. |
 | Client | Clear `Require-PQ-Auth` state (including preload) and eventually remove enforcement; the pin is redundant. The mechanism succeeds by becoming unnecessary. |
+
+# Document History
+
+RFC Editor: please remove before publication.
+
+## draft-sheffer-tls-pq-hsts-00
+
+Initial version.
 
 # Acknowledgments
 {:numbered="false"}
