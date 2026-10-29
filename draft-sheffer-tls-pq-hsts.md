@@ -152,11 +152,6 @@ Known PQ Host / PQ Policy:
   and whether `include-subdomains` applies. Storage is parallel to—not
   part of—HSTS Policy storage.
 
-superdomain:
-: As in {{?RFC6797}}, a domain name of which another domain name is a
-  subdomain. For example, `example.com` is a superdomain of
-  `www.example.com`.
-
 # Syntax {#syntax}
 
 `Require-PQ-Auth` is an HTTP Structured Header field {{!RFC9651}}. Its
@@ -290,7 +285,7 @@ paths using algorithms that are believed to be quantum-resistant.
 When a UA establishes a connection to a host, it checks if either:
 
 * the host is a Known PQ Host
-* some superdomain of this host is a Known PQ Host with `include-subdomains`
+* the host is a subdomain of a Known PQ Host with `include-subdomains`
 
 If either of this conditions hold, the connection MUST use TLS 1.3 {{!RFC9846}}
 or later, and the connection MUST be authenticated by a certification path
