@@ -1,8 +1,8 @@
 <!-- regenerate: on (set to off if you edit this file) -->
 
-# An HSTS Extension for Secure PQ Migration
+# An HSTS-like Header for Secure PQ Migration
 
-This is the working area for the individual Internet-Draft, "An HSTS Extension for Secure PQ Migration".
+This is the working area for the individual Internet-Draft, "An HSTS-like Header for Secure PQ Migration".
 
 * [Editor's Copy](https://yaronf.github.io/draft-sheffer-tls-pq-hsts/#go.draft-sheffer-tls-pq-hsts.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-sheffer-tls-pq-hsts)
