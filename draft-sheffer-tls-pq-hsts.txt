@@ -400,11 +400,9 @@ Table of Contents
    As with HSTS, noting a PQ Policy does not protect initial visits to
    an origin.  An attacker who can modify that first response can strip
    Require-PQ-Auth, and the UA never notes the policy.  Additionally,
-   UAs might limit state set by an origin, e.g. as part of private
-   browsing modes or to protect against cross-sign tracking
-   [ProtectingAgainstHSTSAbuse] [StrictNavigationalSecurity].  When
-   state is limited, there are more "initial" responses for an attacker
-   to intercept.
+   UAs might limit state set by an origin, as described in Section 9.
+   When state is limited, there are more "initial" responses for an
+   attacker to intercept.
 
    Section 6.1 permits UAs to configure other Known PQ Hosts as local
    policy, such as a pre-configured list.  While such measures can
@@ -438,10 +436,18 @@ Table of Contents
 
 9.  Privacy Considerations
 
+   The mechanism described in Section 6.1 causes a UA to maintain state
+   based on user activity in the UA.  This state could be used to
+   correlate user activity across contexts, such as across sites or
+   between normal and private browsing profiles.
+   [ProtectingAgainstHSTSAbuse] and [StrictNavigationalSecurity] discuss
+   analogous issues for HSTS.
 
-   // TODO Privacy Considerations (sticky state parallel to HSTS;
-   // private browsing alignment; subdomain bitvectors; residual `max-
-   // age` TTL entropy without overselling oracles).
+   UAs SHOULD mitigate this by clearing Known PQ Hosts when the user
+   clears other site-specific state, and by partitioning Known PQ Host
+   state across sensitive contexts, such as across sites or across
+   browsing profiles.  Note that these mitigations will limit the
+   effectiveness of this mechanism, as discussed in Section 8.3.
 
 10.  IANA Considerations
 

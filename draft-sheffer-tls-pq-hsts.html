@@ -1626,10 +1626,8 @@ the server offers a quantum-resistant one.<a href="#section-8.2-1" class="pilcro
 <p id="section-8.3-1">As with HSTS, noting a PQ Policy does not protect initial visits to an origin.
 An attacker who can modify that first response can strip <code>Require-PQ-Auth</code>,
 and the UA never notes the policy. Additionally, UAs might limit state set by
-an origin, e.g. as part of private browsing modes or to protect against
-cross-sign tracking <span>[<a href="#ProtectingAgainstHSTSAbuse" class="cite xref">ProtectingAgainstHSTSAbuse</a>]</span>
-          <span>[<a href="#StrictNavigationalSecurity" class="cite xref">StrictNavigationalSecurity</a>]</span>. When state is limited, there are more "initial"
-responses for an attacker to intercept.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+an origin, as described in <a href="#privacy" class="auto internal xref">Section 9</a>. When state is limited, there are more
+"initial" responses for an attacker to intercept.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2"><a href="#noting" class="auto internal xref">Section 6.1</a> permits UAs to configure other Known PQ Hosts as local policy,
 such as a pre-configured list. While such measures can mitigate this attack,
 they can introduce other limitations when the number of otherwise
@@ -1662,14 +1660,21 @@ expires.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 </div>
 </section>
 </div>
-<div id="privacy-considerations">
+<div id="privacy">
 <section id="section-9">
       <h2 id="name-privacy-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-privacy-considerations" class="section-name selfRef">Privacy Considerations</a>
       </h2>
-<p id="section-9-1"><span class="cref">TODO Privacy Considerations (sticky state parallel to HSTS; private
-browsing alignment; subdomain bitvectors;
-residual `max-age` TTL entropy without overselling oracles).</span><a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-1">The mechanism described in <a href="#noting" class="auto internal xref">Section 6.1</a> causes a UA to maintain state based on
+user activity in the UA. This state could be used to correlate user activity
+across contexts, such as across sites or between normal and private browsing
+profiles. <span>[<a href="#ProtectingAgainstHSTSAbuse" class="cite xref">ProtectingAgainstHSTSAbuse</a>]</span> and <span>[<a href="#StrictNavigationalSecurity" class="cite xref">StrictNavigationalSecurity</a>]</span>
+discuss analogous issues for HSTS.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">UAs <span class="bcp14">SHOULD</span> mitigate this by clearing Known PQ Hosts when the user clears other
+site-specific state, and by partitioning Known PQ Host state across sensitive
+contexts, such as across sites or across browsing profiles. Note that these
+mitigations will limit the effectiveness of this mechanism, as discussed in
+<a href="#limitations" class="auto internal xref">Section 8.3</a>.<a href="#section-9-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
