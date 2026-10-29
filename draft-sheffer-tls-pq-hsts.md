@@ -42,6 +42,13 @@ author:
     email: davidben@google.com
 
 informative:
+  RescorlaPQEmergency:
+    title: "PQ emergency"
+    target: https://educatedguesswork.org/posts/pq-emergency/
+    author:
+      ins: E. Rescorla
+      name: Eric Rescorla
+    date: 2024-04
   ChromiumPQAuthRoadmap:
     title: "Post-Quantum HTTPS Authentication Roadmap"
     target: https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/
@@ -111,6 +118,20 @@ does not require the host to be a Known HSTS Host {{?RFC6797}}. HSTS and
 `Require-PQ-Auth` lifecycles are independent. UAs that do not implement
 this document ignore the unknown header field.
 
+## PQ-HSTS in the Broader Migration Context
+
+This mechanism addresses classical trust-anchor impersonation during the
+dual-trust-store period. It is one near-term lever within the bigger industry migration. The
+harder problem is coordinating clients, servers, and trust-anchor
+operators onto quantum-resistant authentication on a compressed timeline
+{{RescorlaPQEmergency}}. {{ChromiumPQAuthRoadmap}} describes a fuller
+migration program in which an HSTS-like opt-in is only an early stage.
+
+As additional context, deployments will use different quantum-resistant
+credential forms, including Merkle Tree Certificates (MTC). Normative
+requirements in this document stay at the trust-anchor abstraction so
+those forms can satisfy `Require-PQ-Auth` without tying the pin to a
+single encoding.
 
 # Conventions and Definitions
 
