@@ -42,13 +42,6 @@ author:
     email: davidben@google.com
 
 informative:
-  RescorlaPQEmergency:
-    title: "PQ emergency"
-    target: https://educatedguesswork.org/posts/pq-emergency/
-    author:
-      ins: E. Rescorla
-      name: Eric Rescorla
-    date: 2024-04
   ChromiumPQAuthRoadmap:
     title: "Post-Quantum HTTPS Authentication Roadmap"
     target: https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/
@@ -91,7 +84,7 @@ unnecessary when UAs remove these trust anchors.
 # Introduction
 
 Migrating TLS authentication to post-quantum cryptography cannot be done
-by flipping a single switch. For a long period, many origins will still
+by flipping a single switch. For a period, many origins will still
 present classical certificate chains, so user agents (UAs) will need to trust
 classical trust anchors alongside quantum-resistant ones.
 This allows an attacker able to forge classical certificates to downgrade the
@@ -104,17 +97,9 @@ from quantum-resistant trust anchors in subsequent connections.
 
 This is a near-term mechanism with several limitations described in
 {{limitations}}. It is intended to be temporary, for use until classical trust
-anchors are removed. {{ChromiumPQAuthRoadmap}} describes an example roadmap to
-do so.
-
-## PQ-HSTS in the Broader Migration Context
-
-This mechanism addresses classical trust-anchor impersonation during the
-dual-trust-store period. It is one near-term lever within the bigger industry migration. The
-harder problem is coordinating clients, servers, and trust-anchor
-operators onto quantum-resistant authentication on a compressed timeline
-{{RescorlaPQEmergency}}. {{ChromiumPQAuthRoadmap}} describes a fuller
-migration program in which an HSTS-like opt-in is only an early stage.
+anchors are removed. {{ChromiumPQAuthRoadmap}} describes a
+fuller migration program in which an HSTS-like opt-in is only an early
+stage.
 
 As additional context, deployments will use different quantum-resistant
 credential forms, including Merkle Tree Certificates (MTC). Normative
