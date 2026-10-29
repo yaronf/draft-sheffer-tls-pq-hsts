@@ -84,7 +84,7 @@ unnecessary when UAs remove these trust anchors.
 # Introduction
 
 Migrating TLS authentication to post-quantum cryptography cannot be done
-by flipping a single switch. For a period, many origins will still
+by flipping a single switch. For a long period, many origins will still
 present classical certificate chains, so user agents (UAs) will need to trust
 classical trust anchors alongside quantum-resistant ones.
 This allows an attacker able to forge classical certificates to downgrade the
@@ -107,6 +107,17 @@ requirements in this document stay at the trust-anchor abstraction so
 those forms can satisfy `Require-PQ-Auth` without tying the pin to a
 single encoding.
 
+## Threat Model
+
+This document addresses classical trust-anchor impersonation during the
+dual-trust-store migration period. An attacker forges a classical
+certificate with a cryptographically-relevant quantum computer (CRQC)
+for a name whose operator intends to use only quantum-resistant
+authentication, and presents that credential to a dual-accepting UA. The
+negotiated key agreement does not matter for this attack: the holder of
+the forged credential can impersonate the server whether key agreement is
+classical or quantum-resistant.
+
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
@@ -114,8 +125,8 @@ single encoding.
 The following terms are used in this document:
 
 classical:
-: Cryptography that is not designed to remain secure against a
-  cryptographically-relevant quantum computer (CRQC) {{?RFC9958}}.
+: Cryptography that is not designed to remain secure against a CRQC
+  {{?RFC9958}}.
 
 quantum-resistant:
 : Cryptography that is designed to remain secure against a CRQC.
@@ -124,28 +135,24 @@ trust anchor:
 : The root of acceptance for a certification path, as defined in {{!RFC5280}}.
 
 Known PQ Host / PQ Policy:
-: A host for which the UA has noted a valid `Require-PQ-Auth` policy
+: A host for which the UA stores a `Require-PQ-Auth` policy
   ({{syntax}}, {{ua-behavior}}), including expiry derived from `max-age`
-  and whether `include-subdomains` applies.
-
-# Threat Model
-
-This document addresses classical trust-anchor impersonation during the
-dual-trust-store migration period. An attacker forges a classical
-certificate with a CRQC for a name whose operator intends to use only
-quantum-resistant authentication, and presents that credential to a
-dual-accepting UA. The negotiated key agreement does not matter for this
-attack: the holder of the forged credential can impersonate the server
-whether key agreement is classical or quantum-resistant.
+  and whether `include-subdomains` applies. The UA obtains that policy by
+  noting the header field or by local policy (for example, a
+  preconfigured list).
 
 # Syntax {#syntax}
 
 `Require-PQ-Auth` is an HTTP Structured Header field {{!RFC9651}}. Its
-value MUST be a Dictionary. Recipients that cannot parse the field value
-as a Dictionary MUST NOT update any Noted PQ Policy for the host based on
-that field (any previously Noted policy remains unchanged).
+value MUST be a Dictionary. Unknown members MUST be ignored.
 
-The following Dictionary members are defined. Unknown members MUST be ignored.
+If the field value cannot be parsed as a Dictionary or does not include a
+valid `max-age` member, the UA MUST NOT
+update any Noted PQ Policy for the host based on that field (any
+previously Noted policy remains unchanged). See
+{{Section 2.2 of !RFC9651}}.
+
+The following Dictionary members are defined.
 
 max-age:
 : Integer (required). Non-negative number of seconds after receipt
@@ -154,15 +161,11 @@ max-age:
   the host (including subdomain scope learned from this host).
 
 include-subdomains:
-: Boolean true if present as a bare Dictionary member (optional). If
-  present, the PQ Policy applies to the host and to hosts whose domain
+: Boolean (optional). True if present as a bare Dictionary member. If
+  set, the PQ Policy applies to the host and to hosts whose domain
   names are subdomains of that host's domain name, analogous to HSTS
   `includeSubDomains` {{?RFC6797}}.
   Absence means host-only scope.
-
-If the Dictionary does not include a valid `max-age` member, or if any
-member is malformed, the UA MUST ignore the entire field. (See
-{{Section 2.2 of !RFC9651}}.)
 
 Examples:
 
@@ -292,13 +295,16 @@ Once all supported UAs are at this stage, servers MAY stop sending this header.
 
 # Operational Considerations {#ops}
 
-<cref>TODO Operational considerations: CDN / multi-CDN consistency;
-staged `max-age` independent of HSTS; independent HSTS
-`includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
-HSTS not required; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
-evolving; SFV serialization (lowercase keys, commas). Middlebox
-carve-out is in {{enforcement}}.</cref>
+The commitment in {{server}} applies to every authoritative server for
+each covered name. Operators that use multiple CDNs, failover providers,
+or HTTP/3 endpoints advertised via Alt-Svc {{?RFC7838}} need each of them
+to meet {{pq-checks}} toward UAs that enforce this mechanism, for the full
+`max-age` window.
 
+`Require-PQ-Auth` policy is independent of HSTS policy. Operators choose
+`max-age` and `include-subdomains` for this header separately from
+`Strict-Transport-Security`. Noting requires HTTPS ({{noting}}); the host
+need not be a Known HSTS Host.
 
 # Security Considerations
 
@@ -318,8 +324,7 @@ agreement mechanism.
 
 The authentication pin still mitigates the threat this document
 targets even if key agreement remains classical. Classical trust-anchor
-impersonation is offline certificate forgery with a CRQC, then
-presentation of that credential. Breaking a live classical Diffie-Hellman
+impersonation requires offline certificate forgery with a CRQC. Breaking a live classical Diffie-Hellman
 key agreement to recover session keys requires a real-time
 CRQC attack on that handshake. That is a harder, later capability than
 the dual-trust-store impersonation this pin blocks for Known PQ Hosts.
@@ -327,8 +332,8 @@ the dual-trust-store impersonation this pin blocks for Known PQ Hosts.
 ## Non-Conformant User Agent Implications
 
 UAs that do not implement this document ignore the header field. If
-such a UA accepts both classical and quantum-resistant authentication, a
-quantum attacker can present a forged classical certificate even when
+such a UA accepts both classical and quantum-resistant authentication, an
+attacker with a CRQC can present a forged classical certificate even when
 the server offers a quantum-resistant one.
 
 ## Limitations
@@ -349,7 +354,8 @@ state and include large, pre-configured lists.
 
 These limitations mean `Require-PQ-Auth` is only viable as a temporary measure
 for a limited number of applications. In many applications, it will still be
-necessary to trust anchors in the near term. {{ChromiumPQAuthRoadmap}}
+necessary to keep trusting classical trust anchors in the near term.
+{{ChromiumPQAuthRoadmap}}
 describes one such transition plan.
 
 ## Denial of Service
@@ -401,8 +407,7 @@ Specification document(s):
 
 Comments:
 : Defined for the header section of HTTP responses. Not defined for
-  use as a trailer field. The field value is a Structured Fields
-  Dictionary {{!RFC9651}}.
+  use as a trailer field.
 
 
 --- back
