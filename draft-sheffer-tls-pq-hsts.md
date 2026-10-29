@@ -41,10 +41,14 @@ author:
     organization: Google LLC
     email: davidben@google.com
 
-normative:
-  IANA.TLS-Parameters: IANA.tls-parameters
-
 informative:
+  RescorlaPQEmergency:
+    title: "PQ emergency"
+    target: https://educatedguesswork.org/posts/pq-emergency/
+    author:
+      ins: E. Rescorla
+      name: Eric Rescorla
+    date: 2024-04
   ChromiumPQAuthRoadmap:
     title: "Post-Quantum HTTPS Authentication Roadmap"
     target: https://www.chromium.org/Home/chromium-security/post-quantum-auth-roadmap/
@@ -103,6 +107,21 @@ This is a near-term mechanism with several limitations described in
 anchors are removed. {{ChromiumPQAuthRoadmap}} describes an example roadmap to
 do so.
 
+## PQ-HSTS in the Broader Migration Context
+
+This mechanism addresses classical trust-anchor impersonation during the
+dual-trust-store period. It is one near-term lever within the bigger industry migration. The
+harder problem is coordinating clients, servers, and trust-anchor
+operators onto quantum-resistant authentication on a compressed timeline
+{{RescorlaPQEmergency}}. {{ChromiumPQAuthRoadmap}} describes a fuller
+migration program in which an HSTS-like opt-in is only an early stage.
+
+As additional context, deployments will use different quantum-resistant
+credential forms, including Merkle Tree Certificates (MTC). Normative
+requirements in this document stay at the trust-anchor abstraction so
+those forms can satisfy `Require-PQ-Auth` without tying the pin to a
+single encoding.
+
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
@@ -115,7 +134,7 @@ classical:
   or elliptic-curve public-key algorithms. A classical trust anchor is a trust
   anchor that authenticates only classical paths.
 
-quantum-resistant (signatures / trust anchors):
+quantum-resistant:
 : Not classical-only. For authentication material, this document treats
   pure post-quantum algorithms and composite algorithms
   {{?I-D.ietf-lamps-pq-composite-sigs}} as one class, consistent with the
@@ -126,13 +145,6 @@ quantum-resistant (signatures / trust anchors):
   this document states the property, not a closed algorithm list.
 
 <cref>TODO: add a more precise definition of quantum-resistance for MTC.</cref>
-
-quantum-resistant (key agreement):
-: Not classical-only. Hybrid key agreement (classical combined with a
-  post-quantum KEM) and pure post-quantum key agreement both satisfy
-  this document. Exact NamedGroup / codepoint acceptance is left to UA
-  policy and the TLS Supported Groups registry
-  {{IANA.TLS-Parameters}}.
 
 trust anchor:
 : The root of acceptance for a server credential: an X.509 trust anchor
@@ -156,6 +168,16 @@ superdomain:
 : As in {{?RFC6797}}, a domain name of which another domain name is a
   subdomain. For example, `example.com` is a superdomain of
   `www.example.com`.
+
+# Threat Model
+
+This document addresses classical trust-anchor impersonation during the
+dual-trust-store migration period. An attacker forges a classical
+certificate with a CRQC for a name whose operator intends to use only
+quantum-resistant authentication, and presents that credential to a
+dual-accepting UA. The negotiated key agreement does not matter for this
+attack: the holder of the forged credential can impersonate the server
+whether key agreement is classical or quantum-resistant.
 
 # Syntax {#syntax}
 
@@ -197,13 +219,9 @@ Require-PQ-Auth: max-age=31536000, include-subdomains
 
 Servers MUST emit `Require-PQ-Auth` only when they can keep the following
 commitment for the lifetime conveyed by `max-age` (and for any hosts
-covered by `include-subdomains`):
-
-1. Serve a certification path anchored at a quantum-resistant trust anchor
-   (pure post-quantum or composite per the server's deployment), with no
-   mixed classical/quantum-resistant path; and
-2. Complete quantum-resistant key agreement (hybrid or pure post-quantum)
-   with clients that implement this document.
+covered by `include-subdomains`): serve a certification path anchored at
+a quantum-resistant trust anchor (pure post-quantum or composite per the
+server's deployment), with no mixed classical/quantum-resistant path.
 
 The commitment applies to every server that answers for each covered
 hostname, not only the instance that sent the header—including all
@@ -290,8 +308,6 @@ a PQ Policy already being Noted.
 2. The accepted certification path is entirely quantum-resistant: no hop is
    classical. (Detailed mixed-path rejection may be refined here or by
    reference to a dedicated path-validation document.)
-3. The negotiated key agreement is quantum-resistant (hybrid or pure
-   post-quantum per local policy).
 
 ## Enforcement {#enforcement}
 
@@ -306,11 +322,17 @@ TLS handshake with a fatal "handshake_failure" alert ({{!RFC9846}},
 Section 6.2). The UA MUST NOT offer the user a way to proceed
 ({{Section 12.1 of ?RFC6797}}).
 
+The UA MAY skip enforcement according to local policy. For example,
+similar to {{Section 2.6 of ?RFC7469}}, the UA MAY skip enforcement if
+the validated certificate chain terminates at a user-defined trust
+anchor, rather than a trust anchor built into the UA (or underlying
+platform). The main use case is a middlebox that terminates TLS using
+such a locally installed trust anchor.
+
 This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
-above. It does not enumerate TLS NamedGroup codepoints or MTC validation
-procedures; those remain matters for TLS/IANA policy and
-{{?I-D.ietf-plants-merkle-tree-certs}}, respectively.
+above. It does not enumerate MTC validation procedures; those remain
+matters for {{?I-D.ietf-plants-merkle-tree-certs}}.
 
 Once classical trust anchors are no longer accepted for authentication,
 `Require-PQ-Auth` is redundant. UAs MAY clear PQ Policy for Known PQ Hosts when
@@ -324,10 +346,9 @@ if any, is unaffected.
 <cref>TODO Operational considerations: CDN / multi-CDN consistency;
 staged `max-age` independent of HSTS; independent HSTS
 `includeSubDomains` vs PQ `include-subdomains`; HTTPS required to note,
-HSTS not required; enterprise TLS interception; public Web ≈ MTC vs
-enterprise ≈ X.509 PQ chains; MTC evolving; SFV serialization (lowercase
-keys, commas); do not assert the pin before hybrid/PQ KE is solid for the
-served audience.</cref>
+HSTS not required; public Web ≈ MTC vs enterprise ≈ X.509 PQ chains; MTC
+evolving; SFV serialization (lowercase keys, commas). Middlebox
+carve-out is in {{enforcement}}.</cref>
 
 
 # Security Considerations
@@ -335,11 +356,24 @@ served audience.</cref>
 The security considerations of HSTS ({{Section 14 of ?RFC6797}}) apply
 to `Require-PQ-Auth`. This section covers where they differ.
 
-## Underlying Secure Transport Considerations
+## Key Agreement {#security-ke}
 
-Quantum-resistant key exchange and authentication are specified for TLS
-1.3 {{!RFC9846}} and not for earlier versions. `Require-PQ-Auth` can
-therefore be used only with TLS 1.3 or later.
+Quantum resistance for a TLS session also requires a quantum-resistant
+key agreement mechanism. While `Require-PQ-Auth` does not directly
+constrain the key agreement, the TLS handshake provides downgrade
+protection when the authentication itself is secure
+({{Appendix F.1 of !RFC9846}}). Provided the Known PQ Host's TLS server
+is correctly configured to prefer quantum-resistant key agreement
+methods, a CRQC cannot downgrade the TLS session to a classical key
+agreement mechanism.
+
+The authentication pin still mitigates the threat this document
+targets even if key agreement remains classical. Classical trust-anchor
+impersonation is offline certificate forgery with a CRQC, then
+presentation of that credential. Breaking a live classical Diffie-Hellman
+key agreement to recover session keys requires a real-time
+CRQC attack on that handshake. That is a harder, later capability than
+the dual-trust-store impersonation this pin blocks for Known PQ Hosts.
 
 ## Non-Conformant User Agent Implications
 
@@ -359,7 +393,7 @@ cross-sign tracking {{ProtectingAgainstHSTSAbuse}}
 responses for an attacker to intercept.
 
 {{noting}} permits UAs to configure other Known PQ Hosts as local policy,
-such as a pre-configured list. Which such measures can mitigate this attack,
+such as a pre-configured list. While such measures can mitigate this attack,
 they can introduce other limitations when the number of otherwise
 quantum-resistant hosts exceeds an implementation's size limits.
 
@@ -373,9 +407,9 @@ describes one such transition plan.
 
 ## Denial of Service
 
-An attacker that controls a TLS-terminating proxy can cause a UA to note
-`Require-PQ-Auth` only when the connection meets {{pq-checks}}. A proxy
-that cannot meet those checks cannot set the policy.
+An attacker that controls a middlebox that terminates TLS can cause a UA
+to note `Require-PQ-Auth` only when the connection meets {{pq-checks}}. A
+middlebox that cannot meet those checks cannot set the policy.
 
 If the attacker can meet the checks and sets a large `max-age`, UAs that
 note the policy require {{pq-checks}} until the policy expires.
@@ -385,11 +419,6 @@ the UA will accept can still meet {{pq-checks}} and deliver that value
 ({{server}}). If the attacker was the only such endpoint and then stops
 meeting the checks, the origin stays unreachable until the policy
 expires.
-
-After a policy is legitimately Noted, a TLS interceptor that cannot meet
-{{pq-checks}} causes the same hard failure. That is an availability
-problem for deployments that intercept TLS, separate from injection.
-
 
 # Privacy Considerations
 
