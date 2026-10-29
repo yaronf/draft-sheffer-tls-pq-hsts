@@ -149,11 +149,6 @@ Known PQ Host / PQ Policy:
   and whether `include-subdomains` applies. Storage is parallel to—not
   part of—HSTS Policy storage.
 
-superdomain:
-: As in {{?RFC6797}}, a domain name of which another domain name is a
-  subdomain. For example, `example.com` is a superdomain of
-  `www.example.com`.
-
 # Threat Model
 
 This document addresses classical trust-anchor impersonation during the
@@ -171,10 +166,7 @@ value MUST be a Dictionary. Recipients that cannot parse the field value
 as a Dictionary MUST NOT update any Noted PQ Policy for the host based on
 that field (any previously Noted policy remains unchanged).
 
-The following Dictionary members are defined. Keys are lowercase as
-required by Structured Fields. Unknown members MUST be ignored.
-Recognized members are processed as specified below when the Dictionary
-parses successfully.
+The following Dictionary members are defined. Unknown members MUST be ignored.
 
 max-age:
 : Integer (required). Non-negative number of seconds after receipt
@@ -186,12 +178,12 @@ include-subdomains:
 : Boolean true if present as a bare Dictionary member (optional). If
   present, the PQ Policy applies to the host and to hosts whose domain
   names are subdomains of that host's domain name, analogous to HSTS
-  `includeSubDomains` {{?RFC6797}} but applying only to this PQ Policy.
+  `includeSubDomains` {{?RFC6797}}.
   Absence means host-only scope.
 
-If the Dictionary does not include a usable `max-age`, or if any present
-member is malformed for its type, the UA MUST NOT update Noted PQ Policy
-from this field.
+If the Dictionary does not include a valid `max-age` member, or if any
+member is malformed, the UA MUST ignore the entire field. (See
+{{Section 2.2 of !RFC9651}}.)
 
 Examples:
 
@@ -202,34 +194,38 @@ Require-PQ-Auth: max-age=31536000, include-subdomains
 
 # Server Processing {#server}
 
-Servers MUST emit `Require-PQ-Auth` only when they can keep the following
-commitment for the lifetime conveyed by `max-age` (and for any hosts
-covered by `include-subdomains`): serve a certification path anchored at
-a quantum-resistant trust anchor (pure post-quantum or composite per the
-server's deployment), with no mixed classical/quantum-resistant path.
+If the server sends a `Require-PQ-Auth` header, all servers that are
+authoritative for the origin MUST, for at least the period denoted by `max-age`,
+serve a certification path that meets {{pq-checks}} in response to TLS
+connections from post-quantum-capable UAs. If the `include-subdomains` member
+is true, all servers authoritative for any subdomain of the origin MUST also
+meet this requirement.
 
-The commitment applies to every server that answers for each covered
-hostname, not only the instance that sent the header—including all
-CDN edges, failover or backup providers, and HTTP/3 endpoints advertised
-via Alt-Svc {{?RFC7838}}. If any such endpoint cannot meet the policy,
-UAs that reach it will fail to connect.
+A typical server deployment will need a combination of classical and
+post-quantum certification paths for all its supported UAs, including legacy
+ones that do not support quantum-resistant trust anchors. This header does not
+constrain connections from legacy UAs. Servers MAY continue to serve classical
+certification paths in those cases.
 
-The server MUST send `Require-PQ-Auth` only over HTTPS. Otherwise UAs
-will not note the field ({{ua-behavior}}). The server SHOULD include the
-header on every HTTPS response, unless it omits the header for
-performance reasons (which typically does not make sense given the
-header's small size).
+How legacy and post-quantum-capable UAs are determined is out of scope for this
+document. {{Section 4.5.1.2 of !RFC9846}} describes the general framework for
+TLS certificate selection, but the exact criteria can be application-dependent,
+depending on the ClientHello fields sent by each UA, the trust anchors each UA
+trusts, etc.
 
-## Choosing policy parameters
+The server MUST send `Require-PQ-Auth` only over HTTPS. If sent, it SHOULD
+include the header on every HTTPS response.
 
-`max-age` should reflect how long the operator is willing to keep the
+## Choosing Policy Parameters
+
+`max-age` SHOULD reflect how long the operator is willing to keep the
 commitment above. Operators typically start with a short `max-age` while
 gaining confidence, then increase it.
 
 `include-subdomains` MUST NOT be sent unless every host that would be
 covered can likewise satisfy the commitment for the same window.
 
-## Updating and clearing policy
+## Updating and Clearing Policy
 
 A valid `Require-PQ-Auth` field replaces any previously Noted PQ Policy
 for that host when the UA notes it ({{ua-behavior}}). Omitting the header
@@ -237,75 +233,71 @@ does not clear Noted policy.
 
 To delete client state before expiry, the server sends `max-age` with
 value 0. UAs that successfully note that response MUST delete the Noted
-PQ Policy ({{ua-behavior}}). That escape hatch is useful only
-in laboratory or similar conditions, where the client population is small
-and individually identifiable. It works only while the server can still
-meet the commitment: enforcing UAs reject connections that do not, and so
-never see the clear. Operators should keep meeting the commitment until
-outstanding pins expire. If the server loses that ability first, those
-UAs stay locked out until expiry or manual action.
+PQ Policy ({{ua-behavior}}). However, this mechanism is limited. UAs with
+the previous Noted policy will continue to enforce the policy until it is
+cleared. A server that is no longer able to meet the commitment might be
+unable to serve such UAs until the outstanding policies expire.
 
 # User Agent Behavior {#ua-behavior}
 
 This section defines how UAs note and enforce `Require-PQ-Auth` policy.
 
-## Noting the header {#noting}
+## Noting the Header {#noting}
 
-Upon receipt of a `Require-PQ-Auth` header field in an HTTP response, the
+Upon receipt of a valid `Require-PQ-Auth` header field in an HTTP response, the
 UA notes a PQ Policy when all of the following hold, and MUST NOT note
 one otherwise:
 
 1. The response was received over an error-free HTTPS connection that
    uses TLS 1.3 {{!RFC9846}} or later.
-2. That connection meets the checks in {{pq-checks}}, whether or not a
-   PQ Policy is already Noted for the host.
-3. The field value parses as a Structured Fields Dictionary per
-   {{syntax}}, including a valid `max-age` member.
-
-The host need not be a Known HSTS Host. Noting PQ Policy MUST NOT modify
-HSTS Policy storage.
+2. That connection meets the checks in {{pq-checks}}.
 
 When noting, the UA MUST:
 
 1. Store a PQ Policy for the host as a Known PQ Host, with expiry derived
    from `max-age` (or delete the policy if `max-age` is 0).
-2. Record subdomain scope from `include-subdomains` when that member is
-   usable; otherwise host-only scope.
+2. Store the value of the `include-subdomains` member.
 
 If a subsequent valid `Require-PQ-Auth` field is noted for the host, it
-replaces the prior PQ Policy (including subdomain scope) for that host.
-Absence of the header field on a later response does not by itself clear
-PQ Policy before expiry; servers clear state with `max-age` of 0.
+replaces the prior PQ Policy (including the `include-subdomains` member) for
+that host. Absence of the header field on a later response does not by itself
+clear PQ Policy before expiry; servers clear state with `max-age` of 0.
+
+Although this mechanism is similar to HSTS {{?RFC6797}}, Known PQ Hosts are
+separate from Known HSTS Hosts, with separate values for `max-age` and
+`include-subdomains`.
 
 UAs MAY additionally configure other hosts as Known PQ Hosts via local policy.
 For example, the UA MAY be pre-configured with a list of pre-loaded Known PQ
 Hosts, similar to {{Section 12.3 of ?RFC6797}}.
 
-## Connection checks {#pq-checks}
+## Quantum-Resistant Paths {#pq-checks}
 
-A connection meets the checks of this section when all of the following
-hold. These checks apply to the connection itself. They do not depend on
-a PQ Policy already being Noted.
+A connection meets the checks of this section when both of the following
+hold. These checks apply when noting a PQ Policy and when enforcing one.
 
-1. The trust anchor that caused acceptance is quantum-resistant (pure
-   post-quantum or composite per local policy), whether that trust anchor
-   is an X.509 trust anchor or an MTC trust base / cosigner.
-2. The accepted certification path is entirely quantum-resistant: no hop is
-   classical. (Detailed mixed-path rejection may be refined here or by
-   reference to a dedicated path-validation document.)
+1. The trust anchor that caused acceptance is quantum-resistant.
+2. Every signature and public key on the accepted certification path is
+   quantum-resistant.
+
+Which trust anchors and algorithms count as quantum-resistant is a matter of
+local policy. The UA is presumed to maintain classical trust anchors alongside
+quantum-resistant ones during the dual-trust-store period. This document
+states the property, not a closed algorithm list.
 
 ## Enforcement {#enforcement}
 
-When establishing a connection to a host covered by an unexpired Noted PQ
-Policy — either because the host itself is a Known PQ Host, or because a
-Known PQ Host that is a superdomain of this host has `include-subdomains`
-— the connection MUST meet the checks in {{pq-checks}}, and MUST use
-TLS 1.3 {{!RFC9846}} or later.
+When a UA establishes a connection to a host, it checks if either:
+
+* the host is a Known PQ Host
+* the host is a subdomain of a Known PQ Host with `include-subdomains`
+
+If either of these conditions hold, the connection MUST use TLS 1.3 {{!RFC9846}}
+or later, and MUST meet the checks in {{pq-checks}}.
 
 If the connection does not meet those requirements, the UA MUST abort the
 TLS handshake with a fatal "handshake_failure" alert ({{!RFC9846}},
-Section 6.2). The UA MUST NOT offer the user a way to proceed
-({{Section 12.1 of ?RFC6797}}).
+Section 6.2).
 
 The UA MAY skip enforcement according to local policy. For example,
 similar to {{Section 2.6 of ?RFC7469}}, the UA MAY skip enforcement if
@@ -314,16 +306,9 @@ anchor, rather than a trust anchor built into the UA (or underlying
 platform). The main use case is a middlebox that terminates TLS using
 such a locally installed trust anchor.
 
-This document does not impose separate end-entity signature-algorithm
-requirements beyond the trust-anchor class and path-consistency rules
-above. It does not enumerate MTC validation procedures; those remain
-matters for {{?I-D.ietf-plants-merkle-tree-certs}}.
-
-Once classical trust anchors are no longer accepted for authentication,
-`Require-PQ-Auth` is redundant. UAs MAY clear PQ Policy for Known PQ Hosts when
-local policy determines that the pin is obsolete.
-Servers SHOULD stop sending the header in that environment. HSTS policy,
-if any, is unaffected.
+Once the UA has removed classical trust anchors, `Require-PQ-Auth` is redundant.
+Such UAs MAY remove support for this mechanism and stop tracking Known PQ Hosts.
+Once all supported UAs are at this stage, servers MAY stop sending this header.
 
 
 # Operational Considerations {#ops}
