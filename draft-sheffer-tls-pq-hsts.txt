@@ -138,38 +138,19 @@ Table of Contents
 
    The following terms are used in this document:
 
-   classical:  Cryptography or credentials that are not designed to
-      remain secure against a cryptographically-relevant quantum
-      computer (CQRC), such as RSA or elliptic-curve public-key
-      algorithms.  A classical trust anchor is a trust anchor that
-      authenticates only classical paths.
+   classical:  Cryptography that is not designed to remain secure
+      against a cryptographically-relevant quantum computer (CRQC)
+      [RFC9958].
 
-   quantum-resistant:  Not classical-only.  For authentication material,
-      this document treats pure post-quantum algorithms and composite
-      algorithms [I-D.ietf-lamps-pq-composite-sigs] as one class,
-      consistent with the PQC end-entity classification in
-      [I-D.sheffer-tls-pqc-continuity].  Which algorithms a UA accepts
-      as quantum-resistant is a matter of local policy and the relevant
-      algorithm specifications; this document states the property, not a
-      closed algorithm list.
+   quantum-resistant:  Cryptography that is designed to remain secure
+      against a CRQC.
 
-
-   // TODO: add a more precise definition of quantum-resistance for MTC.
-
-   trust anchor:  The root of acceptance for a server credential: an
-      X.509 trust anchor [RFC5280] or an MTC trust base / cosigner trust
-      as defined by [I-D.ietf-plants-merkle-tree-certs].  Normative
-      requirements in this document refer to the class of trust anchor
-      (classical vs quantum-resistant), not to a single encoding.
-
-   HSTS terms:  This document refers to Known HSTS Host, HSTS Policy,
-      and related terminology from [RFC6797] only for comparison.  HSTS
-      state is independent of the policy defined here.
+   trust anchor:  The root of acceptance for a certification path, as
+      defined in [RFC5280].
 
    Known PQ Host / PQ Policy:  A host for which the UA has noted a valid
       Require-PQ-Auth policy (Section 4, Section 6), including expiry
       derived from max-age and whether include-subdomains applies.
-      Storage is parallel to—not part of—HSTS Policy storage.
 
 3.  Threat Model
 
@@ -468,6 +449,12 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
+   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
+              Housley, R., and W. Polk, "Internet X.509 Public Key
+              Infrastructure Certificate and Certificate Revocation List
+              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
+              <https://www.rfc-editor.org/rfc/rfc5280>.
+
    [RFC9651]  Nottingham, M. and P. Kamp, "Structured Field Values for
               HTTP", RFC 9651, DOI 10.17487/RFC9651, September 2024,
               <https://www.rfc-editor.org/rfc/rfc9651>.
@@ -498,36 +485,10 @@ Table of Contents
               West, M., "Strict Navigational Security", September 2019,
               <https://github.com/mikewest/strict-navigation-security>.
 
-   [I-D.ietf-lamps-pq-composite-sigs]
-              Ounsworth, M., Gray, J., Pala, M., Klaußner, J., and S.
-              Fluhrer, "Composite Module-Lattice-Based Digital Signature
-              Algorithm (ML-DSA) for use in X.509 Public Key
-              Infrastructure", Work in Progress, Internet-Draft, draft-
-              ietf-lamps-pq-composite-sigs-19, 21 April 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-lamps-
-              pq-composite-sigs-19>.
-
-   [I-D.sheffer-tls-pqc-continuity]
-              Sheffer, Y. and T. Reddy.K, "PQC Continuity: Downgrade
-              Protection for TLS Servers Migrating to PQC", Work in
-              Progress, Internet-Draft, draft-sheffer-tls-pqc-
-              continuity-02, 9 June 2026,
-              <https://datatracker.ietf.org/doc/html/draft-sheffer-tls-
-              pqc-continuity-02>.
-
-   [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
-              Housley, R., and W. Polk, "Internet X.509 Public Key
-              Infrastructure Certificate and Certificate Revocation List
-              (CRL) Profile", RFC 5280, DOI 10.17487/RFC5280, May 2008,
-              <https://www.rfc-editor.org/rfc/rfc5280>.
-
-   [I-D.ietf-plants-merkle-tree-certs]
-              Benjamin, D., O'Brien, D., Westerbaan, B., Valenta, L.,
-              and F. Valsorda, "Merkle Tree Certificates", Work in
-              Progress, Internet-Draft, draft-ietf-plants-merkle-tree-
-              certs-07, 7 October 2026,
-              <https://datatracker.ietf.org/doc/html/draft-ietf-plants-
-              merkle-tree-certs-07>.
+   [RFC9958]  Banerjee, A., Reddy.K, T., Schoinianakis, D., Hollebeek,
+              T., and M. Ounsworth, "Post-Quantum Cryptography for
+              Engineers", RFC 9958, DOI 10.17487/RFC9958, June 2026,
+              <https://www.rfc-editor.org/rfc/rfc9958>.
 
    [RFC6797]  Hodges, J., Jackson, C., and A. Barth, "HTTP Strict
               Transport Security (HSTS)", RFC 6797,
@@ -537,6 +498,14 @@ Table of Contents
    [RFC7469]  Evans, C., Palmer, C., and R. Sleevi, "Public Key Pinning
               Extension for HTTP", RFC 7469, DOI 10.17487/RFC7469, April
               2015, <https://www.rfc-editor.org/rfc/rfc7469>.
+
+   [I-D.sheffer-tls-pqc-continuity]
+              Sheffer, Y. and T. Reddy.K, "PQC Continuity: Downgrade
+              Protection for TLS Servers Migrating to PQC", Work in
+              Progress, Internet-Draft, draft-sheffer-tls-pqc-
+              continuity-02, 9 June 2026,
+              <https://datatracker.ietf.org/doc/html/draft-sheffer-tls-
+              pqc-continuity-02>.
 
 Appendix A.  Document History
 
