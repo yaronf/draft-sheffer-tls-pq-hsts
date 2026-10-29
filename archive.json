@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-27T02:34:20.293286+00:00",
+  "timestamp": "2026-10-29T03:03:00.845877+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -49,7 +49,74 @@
       "color": "ffffff"
     }
   ],
-  "issues": [],
+  "issues": [
+    {
+      "number": 6,
+      "id": "I_kwDOT2GSC88AAAABajJ2eg",
+      "title": "Enterprise TLS interception breaks `Require-PQ-Auth` enforcement",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/issues/6",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\nEnterprise TLS interception (and other non-built-in roots) will break\n`Require-PQ-Auth` enforcement unless UAs can skip the pin for those\nchains. David flagged this as deployment-blocking.\n\n## Proposal\n\nAdd an exception along the lines of RFC 7469 \u00a72.6 (Validating Pinned\nConnections):\n\n> It is acceptable to allow Pin Validation to be disabled for some Hosts\n> according to local policy. For example, a UA may disable Pin Validation\n> for Pinned Hosts whose validated certificate chain terminates at a\n> user-defined trust anchor, rather than a trust anchor built-in to the UA\n> (or underlying platform).\n\nNormative home: Enforcement (and a short Security Considerations note).\n\n## Scope\n\n- In: MAY skip PQ-policy enforcement when the validated chain ends at a\n  user-defined / non-built-in trust anchor (local policy).\n- Out: changing what counts as a quantum-resistant Web PKI trust anchor;\n  enterprise migration schedules (already out of scope in the appendix).\n\n## References\n\n- https://www.rfc-editor.org/rfc/rfc7469.html#section-2.6\n- David\u2019s review note on interception boxes / non-Web-PKI roots",
+      "createdAt": "2026-10-28T09:59:52Z",
+      "updatedAt": "2026-10-28T09:59:52Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 8,
+      "id": "I_kwDOT2GSC88AAAABajkR0Q",
+      "title": "Sticky key-agreement under Require-PQ-Auth adds little benefit",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/issues/8",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\n`Require-PQ-Auth` currently also requires quantum-resistant key\nagreement. That coupling has little payoff for this temporary pin.\n\n- The core value of the draft is stopping classical trust-anchor\n  impersonation during the dual-trust-store period: a CRQC forges a\n  classical certificate offline, and the holder presents it as the\n  server. That attack does not depend on the negotiated key agreement.\n  So even if KE is still classical (or misconfigured), the\n  authentication pin still adds security against the threat this\n  document targets. Breaking classical KE in a live session is a\n  different, harder problem (a real-time CRQC); hybrid / PQ KE\n  addresses it on its own track.\n- Sticky KE enforcement does not usefully detect server\n  misconfiguration. It only fails closed for clients that already have\n  the pin; it does not give operators a clear config signal.\n\n## Proposal\n\nDrop key agreement from `Require-PQ-Auth` (auth-only pin). Remove KE\nfrom the abstract, threat model, definitions, server commitment,\n`{{pq-checks}}`, enforcement, and migration tables as needed. Hybrid /\nPQ KE remains on its own deployment track.\n\nAdd a security consideration about KE: required for complete\nquantum-resistance, but orthogonal to our solution.\n\n## References\n\n- David\u2019s review note on simplifying away KE\n- Draft threat model / `{{pq-checks}}` KE bullet",
+      "createdAt": "2026-10-28T10:27:26Z",
+      "updatedAt": "2026-10-28T10:27:26Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 10,
+      "id": "I_kwDOT2GSC88AAAABaj6V7A",
+      "title": "Remove non-ASCII characters from the draft",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/issues/10",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n\nThe rendered text has 33 lines with non-ASCII characters (idnits warning). Almost all are editorial; they should be ASCII for RFC-style source.\n\n## Inventory (current txt)\n\n- Em dash (`\u2014`, U+2014): ~31 \u2014 body prose and stage titles\n- Almost equal (`\u2248`, U+2248): 2 \u2014 Ops Considerations TODO (`public Web \u2248 MTC`, `enterprise \u2248 X.509`)\n- Sharp s (`\u00df`, U+00DF): 1 \u2014 bibliography author name (`Klau\u00dfner`) pulled in at build from a referenced draft\n\nThe markdown source has the em dashes and the two `\u2248`; the `\u00df` comes from bibxml/reference expansion.\n\n## Proposal\n\n- Replace em dashes with ASCII punctuation (comma, colon, semicolon, hyphen, or parentheses) as fits each sentence.\n- Replace `\u2248` with ASCII (e.g. `~` or `approx.`).\n- For the bibliography `\u00df`: prefer an ASCII spelling if the reference tooling allows, or accept it as external metadata and document the exception.\n\nNo normative behavior change.",
+      "createdAt": "2026-10-28T10:51:22Z",
+      "updatedAt": "2026-10-28T10:51:22Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 12,
+      "id": "I_kwDOT2GSC88AAAABatctsA",
+      "title": "Document is way, way, way too long",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/issues/12",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "davidben"
+      ],
+      "labels": [],
+      "body": "AI tools are verbose. This needs a significant editing pass.",
+      "createdAt": "2026-10-28T21:04:33Z",
+      "updatedAt": "2026-10-28T21:04:33Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
   "pulls": [
     {
       "number": 1,
@@ -348,20 +415,418 @@
       "id": "PR_kwDOT2GSC88AAAABK47ZPg",
       "title": "CQRC-resistant -> quantum-resistant",
       "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/4",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "davidben",
-      "authorAssociation": "NONE",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Having to expand the acronym is unwieldy. RFC 9794 uses quantum-resistant.\n\nFinally got through this document. I have a *ton* more comments to drain into PRs and such, but here's an easy one.",
       "createdAt": "2026-10-26T22:41:57Z",
-      "updatedAt": "2026-10-26T22:41:58Z",
+      "updatedAt": "2026-10-28T09:55:28Z",
       "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
       "baseRefName": "main",
       "baseRefOid": "3ba7d9fab32b25a40f082a0108a696c70e33a021",
       "headRepository": "davidben/draft-sheffer-tls-pq-hsts",
       "headRefName": "crqc-resistant",
       "headRefOid": "94118935aea249fc32c9ba39679e7e6256abd44a",
+      "closedAt": "2026-10-28T09:55:28Z",
+      "mergedAt": "2026-10-28T09:55:28Z",
+      "mergedBy": "yaronf",
+      "mergeCommit": {
+        "oid": "e51f66a10c8bbd76417e4b44323b98fde4725fce"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUZkLnQ",
+          "commit": {
+            "abbreviatedOid": "9411893"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-27T08:17:16Z",
+          "updatedAt": "2026-10-27T08:17:16Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOT2GSC88AAAABK5CnQg",
+      "title": "Retitle the document",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/5",
+      "state": "CLOSED",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The RFC editor is going to ask for PQ and HSTS to be expanded. Expanding the former is pretty reasonable. The latter would be unwieldy. Let's get ahead of that and pick a less fraught title.\n\n(It's OK to leave HTTP as an acronym. That's marked as \"well-known\" in the abbreviations list in\nhttps://rpc-wiki.rfc-editor.org/doku.php?id=abbrev_list )",
+      "createdAt": "2026-10-26T22:54:21Z",
+      "updatedAt": "2026-10-28T13:50:20Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "3ba7d9fab32b25a40f082a0108a696c70e33a021",
+      "headRepository": "davidben/draft-sheffer-tls-pq-hsts",
+      "headRefName": "retitle",
+      "headRefOid": "d9c3fc3ebb68f07630e1e9fa2ada0ff8e1a1d1b3",
+      "closedAt": "2026-10-28T13:50:20Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "body": "I suggest keeping it for now, so people know immediately what we're talking about. Then (e.g. after adoption) come back to this change.",
+          "createdAt": "2026-10-27T08:19:04Z",
+          "updatedAt": "2026-10-27T08:19:04Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUZmGaQ",
+          "commit": {
+            "abbreviatedOid": "d9c3fc3"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "See my comment.",
+          "createdAt": "2026-10-27T08:19:58Z",
+          "updatedAt": "2026-10-27T08:19:58Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "PR_kwDOT2GSC88AAAABLOzmjw",
+      "title": "Enterprise TLS interception carve-out for Require-PQ-Auth",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/7",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n- Allow UAs to skip `Require-PQ-Auth` enforcement under local policy when the chain ends at a user-defined trust anchor (RFC 7469 \u00a72.6 style), so classical enterprise interception roots do not fail closed for every Known PQ Host.\n- Note the residual: where enforcement is skipped, the pin provides no protection; update Security Considerations accordingly.\n- Closes #6.\n\ncc @davidben (raised in review; not yet a repo collaborator)\n\nMade with [Cursor](https://cursor.com)",
+      "createdAt": "2026-10-28T10:08:46Z",
+      "updatedAt": "2026-10-28T20:29:51Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "e51f66a10c8bbd76417e4b44323b98fde4725fce",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "ys-enterprise-interception",
+      "headRefOid": "5cd913dbe9a1179b5a3f745a95fb6ba17a199f3f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUsQQBg",
+          "commit": {
+            "abbreviatedOid": "c756f35"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T13:39:26Z",
+          "updatedAt": "2026-10-28T13:40:43Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Two comments.\n\n1. Who disables and who checks. Such middleboxes are deployed and managed by the enterprise, and so are the UAs behind them. The enterprise can disable Require-PQ-Auth enforcement on its managed UAs through enterprise policy.\n2. The protection does not have to be lost either. The middlebox is the TLS client to the origin. It can apply the checks in {{pq-checks}} on its connection to the origin, and note and enforce Require-PQ-Auth itself. The UA skips enforcement on the connection to the middlebox, while the middlebox enforces the policy on the connection to the origin. Suggest saying so, instead of \u201cthis mechanism provides no protection on that connection\u201d.",
+              "createdAt": "2026-10-28T13:39:26Z",
+              "updatedAt": "2026-10-28T13:40:43Z"
+            },
+            {
+              "originalPosition": 42,
+              "body": "TLS calls these devices middleboxes ({{Section 9.3 of RFC9846}}: \u201cA middlebox which terminates a TLS connection MUST behave as a compliant TLS server (to the original client)\u201d). The draft currently says \u201cTLS-terminating proxy\u201d, \u201cinterception device\u201d and \u201cTLS interceptor\u201d. Suggest using \u201cmiddlebox that terminates TLS\u201d throughout.",
+              "createdAt": "2026-10-28T13:40:38Z",
+              "updatedAt": "2026-10-28T13:40:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUszyjA",
+          "commit": {
+            "abbreviatedOid": "c756f35"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T14:17:49Z",
+          "updatedAt": "2026-10-28T14:17:49Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "1. As discussed, these are not always \"boxes\" and they may not be managed by the enterprise.\n2. Agree, but the text will be somewhat vague because you cannot force someone to implement an RFC.",
+              "createdAt": "2026-10-28T14:17:49Z",
+              "updatedAt": "2026-10-28T14:19:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUs1Xug",
+          "commit": {
+            "abbreviatedOid": "c756f35"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T14:19:36Z",
+          "updatedAt": "2026-10-28T14:19:36Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "Agree.",
+              "createdAt": "2026-10-28T14:19:36Z",
+              "updatedAt": "2026-10-28T14:19:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUxrmOQ",
+          "commit": {
+            "abbreviatedOid": "5cd913d"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T20:27:21Z",
+          "updatedAt": "2026-10-28T20:29:51Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "This is very long. I think two sentences are enough:\n\n> The UA MAY skip enforcement according to local policy. For example, similar to {{Section 2.6 of ?RFC7469}}, the UA MAY skip enforcement if the validated certificate chain terminates as a user-defined trust anchor, rather than a trust anchor built-in to the UA (or underlying platform).",
+              "createdAt": "2026-10-28T20:27:21Z",
+              "updatedAt": "2026-10-28T20:29:51Z"
+            },
+            {
+              "originalPosition": 67,
+              "body": "I suggest we simply delete this paragraph. The original one missed the point a bit. The problem isn't that the TLS interceptor can cause a denial of service. It doesn't need to intercept TLS for that and can just close the connection. That's not interesting.\n\nThe notable thing is that TLS interceptor can *persistently* cause a DoS, even after it stops being on path on the network, or stops being able to intercept TLS.",
+              "createdAt": "2026-10-28T20:29:46Z",
+              "updatedAt": "2026-10-28T20:29:51Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "id": "PR_kwDOT2GSC88AAAABLPSD7w",
+      "title": "Drop key agreement from Require-PQ-Auth",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/9",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n- Make `Require-PQ-Auth` auth-only: remove quantum-resistant key agreement from the abstract, threat model, definitions, server commitment, connection checks, and migration tables.\n- Add Security Considerations explaining that complete quantum resistance still needs QR KE, but it is orthogonal; the pin still helps if KE is misconfigured.\n- Closes #8.\n\ncc @davidben (raised in review; not yet a repo collaborator)\n\nMade with [Cursor](https://cursor.com)",
+      "createdAt": "2026-10-28T10:47:47Z",
+      "updatedAt": "2026-10-28T20:53:00Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "e51f66a10c8bbd76417e4b44323b98fde4725fce",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "ys-drop-ke",
+      "headRefOid": "19585bbef1b059c7bcd3b358438912039c0349f1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUsVR5Q",
+          "commit": {
+            "abbreviatedOid": "302980b"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T13:44:49Z",
+          "updatedAt": "2026-10-28T13:50:19Z",
+          "comments": [
+            {
+              "originalPosition": 198,
+              "body": "Suggest adding to the Key Agreement subsection: \u201cWith quantum-resistant authentication, a CRQC attacker cannot downgrade the negotiated key agreement {{?RFC9958}}.\u201d",
+              "createdAt": "2026-10-28T13:44:49Z",
+              "updatedAt": "2026-10-28T13:50:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUtHuDg",
+          "commit": {
+            "abbreviatedOid": "302980b"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T14:38:43Z",
+          "updatedAt": "2026-10-28T14:38:43Z",
+          "comments": [
+            {
+              "originalPosition": 198,
+              "body": "The text is fine, but the reference is kind of open-ended. Do you have a particular section in mind?",
+              "createdAt": "2026-10-28T14:38:43Z",
+              "updatedAt": "2026-10-28T14:38:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUxfaxQ",
+          "commit": {
+            "abbreviatedOid": "302980b"
+          },
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-10-28T20:11:30Z",
+          "updatedAt": "2026-10-28T20:24:10Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "Optional: In the interest of making the document shorter, I'd actually suggest just removing this paragraph altogether. I'm not sure it adds anything to the introduction.",
+              "createdAt": "2026-10-28T20:11:30Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 54,
+              "body": "Also in the interest of trimming unnecessary text, I'd suggest just deleting this whole paragraph too.",
+              "createdAt": "2026-10-28T20:12:19Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "Existing issue, but \"comparatively well-understood\" is a but subjective. Why not simply:\n\n> This mechanism addresses classical trust-anchor impersonation during the dual-trust-store-period.\n\n(LLMs talk too much.)",
+              "createdAt": "2026-10-28T20:13:13Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 118,
+              "body": "I'm not sure what \"otherwise obtains acceptance under a classical trust anchor\" means, particular relative to what a CRQC can do.\n\nI think simply \"An attacker forges a classical certificate a CQRC, and presents [...]\" is fine.",
+              "createdAt": "2026-10-28T20:14:41Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 123,
+              "body": "Let's just omit the last sentence.",
+              "createdAt": "2026-10-28T20:14:59Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 195,
+              "body": "(TBH I think we can just delete this whole section. It's just restating a fact about TLS that's not directly relevant to what this draft is doing.)",
+              "createdAt": "2026-10-28T20:15:56Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 210,
+              "body": "This last sentence is misleading. While it blocks a classical certificate chain, it doesn't mean much. If you use classical key agreement with post-quantum authentication, the attacker can just break the key agreement, reconstruct the key schedule, and break your connection that way.\n\nInstead, I suggest replacing this section with one that discusses this:\n\n> Quantum resistance for a TLS session also requires a quantum-resistent key agreement mechanism. While `Request-PQ-Auth` does not directly constrain the key agreement, the TLS handshake provides downgrade protection when the authentication itself is secure. See {{Appendix F.1 of !RFC9846}}. Provided the Known PQ Host's TLS server is correctly configured to prefer quantum-resistant key agreement methods, a CRQC cannot downgrade the TLS session to a classical key agreement mechanism.",
+              "createdAt": "2026-10-28T20:23:06Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 226,
+              "body": "This seems redundant iwth the other section. Suggest just removing it.",
+              "createdAt": "2026-10-28T20:23:41Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            },
+            {
+              "originalPosition": 236,
+              "body": "Suggest just not saying anything about key agreement, in the interest of reducing the word count.",
+              "createdAt": "2026-10-28T20:24:02Z",
+              "updatedAt": "2026-10-28T20:24:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABUx-Zzw",
+          "commit": {
+            "abbreviatedOid": "302980b"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-10-28T20:53:00Z",
+          "updatedAt": "2026-10-28T20:53:00Z",
+          "comments": [
+            {
+              "originalPosition": 210,
+              "body": "Here I disagree. A real-time break of a live key exchange is a lot more challenging that an off-line break of a certificate. (Yes this is all speculative but still IMHO very likely.) So there's value in PQ-HSTS even if the key exchange is for some reason non-QR.",
+              "createdAt": "2026-10-28T20:53:00Z",
+              "updatedAt": "2026-10-28T20:53:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 11,
+      "id": "PR_kwDOT2GSC88AAAABLXXpKA",
+      "title": "Trim the discussion of preload",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/11",
+      "state": "CLOSED",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fundamentally, there is nothing useful we can say about preload here other than \"the UA can have some local policy if it wants\", so leave it at that. Preload is not a panacea, particular for this as compared to HSTS.",
+      "createdAt": "2026-10-28T21:04:07Z",
+      "updatedAt": "2026-10-28T21:43:22Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "50b122b754ae68602255d18236dba8668f0f0986",
+      "headRepository": "davidben/draft-sheffer-tls-pq-hsts",
+      "headRefName": "trim-preload",
+      "headRefOid": "0de49ad7676208b52f8c9b24b56aa70534920869",
+      "closedAt": "2026-10-28T21:43:21Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing this temporarily. I'm going to see if pushing to branches on this repo works better because otherwise I can't make stacked PRs apparently.",
+          "createdAt": "2026-10-28T21:43:21Z",
+          "updatedAt": "2026-10-28T21:43:21Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 13,
+      "id": "PR_kwDOT2GSC88AAAABLX2QHw",
+      "title": "Trim the discussion of preload",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/13",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fundamentally, there is nothing useful we can say about preload here other than \"the UA can have some local policy if it wants\", so leave it at that. Preload is not a panacea, particular for this as compared to HSTS.",
+      "createdAt": "2026-10-28T21:43:57Z",
+      "updatedAt": "2026-10-28T21:43:58Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "50b122b754ae68602255d18236dba8668f0f0986",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "davidben-trim-preload",
+      "headRefOid": "0de49ad7676208b52f8c9b24b56aa70534920869",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -370,24 +835,136 @@
       "reviews": []
     },
     {
-      "number": 5,
-      "id": "PR_kwDOT2GSC88AAAABK5CnQg",
-      "title": "Retitle the document",
-      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/5",
+      "number": 14,
+      "id": "PR_kwDOT2GSC88AAAABLX2s4w",
+      "title": "Remove the restating of ChromiumPQAuthRoadmap",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/14",
       "state": "OPEN",
       "author": "davidben",
-      "authorAssociation": "NONE",
+      "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "The RFC editor is going to ask for PQ and HSTS to be expanded. Expanding the former is pretty reasonable. The latter would be unwieldy. Let's get ahead of that and pick a less fraught title.\n\n(It's OK to leave HTTP as an acronym. That's marked as \"well-known\" in the abbreviations list in\nhttps://rpc-wiki.rfc-editor.org/doku.php?id=abbrev_list )",
-      "createdAt": "2026-10-26T22:54:21Z",
-      "updatedAt": "2026-10-26T22:54:22Z",
+      "body": "I was going to give it a rewrite but this document is too long and too AI-generated right now. I don't think restating it, but differently and less accurately, in this document provides any value over just citing the original document.\n\nJust trim this for now, given the submission deadline. We can add a longer discussion if we need to later. But really the main thing that needs to be said about the broader context is that this is a temporary, short-term, and very limited measure. That's covered in the new Limitations section, which will hopefully be easier to find once excess text is trimmed away.\n\nIn doing so, also trim some of the excess sections in the introduction. Those kept restating what was already in the introduction. I've retained the text pointing to I-D.sheffer-tls-pqc-continuity, but instead moved it to Acknowledgements.",
+      "createdAt": "2026-10-28T21:44:31Z",
+      "updatedAt": "2026-10-28T21:44:32Z",
       "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
-      "baseRefName": "main",
-      "baseRefOid": "3ba7d9fab32b25a40f082a0108a696c70e33a021",
-      "headRepository": "davidben/draft-sheffer-tls-pq-hsts",
-      "headRefName": "retitle",
-      "headRefOid": "d9c3fc3ebb68f07630e1e9fa2ada0ff8e1a1d1b3",
+      "baseRefName": "davidben-trim-preload",
+      "baseRefOid": "0de49ad7676208b52f8c9b24b56aa70534920869",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "davidben-trim-appendix",
+      "headRefOid": "2eb1f0ff10fa9280a22f8b9c5c61911876c46c83",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 16,
+      "id": "PR_kwDOT2GSC88AAAABLX84Mg",
+      "title": "Edit the abstract and introduction a bit",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/16",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "authors.ietf.org talks about making the abstract self-contained, so avoid defining it relative to HSTS. The intro similarly doesn't need a long comparison to HSTS. The concept is simple enough that we can introduce it on its own.\n\nBriefly call out the limitations in the introduction, so the reader has broader context.",
+      "createdAt": "2026-10-28T21:52:41Z",
+      "updatedAt": "2026-10-28T21:52:42Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "davidben-trim-appendix",
+      "baseRefOid": "2eb1f0ff10fa9280a22f8b9c5c61911876c46c83",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "davidben-edit-intro",
+      "headRefOid": "945bd5b4a5312333536d97f31d255a994dc7ed67",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 17,
+      "id": "PR_kwDOT2GSC88AAAABLYGfOw",
+      "title": "Fill in privacy considerations",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/17",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-10-28T22:05:58Z",
+      "updatedAt": "2026-10-28T22:05:59Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "davidben-edit-intro",
+      "baseRefOid": "945bd5b4a5312333536d97f31d255a994dc7ed67",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "davidben-privacy",
+      "headRefOid": "3ffa7048fd9854d0269cb708dd4cd291db3a5745",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 18,
+      "id": "PR_kwDOT2GSC88AAAABLYX3Eg",
+      "title": "Rework the core of the document a bit",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/18",
+      "state": "CLOSED",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Some minor shortening of text, but the main thing is getting to a crisper definition of what's in scope. That crisper definition is, unfortunately, \"this is up to the application\". This is unavoidable because the application may have all manner of PKI policies. This avoids the difficulty the older text had with MTCs.\n\nAlso fix some other issues like... the server actually still needs to serve a classical certificate to old clients.",
+      "createdAt": "2026-10-28T22:30:18Z",
+      "updatedAt": "2026-10-28T22:32:00Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "davidben-privacy",
+      "baseRefOid": "3ffa7048fd9854d0269cb708dd4cd291db3a5745",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "davidben-edit-middle",
+      "headRefOid": "66e8e87872add9fb6a12ef2b49c807a05ddfa473",
+      "closedAt": "2026-10-28T22:32:00Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "davidben",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Forgot to add this to a stack. Closing to see if I can fix that...",
+          "createdAt": "2026-10-28T22:32:00Z",
+          "updatedAt": "2026-10-28T22:32:00Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 19,
+      "id": "PR_kwDOT2GSC88AAAABLYZN0Q",
+      "title": "Rework the core of the document a bit",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/19",
+      "state": "OPEN",
+      "author": "davidben",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Some minor shortening of text, but the main thing is getting to a crisper definition of what's in scope. That crisper definition is, unfortunately, \"this is up to the application\". This is unavoidable because the application may have all manner of PKI policies. This avoids the difficulty the older text had with MTCs.\n\nAlso fix some other issues like... the server actually still needs to serve a classical certificate to old clients.",
+      "createdAt": "2026-10-28T22:32:11Z",
+      "updatedAt": "2026-10-28T22:32:12Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "davidben-privacy",
+      "baseRefOid": "3ffa7048fd9854d0269cb708dd4cd291db3a5745",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "davidben-edit-middle",
+      "headRefOid": "66e8e87872add9fb6a12ef2b49c807a05ddfa473",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
