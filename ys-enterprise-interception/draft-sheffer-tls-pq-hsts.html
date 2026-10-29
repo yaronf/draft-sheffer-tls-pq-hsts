@@ -1057,7 +1057,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Sheffer, et al.</td>
-<td class="center">Expires 1 May 2027</td>
+<td class="center">Expires 2 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg {
 <dd class="internet-draft">draft-sheffer-tls-pq-hsts-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-28" class="published">28 October 2026</time>
+<time datetime="2026-10-29" class="published">29 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-01">1 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-02">2 May 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1141,7 +1141,7 @@ retired.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 1 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 2 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1749,22 +1749,12 @@ TLS 1.3 <span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span> or later
 TLS handshake with a fatal "handshake_failure" alert (<span>[<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>,
 Section 6.2). The UA <span class="bcp14">MUST NOT</span> offer the user a way to proceed
 (<span><a href="https://rfc-editor.org/rfc/rfc6797#section-12.1" class="relref">Section 12.1</a> of [<a href="#RFC6797" class="cite xref">RFC6797</a>]</span>).<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-<p id="section-6.3-3">Deployments often place a middlebox (sometimes implemented as on-device software)
-that terminates TLS
-(<span><a href="https://rfc-editor.org/rfc/rfc9846#section-9.3" class="relref">Section 9.3</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>) between the UA and the origin. The
-certificate presented to the UA chains to a trust anchor installed
-locally in the UA or platform. If that trust anchor is not
-quantum-resistant, enforcing the checks above on the UA's connection to
-the middlebox would fail closed for every Known PQ Host reached through
-it. A UA <span class="bcp14">MAY</span> disable <code>Require-PQ-Auth</code> enforcement for some hosts
-according to local policy. For example, a UA may skip enforcement when
+<p id="section-6.3-3">The UA <span class="bcp14">MAY</span> skip enforcement according to local policy. For example,
+similar to <span><a href="https://rfc-editor.org/rfc/rfc7469#section-2.6" class="relref">Section 2.6</a> of [<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>, the UA <span class="bcp14">MAY</span> skip enforcement if
 the validated certificate chain terminates at a user-defined trust
-anchor rather than a trust anchor built into the UA or underlying
-platform (<span><a href="https://rfc-editor.org/rfc/rfc7469#section-2.6" class="relref">Section 2.6</a> of [<a href="#RFC7469" class="cite xref">RFC7469</a>]</span>). Where the UA skips enforcement,
-this mechanism provides no protection on the UA's connection to the
-middlebox. The middlebox is the TLS client toward the origin and can
-apply the checks in <a href="#pq-checks" class="auto internal xref">Section 6.2</a> on that connection, and can note and
-enforce <code>Require-PQ-Auth</code> itself.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+anchor, rather than a trust anchor built into the UA (or underlying
+platform). The main use case is a middlebox that terminates TLS using
+such a locally installed trust anchor.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 <p id="section-6.3-4">This document does not impose separate end-entity signature-algorithm
 requirements beyond the trust-anchor class and path-consistency rules
 above. It does not enumerate TLS NamedGroup codepoints or MTC validation
@@ -1867,14 +1857,6 @@ meeting the checks, the origin stays unreachable until the policy
 expires.<a href="#section-9.4-2" class="pilcrow">¶</a></p>
 <p id="section-9.4-3">A PQ preload entry is configured out of band. The noting rule does not
 stop a poisoned preload list (<a href="#preload" class="auto internal xref">Section 7</a>).<a href="#section-9.4-3" class="pilcrow">¶</a></p>
-<p id="section-9.4-4">After a policy is legitimately Noted, a middlebox that terminates TLS
-whose chain to the UA does not meet <a href="#pq-checks" class="auto internal xref">Section 6.2</a> causes the same hard
-failure unless the UA skips enforcement under local policy
-(<a href="#enforcement" class="auto internal xref">Section 6.3</a>)—for example because the chain terminates at a
-user-defined trust anchor. Deployments that use such a middlebox with a
-locally installed root typically rely on that exception. The pin then
-does not apply on the UA's connection to the middlebox. The middlebox can
-still enforce the policy on its connection to the origin.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
