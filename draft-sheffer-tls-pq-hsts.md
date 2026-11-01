@@ -73,10 +73,10 @@ informative:
 --- abstract
 
 This document defines an HTTP response header field, `Require-PQ-Auth`, that
-instructs user agents to require a quantum-resistant certificate chain in
-subsequent connections. This is a short-term, opt-in mechanism for HTTP
-origins to protect against legacy classical trust anchors. It will become
-unnecessary when UAs remove these trust anchors.
+instructs user agents to require authentication under a quantum-resistant
+trust anchor in subsequent connections. This is a short-term, opt-in
+mechanism for HTTP origins to protect against legacy classical trust
+anchors. It will become unnecessary when UAs remove these trust anchors.
 
 
 --- middle
@@ -107,7 +107,7 @@ requirements in this document stay at the trust-anchor abstraction so
 those forms can satisfy `Require-PQ-Auth` without tying the pin to a
 single encoding.
 
-## Threat Model
+## Threat Model {#threat-model}
 
 This document addresses classical trust-anchor impersonation during the
 dual-trust-store migration period. An attacker forges a classical
@@ -253,14 +253,15 @@ UAs MAY additionally configure other hosts as Known PQ Hosts via local policy.
 For example, the UA MAY be pre-configured with a list of pre-loaded Known PQ
 Hosts, similar to {{Section 12.3 of ?RFC6797}}.
 
-## Quantum-Resistant Paths {#pq-checks}
+## Quantum-Resistant Trust Anchors {#pq-checks}
 
 A connection meets the checks of this section when both of the following
 hold. These checks apply when noting a PQ Policy and when enforcing one.
 
 1. The trust anchor that caused acceptance is quantum-resistant.
-2. Every signature and public key on the accepted certification path is
-   quantum-resistant.
+2. The `SignatureScheme` in the server's CertificateVerify message
+   ({{Section 4.5.2 of !RFC9846}}) is quantum-resistant, or equivalently
+   the end-entity public key is quantum-resistant.
 
 Which trust anchors and algorithms count as quantum-resistant is a matter of
 local policy. The UA is presumed to maintain classical trust anchors alongside
@@ -306,10 +307,26 @@ to meet {{pq-checks}} toward UAs that enforce this mechanism, for the full
 `Strict-Transport-Security`. Noting requires HTTPS ({{noting}}); the host
 need not be a Known HSTS Host.
 
+Enterprises that operate private CAs can migrate host by host by installing
+those CAs under local policy that
+constrains trust to listed domain names (a per-domain CA preload). Some
+browsers already support such constrained trust-anchor configuration.
+Connections that terminate at a user-defined trust anchor are outside
+this mechanism when the UA skips enforcement per {{enforcement}}.
+
 # Security Considerations
 
 The security considerations of HSTS ({{Section 14 of ?RFC6797}}) apply
 to `Require-PQ-Auth`. This section covers where they differ.
+
+## CertificateVerify Check and Opt-Out Credentials {#security-path}
+
+This mechanism targets trust-anchor migration, but a trust-anchor-only
+check would not suffice. Quantum-resistant CAs may still issue classical
+end-entity credentials as a transitional opt-out. Sent with
+`Require-PQ-Auth`, such a credential would leave the connection exposed to
+a CRQC attacking the classical leaf key. The second check in {{pq-checks}}
+rejects that misconfiguration.
 
 ## Key Agreement {#security-ke}
 
@@ -415,6 +432,12 @@ Comments:
 # Document History
 
 RFC Editor: please remove before publication.
+
+## draft-sheffer-tls-pq-hsts-01
+
+- {{pq-checks}}: quantum-resistant trust anchor plus CertificateVerify
+  `SignatureScheme` or equivalently end-entity public key; note
+  enterprise per-domain CA preload ({{ops}}, {{enforcement}}).
 
 ## draft-sheffer-tls-pq-hsts-00
 
