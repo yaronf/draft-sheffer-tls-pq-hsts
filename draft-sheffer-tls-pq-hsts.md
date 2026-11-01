@@ -260,7 +260,8 @@ hold. These checks apply when noting a PQ Policy and when enforcing one.
 
 1. The trust anchor that caused acceptance is quantum-resistant.
 2. The `SignatureScheme` in the server's CertificateVerify message
-   ({{Section 4.5.2 of !RFC9846}}) is quantum-resistant.
+   ({{Section 4.5.2 of !RFC9846}}) is quantum-resistant, or equivalently
+   the end-entity public key is quantum-resistant.
 
 Which trust anchors and algorithms count as quantum-resistant is a matter of
 local policy. The UA is presumed to maintain classical trust anchors alongside
@@ -324,8 +325,8 @@ This mechanism targets trust-anchor migration, but a trust-anchor-only
 check would not suffice. Quantum-resistant CAs may still issue classical
 end-entity credentials as a transitional opt-out. Sent with
 `Require-PQ-Auth`, such a credential would leave the connection exposed to
-a CRQC attacking the classical leaf key. The CertificateVerify
-`SignatureScheme` check in {{pq-checks}} rejects that misconfiguration.
+a CRQC attacking the classical leaf key. The second check in {{pq-checks}}
+rejects that misconfiguration.
 
 ## Key Agreement {#security-ke}
 
@@ -435,8 +436,8 @@ RFC Editor: please remove before publication.
 ## draft-sheffer-tls-pq-hsts-01
 
 - {{pq-checks}}: quantum-resistant trust anchor plus CertificateVerify
-  `SignatureScheme`; note enterprise per-domain CA preload ({{ops}},
-  {{enforcement}}).
+  `SignatureScheme` or equivalently end-entity public key; note
+  enterprise per-domain CA preload ({{ops}}, {{enforcement}}).
 
 ## draft-sheffer-tls-pq-hsts-00
 
