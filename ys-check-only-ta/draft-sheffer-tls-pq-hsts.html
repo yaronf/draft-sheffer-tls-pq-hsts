@@ -1495,7 +1495,8 @@ hold. These checks apply when noting a PQ Policy and when enforcing one.<a href=
 </li>
           <li id="section-5.2-2.2">
             <p id="section-5.2-2.2.1">The <code>SignatureScheme</code> in the server's CertificateVerify message
-(<span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.5.2" class="relref">Section 4.5.2</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>) is quantum-resistant.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
+(<span><a href="https://rfc-editor.org/rfc/rfc9846#section-4.5.2" class="relref">Section 4.5.2</a> of [<a href="#RFC9846" class="cite xref">RFC9846</a>]</span>) is quantum-resistant, or equivalently
+the end-entity public key is quantum-resistant.<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-5.2-3">Which trust anchors and algorithms count as quantum-resistant is a matter of
@@ -1574,8 +1575,8 @@ to <code>Require-PQ-Auth</code>. This section covers where they differ.<a href="
 check would not suffice. Quantum-resistant CAs may still issue classical
 end-entity credentials as a transitional opt-out. Sent with
 <code>Require-PQ-Auth</code>, such a credential would leave the connection exposed to
-a CRQC attacking the classical leaf key. The CertificateVerify
-<code>SignatureScheme</code> check in <a href="#pq-checks" class="auto internal xref">Section 5.2</a> rejects that misconfiguration.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+a CRQC attacking the classical leaf key. The second check in <a href="#pq-checks" class="auto internal xref">Section 5.2</a>
+rejects that misconfiguration.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-ke">
@@ -1803,8 +1804,8 @@ use as a trailer field.<a href="#section-9-2.10.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-A.1-1.1">
             <p id="appendix-A.1-1.1.1"><a href="#pq-checks" class="auto internal xref">Section 5.2</a>: quantum-resistant trust anchor plus CertificateVerify
-<code>SignatureScheme</code>; note enterprise per-domain CA preload (<a href="#ops" class="auto internal xref">Section 6</a>,
-<a href="#enforcement" class="auto internal xref">Section 5.3</a>).<a href="#appendix-A.1-1.1.1" class="pilcrow">¶</a></p>
+<code>SignatureScheme</code> or equivalently end-entity public key; note
+enterprise per-domain CA preload (<a href="#ops" class="auto internal xref">Section 6</a>, <a href="#enforcement" class="auto internal xref">Section 5.3</a>).<a href="#appendix-A.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
