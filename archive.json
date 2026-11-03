@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-01T02:46:37.057668+00:00",
+  "timestamp": "2026-11-03T04:12:39.998045+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -1057,6 +1057,113 @@
       },
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 22,
+      "id": "PR_kwDOT2GSC88AAAABMFtLig",
+      "title": "QR trust anchor plus CertificateVerify check",
+      "url": "https://github.com/yaronf/draft-sheffer-tls-pq-hsts/pull/22",
+      "state": "OPEN",
+      "author": "yaronf",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Summary\n- Narrow `{#pq-checks}` to a quantum-resistant trust anchor plus a quantum-resistant CertificateVerify `SignatureScheme` (not every path hop).\n- Explain why the CertificateVerify check is needed when QR CAs may issue classical opt-out leaves.\n- Note enterprise per-domain CA preload; user-defined TAs stay outside the pin via the enforcement skip.\n\nMade with [Cursor](https://cursor.com)",
+      "createdAt": "2026-11-01T09:52:16Z",
+      "updatedAt": "2026-11-02T14:53:26Z",
+      "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "baseRefName": "main",
+      "baseRefOid": "662dc614beef98b6e7a9a62c9f1469d570b294b7",
+      "headRepository": "yaronf/draft-sheffer-tls-pq-hsts",
+      "headRefName": "ys-check-only-ta",
+      "headRefOid": "e7b132c59ef3486ca8381acad3edc5e7be061863",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOT2GSC88AAAABVfk0Mw",
+          "commit": {
+            "abbreviatedOid": "e7b132c"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T13:36:27Z",
+          "updatedAt": "2026-11-02T13:36:32Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "The new checks miss intermediate CAs. A CRQC attacker who breaks a classical intermediate under a quantum-resistant root can issue a leaf with its own quantum-resistant key, and both checks pass. ",
+              "createdAt": "2026-11-02T13:36:28Z",
+              "updatedAt": "2026-11-02T13:36:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABVfqjWw",
+          "commit": {
+            "abbreviatedOid": "e7b132c"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T13:43:13Z",
+          "updatedAt": "2026-11-02T13:43:13Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "The assumption (which can be made more explicit) is that rules enforced on the CAs by browsers' \"root programs\" plus CT monitoring will prevent these cases.",
+              "createdAt": "2026-11-02T13:43:13Z",
+              "updatedAt": "2026-11-02T13:43:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABVgfcDQ",
+          "commit": {
+            "abbreviatedOid": "e7b132c"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T14:46:24Z",
+          "updatedAt": "2026-11-02T14:46:25Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "Root programs don\u2019t cover enterprise X.509 chains, which the draft includes. CT doesn\u2019t help against a CRQC attacker, who can forge the traditionally signed SCTs.",
+              "createdAt": "2026-11-02T14:46:24Z",
+              "updatedAt": "2026-11-02T14:46:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABVglh7A",
+          "commit": {
+            "abbreviatedOid": "e7b132c"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-02T14:53:25Z",
+          "updatedAt": "2026-11-02T14:53:26Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "Quoting @davidben here: enterprise chains are excluded as per {{enforcement}} (non built-in trust anchors), and then these TAs are managed through explicit configuration, see the new paragraph in L310.\r\n\r\nI think we need to discuss these issues to get all of us on the same page - see also the Slack thread.",
+              "createdAt": "2026-11-02T14:53:25Z",
+              "updatedAt": "2026-11-02T14:53:26Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
