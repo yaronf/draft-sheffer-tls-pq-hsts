@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-11-03T04:12:39.998045+00:00",
+  "timestamp": "2026-11-05T03:52:27.868411+00:00",
   "repo": "yaronf/draft-sheffer-tls-pq-hsts",
   "labels": [
     {
@@ -1070,7 +1070,7 @@
       "labels": [],
       "body": "## Summary\n- Narrow `{#pq-checks}` to a quantum-resistant trust anchor plus a quantum-resistant CertificateVerify `SignatureScheme` (not every path hop).\n- Explain why the CertificateVerify check is needed when QR CAs may issue classical opt-out leaves.\n- Note enterprise per-domain CA preload; user-defined TAs stay outside the pin via the enforcement skip.\n\nMade with [Cursor](https://cursor.com)",
       "createdAt": "2026-11-01T09:52:16Z",
-      "updatedAt": "2026-11-02T14:53:26Z",
+      "updatedAt": "2026-11-03T09:34:05Z",
       "baseRepository": "yaronf/draft-sheffer-tls-pq-hsts",
       "baseRefName": "main",
       "baseRefOid": "662dc614beef98b6e7a9a62c9f1469d570b294b7",
@@ -1160,6 +1160,46 @@
               "body": "Quoting @davidben here: enterprise chains are excluded as per {{enforcement}} (non built-in trust anchors), and then these TAs are managed through explicit configuration, see the new paragraph in L310.\r\n\r\nI think we need to discuss these issues to get all of us on the same page - see also the Slack thread.",
               "createdAt": "2026-11-02T14:53:25Z",
               "updatedAt": "2026-11-02T14:53:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABVquIcA",
+          "commit": {
+            "abbreviatedOid": "e7b132c"
+          },
+          "author": "tireddy2",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-03T08:25:05Z",
+          "updatedAt": "2026-11-03T08:25:15Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "The proposed text is not clear to me, how about the following text:\n\nEnterprises operating private CAs can phase their migration domain by domain by configuring managed UAs with local policies that associate each installed CA with the domain names for which it is trusted (per-domain CA preloading). Some browsers already support such constrained trust-anchor policies.\n\nSeparately, UAs MAY skip enforcement for connections whose certificate chain terminates at a locally installed trust anchor, according to the local policy described in {{enforcement}}. This accommodates deployments such as TLS-interception middleboxes.",
+              "createdAt": "2026-11-03T08:25:06Z",
+              "updatedAt": "2026-11-03T08:25:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOT2GSC88AAAABVrce1w",
+          "commit": {
+            "abbreviatedOid": "e7b132c"
+          },
+          "author": "yaronf",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-11-03T09:34:04Z",
+          "updatedAt": "2026-11-03T09:34:04Z",
+          "comments": [
+            {
+              "originalPosition": 47,
+              "body": "Not really, because if you want configuration-driven migration (your first paragraph), you need these servers to be skipped - excluded from PQ-HSTS (2nd paragraph). So it's not \"separately\" at all.",
+              "createdAt": "2026-11-03T09:34:04Z",
+              "updatedAt": "2026-11-03T09:34:05Z"
             }
           ]
         }
